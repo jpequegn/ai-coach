@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.75 as builder
+FROM rust:1.83 as builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY Cargo.toml Cargo.lock ./
 # Create a dummy main.rs to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs && echo "" > src/lib.rs
 
-# Build dependencies
+# Build dependencies (this will generate Cargo.lock)
 RUN cargo build --release && rm src/*.rs
 
 # Copy source code

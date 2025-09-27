@@ -1,5 +1,5 @@
 use ai_coach::api::routes::create_routes;
-use ai_coach::config::{AppConfig, DatabaseConfig};
+use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
 use tokio::net::TcpListener;
 use tracing::{info, instrument};
 use tracing_subscriber;
@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = db_config.create_pool().await?;
 
     // Run migrations
-    sqlx::migrate!("./migrations").run(&db).await?;
+    run_migrations(&db).await?;
 
     // Create the application routes
     let app = create_routes(db, &app_config.jwt_secret);

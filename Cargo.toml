@@ -29,3 +29,6 @@ lettre = "0.11"
 regex = "1.0"
 md5 = "0.7"
 futures = "0.3"
+
+# Force older version of base64ct to avoid edition2024 requirement
+base64ct = "=1.6.0"
