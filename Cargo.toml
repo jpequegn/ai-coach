@@ -19,3 +19,6 @@ jsonwebtoken = "9.0"
 # candle-core = "0.7"  # TODO: Fix version conflicts and re-enable
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+# Force older version of base64ct to avoid edition2024 requirement
+base64ct = "=1.6.0"
