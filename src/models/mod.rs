@@ -8,6 +8,7 @@ pub mod coaching_recommendation;
 pub mod training_plan;
 pub mod model_prediction;
 pub mod training_features;
+pub mod workout_recommendation;
 pub mod validation;
 
 pub use user::*;
@@ -18,4 +19,5 @@ pub use coaching_recommendation::*;
 pub use training_plan::*;
 pub use model_prediction::*;
 pub use training_features::*;
+pub use workout_recommendation::*;
 pub use validation::*;

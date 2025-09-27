@@ -13,6 +13,7 @@ pub mod ml_model_service;
 pub mod model_training_service;
 pub mod training_recommendation_service;
 pub mod model_versioning_service;
+pub mod workout_recommendation_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -27,3 +28,4 @@ pub use ml_model_service::MLModelService;
 pub use model_training_service::ModelTrainingService;
 pub use training_recommendation_service::TrainingRecommendationService;
 pub use model_versioning_service::ModelVersioningService;
+pub use workout_recommendation_service::WorkoutRecommendationService;
