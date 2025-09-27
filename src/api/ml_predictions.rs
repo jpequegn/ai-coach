@@ -8,13 +8,12 @@ use axum::{
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::auth::{AuthService, Claims};
 use crate::services::{
     TrainingRecommendationService, ModelTrainingService, ModelVersioningService,
-    FeatureEngineeringService, MLModelService,
+    FeatureEngineeringService,
 };
 use crate::models::TrainingFeatures;
 

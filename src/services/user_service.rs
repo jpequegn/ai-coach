@@ -3,7 +3,8 @@ use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{User, CreateUser, UpdateUser, UserResponse};
+use crate::auth::password::hash_password;
+use crate::models::{CreateUser, UpdateUser, UserResponse};
 
 pub struct UserService {
     db: PgPool,
@@ -15,8 +16,8 @@ impl UserService {
     }
 
     pub async fn create_user(&self, user_data: CreateUser) -> Result<UserResponse> {
-        // TODO: Hash password properly in production
-        let password_hash = format!("hashed_{}", user_data.password);
+        let password_hash = hash_password(&user_data.password)
+            .map_err(|e| anyhow::anyhow!("Failed to hash password: {}", e))?;
 
         let user = sqlx::query_as!(
             User,

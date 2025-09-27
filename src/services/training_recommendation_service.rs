@@ -1,12 +1,12 @@
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use chrono::{Utc, Duration};
 use sqlx::PgPool;
 use uuid::Uuid;
 use std::collections::HashMap;
-use tracing::{info, warn, error};
+use tracing::{info, warn};
 use serde::{Serialize, Deserialize};
 
-use crate::models::{TrainingFeatures, TrainingLoadPrediction, ModelPrediction, CreateModelPrediction};
+use crate::models::{TrainingFeatures, TrainingLoadPrediction, CreateModelPrediction};
 use crate::services::{FeatureEngineeringService, MLModelService, ModelPredictionService};
 
 /// Recommendation request with user preferences

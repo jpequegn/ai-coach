@@ -3,7 +3,7 @@ use chrono::{Utc, NaiveDate, Duration, Datelike};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{TrainingFeatures, TrainingDataPoint, PerformanceManagementChart, TrainingSession};
+use crate::models::{TrainingFeatures, TrainingDataPoint, TrainingSession};
 use crate::services::{TrainingAnalysisService, TrainingSessionService};
 
 /// Service for extracting machine learning features from training data

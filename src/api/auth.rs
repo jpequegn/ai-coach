@@ -1,6 +1,5 @@
 use axum::{
     extract::{Query, Request, State},
-    http::StatusCode,
     middleware,
     response::Json,
     routing::{get, post, put},
@@ -113,8 +112,8 @@ async fn update_profile(
     State(auth_service): State<AuthService>,
     Json(update_request): Json<UpdateProfileRequest>,
 ) -> Result<Json<MessageResponse>, AuthError> {
-    // Session is available via middleware - for now just return success
-    // TODO: Implement profile update logic in auth service
+    // Placeholder implementation - profile update logic not yet implemented
+    // Future: Connect to user service and update profile data
 
     Ok(Json(MessageResponse {
         message: "Profile updated successfully".to_string(),
@@ -127,8 +126,8 @@ async fn change_password(
     State(auth_service): State<AuthService>,
     Json(change_request): Json<ChangePasswordRequest>,
 ) -> Result<Json<MessageResponse>, AuthError> {
-    // Session is available via middleware - for now just return success
-    // TODO: Implement password change logic in auth service
+    // Placeholder implementation - password change logic not yet implemented
+    // Future: Validate current password and update with new hash
 
     Ok(Json(MessageResponse {
         message: "Password changed successfully".to_string(),
@@ -141,7 +140,8 @@ async fn forgot_password(
     State(auth_service): State<AuthService>,
     Json(request): Json<ForgotPasswordRequest>,
 ) -> Result<Json<MessageResponse>, AuthError> {
-    // TODO: Implement forgot password logic
+    // Placeholder implementation - forgot password flow not yet implemented
+    // Future: Generate reset token and send email
     // This should:
     // 1. Check if user exists
     // 2. Generate reset token
@@ -159,7 +159,8 @@ async fn reset_password(
     State(auth_service): State<AuthService>,
     Json(request): Json<ResetPasswordRequest>,
 ) -> Result<Json<MessageResponse>, AuthError> {
-    // TODO: Implement password reset logic
+    // Placeholder implementation - password reset flow not yet implemented
+    // Future: Validate reset token and update password
     // This should:
     // 1. Validate reset token
     // 2. Check if token is not expired
@@ -194,7 +195,8 @@ struct ListUsersQuery {
 async fn list_users(
     Query(params): Query<ListUsersQuery>,
 ) -> Result<Json<Vec<UserInfo>>, AuthError> {
-    // TODO: Implement user listing logic
+    // Placeholder implementation - user listing not yet implemented
+    // Future: Return paginated list of users with proper admin authorization
     Ok(Json(vec![]))
 }
 
@@ -208,7 +210,8 @@ async fn update_user_role(
     axum::extract::Path(user_id): axum::extract::Path<uuid::Uuid>,
     Json(request): Json<UpdateRoleRequest>,
 ) -> Result<Json<MessageResponse>, AuthError> {
-    // TODO: Implement role update logic
+    // Placeholder implementation - role update not yet implemented
+    // Future: Update user role with proper admin authorization
     Ok(Json(MessageResponse {
         message: "User role updated successfully".to_string(),
     }))
