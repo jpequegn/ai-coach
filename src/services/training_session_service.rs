@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{TrainingSession, CreateTrainingSession, UpdateTrainingSession, SessionSummary};
 
+#[derive(Clone)]
 pub struct TrainingSessionService {
     db: PgPool,
 }
