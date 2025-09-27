@@ -1,0 +1,21 @@
+[package]
+name = "ai-coach"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# trainrs = { git = "https://github.com/username/trainrs" }  # TODO: Update with actual repository URL
+axum = "0.7"
+tokio = { version = "1.0", features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+jsonwebtoken = "9.0"
+# candle-core = "0.7"  # TODO: Fix version conflicts and re-enable
+tracing = "0.1"
+tracing-subscriber = "0.3"
