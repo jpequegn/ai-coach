@@ -1,10 +1,10 @@
 use anyhow::{Result, anyhow};
-use chrono::{Utc, NaiveDate, Duration};
+use chrono::{Utc, Duration};
 use sqlx::PgPool;
 use uuid::Uuid;
 use tracing::{info, warn, error};
 
-use crate::models::{TrainingDataPoint, ModelMetrics, TrainingFeatures};
+use crate::models::ModelMetrics;
 use crate::services::{FeatureEngineeringService, MLModelService, ModelPredictionService};
 
 /// Configuration for model training

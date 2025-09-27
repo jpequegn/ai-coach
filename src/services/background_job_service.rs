@@ -2,12 +2,12 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
-use tracing::{info, warn, error};
+use tokio_cron_scheduler::{Job, JobScheduler};
+use tracing::{info, error};
 use uuid::Uuid;
 
 use crate::services::{TrainingAnalysisService, TrainingSessionService};
-use crate::models::{TrainingSession, UpdateTrainingSession};
+use crate::models::UpdateTrainingSession;
 
 #[derive(Debug, Clone)]
 pub enum JobType {
