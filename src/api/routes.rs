@@ -6,6 +6,7 @@ use super::health::health_check;
 use super::training::training_routes;
 use super::ml_predictions::ml_prediction_routes;
 use super::workout_recommendations::workout_recommendation_routes;
+use super::performance_insights::performance_insights_routes;
 use crate::auth::AuthService;
 
 pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
@@ -18,4 +19,5 @@ pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
         .nest("/api/training", training_routes(db.clone(), auth_service.clone()))
         .nest("/api/ml", ml_prediction_routes(db.clone(), auth_service.clone()))
         .nest("/api/workouts", workout_recommendation_routes(db.clone(), auth_service.clone()))
+        .nest("/api/performance", performance_insights_routes(db.clone(), auth_service.clone()))
 }
