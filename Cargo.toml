@@ -38,5 +38,14 @@ tokio-util = { version = "0.7", features = ["io"] }
 redis = { version = "0.24", features = ["tokio-comp"] }
 tokio-cron-scheduler = "0.10"
 
+# Machine Learning dependencies
+linfa = "0.7"
+linfa-linear = "0.7"
+linfa-trees = "0.7"
+linfa-preprocessing = "0.7"
+ndarray = "0.16"
+ndarray-stats = "0.6"
+statrs = "0.17"
+
 # Force older version of base64ct to avoid edition2024 requirement
 base64ct = "=1.6.0"

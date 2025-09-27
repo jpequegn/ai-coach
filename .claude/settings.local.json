@@ -16,7 +16,9 @@
       "Bash(set DATABASE_URL=postgresql://postgres:password@localhost:5432/ai_coach)",
       "Bash(git fetch:*)",
       "Bash(git log:*)",
-      "Bash(cargo:*)"
+      "Bash(cargo:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

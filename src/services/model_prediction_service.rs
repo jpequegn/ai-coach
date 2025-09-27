@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{ModelPrediction, CreateModelPrediction, UpdateModelPrediction};
 
+#[derive(Clone)]
 pub struct ModelPredictionService {
     db: PgPool,
 }
