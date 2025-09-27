@@ -242,7 +242,7 @@ impl WorkoutRecommendationService {
     }
 
     /// Create endurance workout
-    fn create_endurance_workout(&self, duration: u32, target_tss: f32, sport: &SportType) -> WorkoutRecommendation {
+    fn create_endurance_workout(&self, duration: u32, _target_tss: f32, sport: &SportType) -> WorkoutRecommendation {
         let zones = match sport {
             SportType::Cycling => vec![2, 3], // Zones 2-3 for cycling
             SportType::Running => vec![1, 2], // Zones 1-2 for running
@@ -266,7 +266,7 @@ impl WorkoutRecommendationService {
     }
 
     /// Create threshold workout
-    fn create_threshold_workout(&self, duration: u32, target_tss: f32) -> WorkoutRecommendation {
+    fn create_threshold_workout(&self, duration: u32, _target_tss: f32) -> WorkoutRecommendation {
         let warmup = (duration as f32 * 0.2) as u32;
         let cooldown = (duration as f32 * 0.15) as u32;
         let work_time = duration - warmup - cooldown;
@@ -308,7 +308,7 @@ impl WorkoutRecommendationService {
     }
 
     /// Create VO2max workout
-    fn create_vo2max_workout(&self, duration: u32, target_tss: f32) -> WorkoutRecommendation {
+    fn create_vo2max_workout(&self, duration: u32, _target_tss: f32) -> WorkoutRecommendation {
         let warmup = (duration as f32 * 0.25) as u32;
         let cooldown = (duration as f32 * 0.2) as u32;
 
@@ -332,7 +332,7 @@ impl WorkoutRecommendationService {
     }
 
     /// Create test workout
-    fn create_test_workout(&self, features: &TrainingFeatures, sport: &SportType) -> WorkoutRecommendation {
+    fn create_test_workout(&self, features: &TrainingFeatures, _sport: &SportType) -> WorkoutRecommendation {
         // Determine appropriate test based on recent training
         let test_type = if features.days_since_last_workout > 30 {
             TestType::Ramp // Start with ramp test after long break
@@ -349,7 +349,7 @@ impl WorkoutRecommendationService {
     }
 
     /// Calculate workout difficulty
-    fn calculate_workout_difficulty(&self, workout: &WorkoutRecommendation, sport: &SportType) -> WorkoutDifficulty {
+    fn calculate_workout_difficulty(&self, workout: &WorkoutRecommendation, _sport: &SportType) -> WorkoutDifficulty {
         let (intensity_factor, duration_minutes, complexity_factor) = match workout {
             WorkoutRecommendation::Recovery { duration, .. } => {
                 (2.0, *duration, 1.0)

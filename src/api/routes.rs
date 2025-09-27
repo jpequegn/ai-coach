@@ -17,5 +17,5 @@ pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
         .nest("/api/admin", admin_routes(auth_service.clone()))
         .nest("/api/training", training_routes(db.clone(), auth_service.clone()))
         .nest("/api/ml", ml_prediction_routes(db.clone(), auth_service.clone()))
-        .nest("/api/workouts", workout_recommendation_routes().with_state((db, auth_service)))
+        .nest("/api/workouts", workout_recommendation_routes(db.clone(), auth_service.clone()))
 }

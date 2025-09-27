@@ -9,10 +9,11 @@ use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
+use chrono;
 
 use crate::auth::{AuthService, Claims};
-use crate::models::{StructuredWorkoutRecommendation, SportType};
-use crate::services::{WorkoutRecommendationService};
+use crate::models::{StructuredWorkoutRecommendation, SportType, TrainingZone};
+use crate::services::WorkoutRecommendationService;
 
 /// Query parameters for workout recommendations
 #[derive(Debug, Deserialize)]
@@ -42,6 +43,24 @@ pub struct WorkoutAlternativesResponse {
     pub message: String,
 }
 
+/// API Error response
+#[derive(Debug, Serialize)]
+pub struct ApiError {
+    pub error_code: String,
+    pub message: String,
+    pub details: Option<serde_json::Value>,
+}
+
+impl ApiError {
+    pub fn new(code: &str, message: &str) -> Self {
+        Self {
+            error_code: code.to_string(),
+            message: message.to_string(),
+            details: None,
+        }
+    }
+}
+
 /// Workout feedback for improving recommendations
 #[derive(Debug, Deserialize)]
 pub struct WorkoutFeedback {
@@ -54,24 +73,46 @@ pub struct WorkoutFeedback {
     pub notes: Option<String>,
 }
 
+/// Shared state for workout recommendation API
+#[derive(Clone)]
+pub struct WorkoutAppState {
+    pub db: PgPool,
+    pub auth_service: AuthService,
+    pub workout_service: WorkoutRecommendationService,
+}
+
 /// Create workout recommendation routes
-pub fn workout_recommendation_routes() -> Router<(PgPool, AuthService)> {
+pub fn workout_recommendation_routes(db: PgPool, auth_service: AuthService) -> Router {
+    let workout_service = WorkoutRecommendationService::new(db.clone());
+
+    let shared_state = WorkoutAppState {
+        db,
+        auth_service,
+        workout_service,
+    };
+
     Router::new()
-        .route("/recommendation", get(get_workout_recommendation))
-        .route("/alternatives/:recommendation_id", get(get_workout_alternatives))
-        .route("/feedback", post(submit_workout_feedback))
-        .route("/templates", get(get_workout_templates))
-        .route("/zones/:sport_type", get(get_training_zones))
+        .route("/test", get(test_handler))
+        // .route("/recommendation", get(get_workout_recommendation))
+        // .route("/alternatives/:recommendation_id", get(get_workout_alternatives))
+        // .route("/feedback", post(submit_workout_feedback))
+        // .route("/templates", get(get_workout_templates))
+        // .route("/zones/:sport_type", get(get_training_zones))
+        .with_state(shared_state)
 }
 
 /// Get personalized workout recommendation
-#[tracing::instrument(skip(db, _auth_service))]
 async fn get_workout_recommendation(
+    State(state): State<WorkoutAppState>,
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
-    State((db, _auth_service)): State<(PgPool, AuthService)>,
     Query(query): Query<WorkoutRecommendationQuery>,
-) -> Result<Json<WorkoutRecommendationResponse>, StatusCode> {
-    let user_id = claims.sub;
+) -> Result<Json<WorkoutRecommendationResponse>, (StatusCode, Json<ApiError>)> {
+    let user_id = claims.sub.parse::<Uuid>().map_err(|e| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", &format!("Invalid user ID format: {}", e))),
+        )
+    })?;
 
     // Parse sport type
     let sport_type = match query.sport_type.as_deref() {
@@ -111,9 +152,7 @@ async fn get_workout_recommendation(
         recent_workouts,
     };
 
-    let workout_service = WorkoutRecommendationService::new(db);
-
-    match workout_service.get_structured_workout_recommendation(request).await {
+    match state.workout_service.get_structured_workout_recommendation(request).await {
         Ok(recommendation) => {
             tracing::info!("Generated workout recommendation for user {}", user_id);
             Ok(Json(WorkoutRecommendationResponse {
@@ -124,18 +163,20 @@ async fn get_workout_recommendation(
         }
         Err(e) => {
             tracing::error!("Failed to generate workout recommendation: {}", e);
-            Err(StatusCode::INTERNAL_SERVER_ERROR)
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new("WORKOUT_RECOMMENDATION_ERROR", &format!("Failed to generate workout recommendation: {}", e))),
+            ))
         }
     }
 }
 
 /// Get alternative workout options for a recommendation
-#[tracing::instrument(skip(db, _auth_service))]
 async fn get_workout_alternatives(
+    State(_state): State<WorkoutAppState>,
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
-    State((db, _auth_service)): State<(PgPool, AuthService)>,
     Path(recommendation_id): Path<Uuid>,
-) -> Result<Json<WorkoutAlternativesResponse>, StatusCode> {
+) -> Result<Json<WorkoutAlternativesResponse>, (StatusCode, Json<ApiError>)> {
     let _user_id = claims.sub;
 
     // In a full implementation, we would:
@@ -152,12 +193,11 @@ async fn get_workout_alternatives(
 }
 
 /// Submit feedback on a completed workout
-#[tracing::instrument(skip(db, _auth_service, feedback))]
 async fn submit_workout_feedback(
+    State(_state): State<WorkoutAppState>,
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
-    State((db, _auth_service)): State<(PgPool, AuthService)>,
     Json(feedback): Json<WorkoutFeedback>,
-) -> Result<Json<serde_json::Value>, StatusCode> {
+) -> Result<Json<serde_json::Value>, (StatusCode, Json<ApiError>)> {
     let _user_id = claims.sub;
 
     // In a full implementation, we would:
@@ -174,12 +214,11 @@ async fn submit_workout_feedback(
 }
 
 /// Get available workout templates
-#[tracing::instrument(skip(db, _auth_service))]
 async fn get_workout_templates(
+    State(_state): State<WorkoutAppState>,
     WithRejection(_claims, _): WithRejection<Claims, StatusCode>,
-    State((db, _auth_service)): State<(PgPool, AuthService)>,
     Query(query): Query<WorkoutTemplateQuery>,
-) -> Result<Json<WorkoutTemplatesResponse>, StatusCode> {
+) -> Result<Json<WorkoutTemplatesResponse>, (StatusCode, Json<ApiError>)> {
     // In a full implementation, we would fetch templates from database
     // For now, return basic templates
 
@@ -231,13 +270,11 @@ async fn get_workout_templates(
 }
 
 /// Get training zones for a specific sport
-#[tracing::instrument(skip(db, _auth_service))]
 async fn get_training_zones(
+    State(_state): State<WorkoutAppState>,
     WithRejection(_claims, _): WithRejection<Claims, StatusCode>,
-    State((db, _auth_service)): State<(PgPool, AuthService)>,
     Path(sport_type): Path<String>,
-) -> Result<Json<TrainingZonesResponse>, StatusCode> {
-    use crate::models::TrainingZone;
+) -> Result<Json<TrainingZonesResponse>, (StatusCode, Json<ApiError>)> {
 
     let zones = match sport_type.as_str() {
         "cycling" => TrainingZone::cycling_zones(),
@@ -251,6 +288,19 @@ async fn get_training_zones(
         success: true,
         message: "Training zones retrieved successfully".to_string(),
     }))
+}
+
+/// Get current champion model - copied from ml_predictions.rs
+pub async fn test_handler(
+    State(state): State<WorkoutAppState>,
+    WithRejection(_claims, _): WithRejection<Claims, StatusCode>,
+) -> Result<Json<serde_json::Value>, (StatusCode, Json<ApiError>)> {
+    let response = serde_json::json!({
+        "champion_version": "test",
+        "timestamp": chrono::Utc::now()
+    });
+
+    Ok(Json(response))
 }
 
 /// Query parameters for workout templates
