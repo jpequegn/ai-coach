@@ -12,7 +12,11 @@
       "Bash(gh pr create:*)",
       "Bash(gh repo view:*)",
       "Bash(gh repo edit:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(set DATABASE_URL=postgresql://postgres:password@localhost:5432/ai_coach)",
+      "Bash(git fetch:*)",
+      "Bash(git log:*)",
+      "Bash(cargo:*)"
     ],
     "deny": [],
     "ask": []
