@@ -1,0 +1,16 @@
+Hi {{user_name}},
+
+Here's your weekly training summary:
+
+{{notification_title}}
+
+{{notification_message}}
+
+Keep up the excellent work! Consistency is key to achieving your fitness goals.
+
+Best regards,
+{{app_name}} Team
+
+---
+View detailed analytics: {{app_url}}/analytics
+Unsubscribe: {{unsubscribe_url}}

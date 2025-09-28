@@ -1,0 +1,24 @@
+Hi {{user_name}},
+
+Important health alert:
+
+{{notification_title}}
+
+{{notification_message}}
+
+Please consider:
+- Taking 1-2 recovery days
+- Reducing training intensity
+- Focusing on sleep and nutrition
+- Monitoring how you feel
+
+Your health and safety are our top priority. Listen to your body.
+
+If you have concerns, please consult with a healthcare professional.
+
+Best regards,
+{{app_name}} Team
+
+---
+View your training load: {{app_url}}/analytics/training-load
+Unsubscribe: {{unsubscribe_url}}

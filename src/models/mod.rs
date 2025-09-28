@@ -10,6 +10,7 @@ pub mod model_prediction;
 pub mod training_features;
 pub mod workout_recommendation;
 pub mod performance_insights;
+pub mod notification;
 pub mod validation;
 
 pub use user::*;
@@ -22,4 +23,5 @@ pub use model_prediction::*;
 pub use training_features::*;
 pub use workout_recommendation::*;
 pub use performance_insights::*;
+pub use notification::*;
 pub use validation::*;

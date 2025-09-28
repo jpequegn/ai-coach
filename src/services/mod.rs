@@ -15,6 +15,9 @@ pub mod training_recommendation_service;
 pub mod model_versioning_service;
 pub mod workout_recommendation_service;
 pub mod performance_insights_service;
+pub mod notification_service;
+pub mod notification_scheduler;
+pub mod email_notification_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -31,3 +34,6 @@ pub use training_recommendation_service::TrainingRecommendationService;
 pub use model_versioning_service::ModelVersioningService;
 pub use workout_recommendation_service::WorkoutRecommendationService;
 pub use performance_insights_service::PerformanceInsightsService;
+pub use notification_service::NotificationService;
+pub use notification_scheduler::NotificationScheduler;
+pub use email_notification_service::EmailNotificationService;
