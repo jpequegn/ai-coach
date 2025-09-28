@@ -12,6 +12,8 @@ use super::user_profile::user_profile_routes;
 use super::analytics::analytics_routes;
 use super::coaching::coaching_routes;
 use super::notifications::notification_routes;
+use super::events::events_routes;
+use super::plan_generation::plan_generation_routes;
 use super::docs::docs_routes;
 use crate::auth::AuthService;
 
@@ -28,6 +30,8 @@ pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
         .nest("/analytics", analytics_routes(db.clone(), auth_service.clone()))
         .nest("/user", user_profile_routes(db.clone(), auth_service.clone()))
         .nest("/notifications", notification_routes(db.clone(), auth_service.clone()))
+        .nest("/events", events_routes(db.clone(), auth_service.clone()))
+        .nest("/plans", plan_generation_routes(db.clone(), auth_service.clone()))
         // Documentation routes
         .merge(docs_routes())
         // Legacy routes for backward compatibility

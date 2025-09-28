@@ -11,6 +11,9 @@ pub mod training_features;
 pub mod workout_recommendation;
 pub mod performance_insights;
 pub mod notification;
+pub mod goal;
+pub mod event;
+pub mod plan_generation;
 pub mod validation;
 
 pub use user::*;
@@ -24,4 +27,7 @@ pub use training_features::*;
 pub use workout_recommendation::*;
 pub use performance_insights::*;
 pub use notification::*;
+pub use goal::*;
+pub use event::*;
+pub use plan_generation::*;
 pub use validation::*;
