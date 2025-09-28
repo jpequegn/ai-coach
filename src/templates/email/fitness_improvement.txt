@@ -1,0 +1,18 @@
+Hi {{user_name}},
+
+Great news! We've detected significant improvement in your fitness level:
+
+{{notification_title}}
+
+{{notification_message}}
+
+This improvement shows that your training is working! Keep up the excellent work and maintain your current training approach.
+
+Your dedication is paying off!
+
+Best regards,
+{{app_name}} Team
+
+---
+View your progress: {{app_url}}/analytics
+Unsubscribe: {{unsubscribe_url}}

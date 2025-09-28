@@ -1,0 +1,21 @@
+Hi {{user_name}},
+
+This is a reminder that you have a workout scheduled soon:
+
+{{notification_title}}
+
+{{notification_message}}
+
+Don't forget to:
+- Warm up properly before starting
+- Have water available
+- Track your performance
+
+Keep up the great work!
+
+Best regards,
+{{app_name}} Team
+
+---
+Manage your notification preferences: {{app_url}}/settings/notifications
+Unsubscribe: {{unsubscribe_url}}

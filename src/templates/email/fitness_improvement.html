@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Improvement Detected</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); color: white; padding: 20px; text-align: center; border-radius: 8px; }
+        .content { padding: 20px; background: #f9f9f9; border-radius: 8px; margin: 20px 0; }
+        .improvement-card { background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #56ab2f; }
+        .celebration { text-align: center; font-size: 48px; margin: 20px 0; }
+        .btn { display: inline-block; padding: 10px 20px; background: #56ab2f; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; color: #666; font-size: 14px; margin-top: 30px; }
+        .unsubscribe { font-size: 12px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Congratulations!</h1>
+        <p>Your fitness has improved, {{user_name}}!</p>
+    </div>
+
+    <div class="content">
+        <div class="celebration">🚀💪✨</div>
+
+        <div class="improvement-card">
+            <h2>{{notification_title}}</h2>
+            <p>{{notification_message}}</p>
+        </div>
+
+        <p>This improvement shows that your training is working! Your dedication and consistency are paying off.</p>
+
+        <p><strong>Keep it up!</strong> Continue with your current training approach - it's clearly working for you.</p>
+
+        <div style="text-align: center;">
+            <a href="{{app_url}}/analytics" class="btn">View My Progress</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Celebrate your success!<br>{{app_name}} Team</p>
+        <p>{{current_date}}</p>
+        <div class="unsubscribe">
+            <a href="{{unsubscribe_url}}">Unsubscribe</a>
+        </div>
+    </div>
+</body>
+</html>

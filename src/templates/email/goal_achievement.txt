@@ -1,0 +1,18 @@
+Hi {{user_name}},
+
+Congratulations! You've achieved one of your training goals:
+
+{{notification_title}}
+
+{{notification_message}}
+
+This is a significant milestone in your fitness journey. Your hard work and dedication have paid off!
+
+Time to celebrate and set your next challenge!
+
+Best regards,
+{{app_name}} Team
+
+---
+View your goals: {{app_url}}/goals
+Unsubscribe: {{unsubscribe_url}}
