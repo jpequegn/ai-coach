@@ -12,4 +12,6 @@ pub mod user_profile;
 pub mod analytics;
 pub mod coaching;
 pub mod notifications;
+pub mod events;
+pub mod plan_generation;
 pub mod docs;

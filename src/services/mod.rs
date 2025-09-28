@@ -18,6 +18,9 @@ pub mod performance_insights_service;
 pub mod notification_service;
 pub mod notification_scheduler;
 pub mod email_notification_service;
+pub mod goal_service;
+pub mod event_service;
+pub mod plan_generation_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -37,3 +40,6 @@ pub use performance_insights_service::PerformanceInsightsService;
 pub use notification_service::NotificationService;
 pub use notification_scheduler::NotificationScheduler;
 pub use email_notification_service::EmailNotificationService;
+pub use goal_service::GoalService;
+pub use event_service::EventService;
+pub use plan_generation_service::PlanGenerationService;
