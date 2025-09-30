@@ -14,4 +14,5 @@ pub mod coaching;
 pub mod notifications;
 pub mod events;
 pub mod plan_generation;
+pub mod vision;
 pub mod docs;
