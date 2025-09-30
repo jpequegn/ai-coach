@@ -21,6 +21,9 @@ pub mod email_notification_service;
 pub mod goal_service;
 pub mod event_service;
 pub mod plan_generation_service;
+pub mod vision_analysis_service;
+pub mod video_storage_service;
+pub mod video_processing_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -43,3 +46,6 @@ pub use email_notification_service::EmailNotificationService;
 pub use goal_service::GoalService;
 pub use event_service::EventService;
 pub use plan_generation_service::PlanGenerationService;
+pub use vision_analysis_service::VisionAnalysisService;
+pub use video_storage_service::VideoStorageService;
+pub use video_processing_service::VideoProcessingService;

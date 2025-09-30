@@ -14,6 +14,7 @@ pub mod notification;
 pub mod goal;
 pub mod event;
 pub mod plan_generation;
+pub mod vision_analysis;
 pub mod validation;
 
 pub use user::*;
@@ -30,4 +31,5 @@ pub use notification::*;
 pub use goal::*;
 pub use event::*;
 pub use plan_generation::*;
+pub use vision_analysis::*;
 pub use validation::*;
