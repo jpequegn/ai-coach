@@ -1,12 +1,8 @@
 // Terminal UI module using ratatui
-// TODO: Implement interactive dashboard
 
-pub struct Dashboard {
-    // TODO: Add ratatui terminal state
-}
+mod app;
+mod dashboard;
+mod widgets;
 
-impl Dashboard {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
+pub use app::App;
+pub use dashboard::Dashboard;
