@@ -22,7 +22,11 @@
       "Bash(find:*)",
       "Bash(cat:*)",
       "Bash(gh:*)",
-      "Read(//Users/julienpequegnot/Code/**)"
+      "Read(//Users/julienpequegnot/Code/**)",
+      "Bash(gh issue comment:*)",
+      "Bash(./target/release/ai-coach --help)",
+      "Bash(./target/debug/ai-coach:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
