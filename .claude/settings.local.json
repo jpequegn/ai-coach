@@ -19,7 +19,10 @@
       "Bash(cargo:*)",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(gh:*)",
+      "Read(//Users/julienpequegnot/Code/**)"
     ],
     "deny": [],
     "ask": []
