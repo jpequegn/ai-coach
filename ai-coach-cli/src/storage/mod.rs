@@ -18,6 +18,11 @@ pub struct Storage {
 impl Storage {
     /// Get database directory path (~/.ai-coach/)
     pub fn db_path() -> Result<PathBuf> {
+        // Check for test environment variable first
+        if let Ok(test_path) = std::env::var("AI_COACH_DB_PATH") {
+            return Ok(PathBuf::from(test_path));
+        }
+
         let config_dir = crate::config::Config::config_dir()?;
         Ok(config_dir)
     }
@@ -29,6 +34,17 @@ impl Storage {
         tracing::info!("Initializing sled database at {:?}", db_path);
 
         let db = sled::open(db_path)
+            .context("Failed to open sled database")?;
+
+        Ok(Self { db })
+    }
+
+    /// Initialize storage with custom path (for testing)
+    #[cfg(test)]
+    pub fn init_with_path(path: PathBuf) -> Result<Self> {
+        tracing::info!("Initializing sled database at {:?}", path);
+
+        let db = sled::open(path)
             .context("Failed to open sled database")?;
 
         Ok(Self { db })
@@ -115,10 +131,27 @@ impl Storage {
         Ok(deleted)
     }
 
-    /// Get workouts that need to be synced
+    /// Get workouts that are in the sync queue
     pub fn get_unsynced_workouts(&self) -> Result<Vec<Workout>> {
-        let workouts = self.list_workouts()?;
-        Ok(workouts.into_iter().filter(|w| !w.synced).collect())
+        let sync_queue = self.db.open_tree(SYNC_QUEUE_TREE)
+            .context("Failed to open sync queue tree")?;
+        let workouts_tree = self.db.open_tree(WORKOUTS_TREE)
+            .context("Failed to open workouts tree")?;
+
+        let mut workouts = Vec::new();
+        for item in sync_queue.iter() {
+            let (key, _value) = item.context("Failed to read sync queue item")?;
+
+            // Get the workout from workouts tree
+            if let Some(workout_data) = workouts_tree.get(&key)
+                .context("Failed to get workout")? {
+                let workout: Workout = bincode::deserialize(&workout_data)
+                    .context("Failed to deserialize workout")?;
+                workouts.push(workout);
+            }
+        }
+
+        Ok(workouts)
     }
 
     /// Add workout to sync queue

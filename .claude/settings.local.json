@@ -26,7 +26,9 @@
       "Bash(gh issue comment:*)",
       "Bash(./target/release/ai-coach --help)",
       "Bash(./target/debug/ai-coach:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(./target/release/ai-coach:*)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []
