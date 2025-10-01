@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::Args;
 use dialoguer::{Input, Password};
 
+use crate::api::ApiClient;
 use crate::config::Config;
 
 #[derive(Args)]
@@ -18,26 +19,34 @@ impl LoginCommand {
             .interact_text()?;
 
         // Get password
-        let _password = Password::new()
+        let password = Password::new()
             .with_prompt("Password")
             .interact()?;
 
         println!();
         println!("Logging in as {}...", username);
 
-        // TODO: Call API login endpoint
-        // For now, just save a mock token
-        let mut config = Config::load()?;
-        config.set_tokens(
-            "mock_access_token".to_string(),
-            "mock_refresh_token".to_string(),
-        );
-        config.save()?;
+        // Load config and create API client
+        let config = Config::load()?;
+        let client = ApiClient::new(config)?;
 
-        println!("✓ Login successful!");
-        println!();
-        println!("You can now use AI Coach CLI commands.");
+        // Call API login endpoint
+        match client.login(&username, &password).await {
+            Ok(response) => {
+                // Tokens are automatically saved by ApiClient
+                println!("✓ Login successful!");
+                println!();
+                println!("Welcome, {}!", response.user.username);
+                println!("Email: {}", response.user.email);
+                println!();
+                println!("You can now use AI Coach CLI commands.");
 
-        Ok(())
+                Ok(())
+            }
+            Err(e) => {
+                println!("✗ Login failed: {}", e);
+                Err(e)
+            }
+        }
     }
 }

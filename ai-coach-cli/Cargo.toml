@@ -9,6 +9,10 @@ repository = "https://github.com/jpequegn/ai-coach"
 keywords = ["cli", "training", "fitness", "ai"]
 categories = ["command-line-utilities"]
 
+[lib]
+name = "ai_coach_cli"
+path = "src/lib.rs"
+
 [[bin]]
 name = "ai-coach"
 path = "src/main.rs"
