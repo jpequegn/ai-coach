@@ -33,7 +33,9 @@ clap_complete = "4.5"
 ratatui = "0.28"
 crossterm = "0.28"
 
-# Local storage - TODO: Add in Phase 5 (resolve sqlx conflict in workspace)
+# Local storage - Commented out due to conflict with sqlx in ai-coach-api
+# SQLite implementation moved to Phase 5
+# Will use sled (embedded DB) or redb instead of rusqlite to avoid libsqlite3-sys conflict
 # rusqlite = { version = "0.32", features = ["bundled", "chrono", "uuid"] }
 
 # HTTP client for API
