@@ -1,0 +1,59 @@
+[package]
+name = "ai-coach-cli"
+version.workspace = true
+edition.workspace = true
+authors = ["AI Coach Team"]
+description = "Terminal-based training log application for AI Coach"
+license = "MIT"
+repository = "https://github.com/jpequegn/ai-coach"
+keywords = ["cli", "training", "fitness", "ai"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "ai-coach"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+
+# CLI-specific dependencies
+clap = { version = "4.5", features = ["derive", "env", "cargo"] }
+clap_complete = "4.5"
+
+# TUI framework
+ratatui = "0.28"
+crossterm = "0.28"
+
+# Local storage - TODO: Add in Phase 5 (resolve sqlx conflict in workspace)
+# rusqlite = { version = "0.32", features = ["bundled", "chrono", "uuid"] }
+
+# HTTP client for API
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Interactive prompts
+dialoguer = "0.11"
+indicatif = "0.17"
+
+# Configuration
+toml = "0.8"
+dirs = "5.0"
+
+# Terminal colors and styling
+console = "0.15"
+colored = "2.1"
+
+[dev-dependencies]
+# Testing utilities
+tempfile = "3.12"
+mockito = "1.5"
+assert_cmd = "2.0"
+predicates = "3.1"

@@ -4,7 +4,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI Coach is a Rust-based REST API for AI-powered athletic coaching, featuring machine learning models for training predictions, workout recommendations, and performance insights. Built with Axum web framework, PostgreSQL database, and Linfa ML framework.
+AI Coach is a comprehensive AI-powered athletic coaching platform consisting of:
+
+1. **AI Coach API** (`ai-coach-api/`): Rust-based REST API with machine learning models for training predictions, workout recommendations, and performance insights. Built with Axum web framework, PostgreSQL database, and Linfa ML framework.
+
+2. **AI Coach CLI** (`ai-coach-cli/`): Terminal-based training log application with fast, keyboard-driven interface for logging workouts, tracking goals, and viewing analytics. Built with clap, ratatui, and async Rust.
+
+### Workspace Structure
+
+The project uses a Cargo workspace with two main packages:
+
+```
+ai-coach/
+├── ai-coach-api/       # REST API server
+│   ├── src/
+│   ├── migrations/
+│   └── tests/
+├── ai-coach-cli/       # CLI application
+│   ├── src/
+│   │   ├── commands/   # CLI commands
+│   │   ├── config/     # Configuration system
+│   │   ├── api/        # API client
+│   │   ├── storage/    # Local storage
+│   │   └── ui/         # Terminal UI
+│   └── tests/
+└── Cargo.toml          # Workspace root
+```
 
 ## Core Architecture
 
@@ -263,3 +288,134 @@ Uses `anyhow::Result` for services, custom error types for API responses. All AP
 - Follow Rust naming conventions (snake_case for functions/variables)
 - Keep handlers thin, move logic to services
 - Use SQLx compile-time query verification when possible
+
+## CLI Development
+
+The AI Coach CLI (`ai-coach-cli/`) is a terminal-based training log application built with Rust.
+
+### CLI Commands
+
+```bash
+# Build and run CLI
+cargo run -p ai-coach-cli -- [COMMAND]
+
+# Run CLI tests
+cargo test -p ai-coach-cli
+
+# Check CLI compilation
+cargo check -p ai-coach-cli
+
+# Install CLI locally
+cargo install --path ai-coach-cli
+```
+
+### CLI Architecture
+
+```
+ai-coach-cli/src/
+├── main.rs           # Entry point with tokio runtime
+├── commands/         # Command implementations
+│   ├── mod.rs        # CLI argument parsing with clap
+│   ├── login.rs      # Authentication commands
+│   ├── logout.rs
+│   ├── workout.rs    # Workout management
+│   ├── goals.rs      # Goal management
+│   ├── stats.rs      # Statistics display
+│   ├── sync.rs       # Server synchronization
+│   ├── dashboard.rs  # TUI dashboard
+│   └── config_cmd.rs # Configuration management
+├── config/           # Configuration system
+│   └── mod.rs        # TOML-based config (~/.ai-coach/config.toml)
+├── api/              # API client for server communication
+├── storage/          # Local SQLite storage (TODO: Phase 5)
+└── ui/               # Terminal UI with ratatui (TODO: Phase 4)
+```
+
+### CLI Development Patterns
+
+**Command Structure**: All commands use clap derive macros:
+```rust
+#[derive(Args)]
+pub struct YourCommand {
+    /// Command description
+    #[arg(short, long)]
+    option: Option<String>,
+}
+
+impl YourCommand {
+    pub async fn execute(self) -> Result<()> {
+        // Implementation
+    }
+}
+```
+
+**Configuration Access**:
+```rust
+use crate::config::Config;
+
+let config = Config::load()?;
+if !config.is_authenticated() {
+    println!("Please login first");
+    return Ok(());
+}
+```
+
+**Interactive Prompts**: Use dialoguer for user input:
+```rust
+use dialoguer::{Input, Password, Select};
+
+let username: String = Input::new()
+    .with_prompt("Username")
+    .interact_text()?;
+```
+
+### CLI Testing
+
+Use `assert_cmd` for CLI integration tests:
+```rust
+use assert_cmd::Command;
+use predicates::prelude::*;
+
+#[test]
+fn test_command() {
+    let mut cmd = Command::cargo_bin("ai-coach").unwrap();
+    cmd.arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("expected"));
+}
+```
+
+### CLI Configuration
+
+Default config location: `~/.ai-coach/config.toml`
+
+```toml
+[api]
+base_url = "http://localhost:3000"
+timeout_seconds = 30
+
+[auth]
+token = ""
+refresh_token = ""
+
+[sync]
+auto_sync = true
+conflict_resolution = "server_wins"
+```
+
+### CLI Roadmap
+
+See `docs/planning/feature-8-cli-tool.md` for detailed implementation plan.
+
+**Phase 1 (Complete)**: CLI Foundation with clap, command structure, configuration
+**Phase 2-8**: Authentication, workout logging, TUI dashboard, goals, sync, analytics, distribution
+
+### Important CLI Notes
+
+- **Offline First**: CLI should work without server connection, syncing when available
+- **Configuration**: Always check config exists before operations
+- **Error Messages**: User-friendly error messages with suggestions
+- **Testing**: Test both success and error paths for all commands
+- **Progress Indicators**: Use indicatif for long-running operations
+- **Shell Completions**: Generate completions for bash, zsh, fish
