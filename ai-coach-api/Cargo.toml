@@ -18,7 +18,7 @@ tracing-subscriber = { workspace = true }
 # API-specific dependencies
 axum = "0.7"
 axum-extra = { version = "0.9", features = ["typed-header", "multipart"] }
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate"] }
+sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate"] }
 jsonwebtoken = "9.0"
 bcrypt = "0.15"
 tower = "0.5"
