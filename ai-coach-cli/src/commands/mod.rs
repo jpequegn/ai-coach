@@ -1,5 +1,6 @@
 mod login;
 mod logout;
+mod whoami;
 mod workout;
 mod goals;
 mod stats;
@@ -12,6 +13,7 @@ use clap::{Parser, Subcommand};
 
 pub use login::LoginCommand;
 pub use logout::LogoutCommand;
+pub use whoami::WhoamiCommand;
 pub use workout::WorkoutCommand;
 pub use stats::StatsCommand;
 pub use sync::SyncCommand;
@@ -45,6 +47,9 @@ enum Commands {
 
     /// Logout from AI Coach
     Logout(LogoutCommand),
+
+    /// Show current user information
+    Whoami(WhoamiCommand),
 
     /// Manage workouts
     #[command(subcommand)]
@@ -183,6 +188,7 @@ impl Cli {
         match self.command {
             Commands::Login(cmd) => cmd.execute().await,
             Commands::Logout(cmd) => cmd.execute().await,
+            Commands::Whoami(cmd) => cmd.execute().await,
             Commands::Workout(subcmd) => match subcmd {
                 WorkoutSubcommands::Log(cmd) => cmd.execute().await,
                 WorkoutSubcommands::List { r#type, from, to, limit } => {
