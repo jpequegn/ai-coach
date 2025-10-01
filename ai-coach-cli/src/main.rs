@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod models;
 mod storage;
 mod api;
 mod ui;

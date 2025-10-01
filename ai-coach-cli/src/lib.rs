@@ -4,5 +4,6 @@
 pub mod api;
 pub mod config;
 pub mod commands;
+pub mod models;
 pub mod storage;
 pub mod ui;

@@ -2,6 +2,7 @@ mod login;
 mod logout;
 mod whoami;
 mod workout;
+mod workout_parser;
 mod goals;
 mod stats;
 mod sync;
