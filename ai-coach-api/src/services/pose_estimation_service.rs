@@ -185,9 +185,10 @@ impl PoseEstimationService {
         let (input_tensor, scale, pad_x, pad_y) = self.preprocess_image(image)?;
 
         // Run inference
+        use ort::inputs;
         let outputs = self
             .session
-            .run(ort::inputs!["images" => input_tensor.view()]?)
+            .run(inputs!["images" => input_tensor.view()]?)
             .context("Failed to run inference")?;
 
         // Extract output tensor
@@ -456,12 +457,9 @@ mod tests {
 
     #[test]
     fn test_iou_calculation() {
-        let service = PoseEstimationService {
-            session: unsafe { std::mem::zeroed() }, // Placeholder for test
-            model_input_size: 640,
-            confidence_threshold: 0.5,
-            nms_iou_threshold: 0.45,
-        };
+        // Load actual model for test
+        let service = PoseEstimationService::new("models/pose_v1.onnx")
+            .expect("Failed to load model for test");
 
         // Same box
         let iou = service.calculate_iou((100.0, 100.0, 50.0, 50.0), (100.0, 100.0, 50.0, 50.0));
