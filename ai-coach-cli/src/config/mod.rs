@@ -189,11 +189,9 @@ impl Config {
             return Ok(Self::default());
         }
 
-        let contents = fs::read_to_string(&config_file)
-            .context("Failed to read config file")?;
+        let contents = fs::read_to_string(&config_file).context("Failed to read config file")?;
 
-        let config: Config = toml::from_str(&contents)
-            .context("Failed to parse config file")?;
+        let config: Config = toml::from_str(&contents).context("Failed to parse config file")?;
 
         Ok(config)
     }
@@ -201,15 +199,12 @@ impl Config {
     /// Save configuration to file
     pub fn save(&self) -> Result<()> {
         let config_dir = Self::config_dir()?;
-        fs::create_dir_all(&config_dir)
-            .context("Failed to create config directory")?;
+        fs::create_dir_all(&config_dir).context("Failed to create config directory")?;
 
         let config_file = Self::config_file()?;
-        let contents = toml::to_string_pretty(self)
-            .context("Failed to serialize config")?;
+        let contents = toml::to_string_pretty(self).context("Failed to serialize config")?;
 
-        fs::write(&config_file, contents)
-            .context("Failed to write config file")?;
+        fs::write(&config_file, contents).context("Failed to write config file")?;
 
         Ok(())
     }

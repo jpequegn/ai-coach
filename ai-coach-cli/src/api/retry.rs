@@ -52,7 +52,8 @@ impl RetryConfig {
                     sleep(Duration::from_millis(delay_ms)).await;
 
                     // Exponential backoff with cap
-                    delay_ms = ((delay_ms as f64 * self.backoff_factor) as u64).min(self.max_delay_ms);
+                    delay_ms =
+                        ((delay_ms as f64 * self.backoff_factor) as u64).min(self.max_delay_ms);
                 }
             }
         }

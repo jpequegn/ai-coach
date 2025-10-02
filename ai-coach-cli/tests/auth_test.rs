@@ -35,10 +35,7 @@ async fn test_whoami_requires_authentication() -> Result<()> {
     let result = client.whoami().await;
 
     assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err().to_string(),
-        "Not logged in"
-    );
+    assert_eq!(result.unwrap_err().to_string(), "Not logged in");
     Ok(())
 }
 
@@ -71,6 +68,9 @@ fn test_api_error_from_status() {
     let error = ApiError::from_status(StatusCode::BAD_REQUEST, "Bad Request".to_string());
     assert!(matches!(error, ApiError::BadRequest(_)));
 
-    let error = ApiError::from_status(StatusCode::INTERNAL_SERVER_ERROR, "Server Error".to_string());
+    let error = ApiError::from_status(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        "Server Error".to_string(),
+    );
     assert!(matches!(error, ApiError::ServerError(_)));
 }

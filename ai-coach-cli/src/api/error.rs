@@ -29,7 +29,10 @@ pub enum ApiError {
 impl ApiError {
     pub fn from_status(status: StatusCode, message: String) -> Self {
         let msg = if message.is_empty() {
-            status.canonical_reason().unwrap_or("Unknown error").to_string()
+            status
+                .canonical_reason()
+                .unwrap_or("Unknown error")
+                .to_string()
         } else {
             message
         };

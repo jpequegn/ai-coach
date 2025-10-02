@@ -109,7 +109,8 @@ impl ApiClient {
                     password: password.clone(),
                 };
 
-                let response = self.client
+                let response = self
+                    .client
                     .post(&url)
                     .json(&request)
                     .send()
@@ -154,7 +155,8 @@ impl ApiClient {
 
         tracing::debug!("Refreshing access token");
 
-        let response = self.client
+        let response = self
+            .client
             .post(&url)
             .json(&request)
             .send()
@@ -191,7 +193,8 @@ impl ApiClient {
 
         tracing::debug!("Fetching current user information");
 
-        let response = self.client
+        let response = self
+            .client
             .get(&url)
             .header("Authorization", format!("Bearer {}", token))
             .send()
@@ -209,7 +212,9 @@ impl ApiClient {
             tracing::info!("Retrieved user info for {}", user_info.username);
             Ok(user_info)
         } else if status == StatusCode::UNAUTHORIZED {
-            Err(anyhow::anyhow!("Authentication token is invalid or expired"))
+            Err(anyhow::anyhow!(
+                "Authentication token is invalid or expired"
+            ))
         } else {
             let error_text = response.text().await.unwrap_or_default();
             Err(ApiError::from_status(status, error_text).into())
@@ -256,7 +261,8 @@ impl ApiClient {
             config.auth.token.clone()
         };
 
-        let response = self.client
+        let response = self
+            .client
             .get(&url)
             .header("Authorization", format!("Bearer {}", token))
             .send()
@@ -270,7 +276,8 @@ impl ApiClient {
             let new_token = self.try_refresh_token().await?;
 
             // Retry with new token
-            let response = self.client
+            let response = self
+                .client
                 .get(&url)
                 .header("Authorization", format!("Bearer {}", new_token))
                 .send()
@@ -295,7 +302,8 @@ impl ApiClient {
             config.auth.token.clone()
         };
 
-        let response = self.client
+        let response = self
+            .client
             .post(&url)
             .header("Authorization", format!("Bearer {}", token))
             .json(body)
@@ -310,7 +318,8 @@ impl ApiClient {
             let new_token = self.try_refresh_token().await?;
 
             // Retry with new token
-            let response = self.client
+            let response = self
+                .client
                 .post(&url)
                 .header("Authorization", format!("Bearer {}", new_token))
                 .json(body)
