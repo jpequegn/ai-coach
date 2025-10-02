@@ -24,6 +24,7 @@ pub mod plan_generation_service;
 pub mod vision_analysis_service;
 pub mod video_storage_service;
 pub mod video_processing_service;
+pub mod pose_estimation_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -49,3 +50,4 @@ pub use plan_generation_service::PlanGenerationService;
 pub use vision_analysis_service::VisionAnalysisService;
 pub use video_storage_service::VideoStorageService;
 pub use video_processing_service::VideoProcessingService;
+pub use pose_estimation_service::PoseEstimationService;
