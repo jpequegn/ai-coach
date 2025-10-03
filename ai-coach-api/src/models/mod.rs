@@ -18,6 +18,7 @@ pub mod vision_analysis;
 pub mod validation;
 pub mod keypoint;
 pub mod recovery_data;
+pub mod recovery_analysis;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -42,3 +43,4 @@ pub use keypoint::{
     SmoothingConfig,
 };
 pub use recovery_data::*;
+pub use recovery_analysis::*;
