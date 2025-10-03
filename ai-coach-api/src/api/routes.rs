@@ -17,6 +17,7 @@ use super::plan_generation::plan_generation_routes;
 use super::vision::vision_routes;
 use super::docs::docs_routes;
 use super::recovery::recovery_routes;
+use super::recovery_analysis::recovery_analysis_routes;
 use crate::auth::AuthService;
 
 pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
@@ -36,6 +37,7 @@ pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
         .nest("/plans", plan_generation_routes(db.clone(), auth_service.clone()))
         .nest("/vision", vision_routes(db.clone(), auth_service.clone()))
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
         // Documentation routes
         .merge(docs_routes())
         // Legacy routes for backward compatibility
