@@ -17,3 +17,4 @@ pub mod plan_generation;
 pub mod vision;
 pub mod docs;
 pub mod recovery;
+pub mod recovery_analysis;
