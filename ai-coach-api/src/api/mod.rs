@@ -16,3 +16,4 @@ pub mod events;
 pub mod plan_generation;
 pub mod vision;
 pub mod docs;
+pub mod recovery;
