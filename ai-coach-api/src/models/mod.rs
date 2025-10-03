@@ -17,6 +17,7 @@ pub mod plan_generation;
 pub mod vision_analysis;
 pub mod validation;
 pub mod keypoint;
+pub mod recovery_data;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -40,3 +41,4 @@ pub use keypoint::{
     CocoKeypoint, JointAngle, NormalizationMethod, NormalizationParams, PoseFrame,
     SmoothingConfig,
 };
+pub use recovery_data::*;
