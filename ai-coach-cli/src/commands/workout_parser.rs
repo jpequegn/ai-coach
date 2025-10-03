@@ -42,29 +42,22 @@ impl Default for WorkoutParser {
 impl WorkoutParser {
     pub fn new() -> Self {
         // Running patterns
-        let running_patterns = vec![
-            Regex::new(r"(?i)\b(ran|running|run|jog|jogging)\b").unwrap(),
-        ];
+        let running_patterns = vec![Regex::new(r"(?i)\b(ran|running|run|jog|jogging)\b").unwrap()];
 
         // Cycling patterns
-        let cycling_patterns = vec![
-            Regex::new(r"(?i)\b(cycl(e|ed|ing)|bik(e|ed|ing)|rode)\b").unwrap(),
-        ];
+        let cycling_patterns =
+            vec![Regex::new(r"(?i)\b(cycl(e|ed|ing)|bik(e|ed|ing)|rode)\b").unwrap()];
 
         // Swimming patterns
-        let swimming_patterns = vec![
-            Regex::new(r"(?i)\b(swim|swimming|swam)\b").unwrap(),
-        ];
+        let swimming_patterns = vec![Regex::new(r"(?i)\b(swim|swimming|swam)\b").unwrap()];
 
         // Walking patterns
-        let walking_patterns = vec![
-            Regex::new(r"(?i)\b(walk|walking|walked|hike|hiking|hiked)\b").unwrap(),
-        ];
+        let walking_patterns =
+            vec![Regex::new(r"(?i)\b(walk|walking|walked|hike|hiking|hiked)\b").unwrap()];
 
         // Strength patterns
-        let strength_patterns = vec![
-            Regex::new(r"(?i)\b(lift|lifting|lifted|strength|weights?|gym)\b").unwrap(),
-        ];
+        let strength_patterns =
+            vec![Regex::new(r"(?i)\b(lift|lifting|lifted|strength|weights?|gym)\b").unwrap()];
 
         // Distance patterns (km, miles, meters) - more specific to avoid matching times
         let distance_patterns = vec![
@@ -113,27 +106,49 @@ impl WorkoutParser {
     }
 
     fn detect_exercise_type(&self, description: &str) -> Result<String> {
-        if self.running_patterns.iter().any(|r| r.is_match(description)) {
+        if self
+            .running_patterns
+            .iter()
+            .any(|r| r.is_match(description))
+        {
             return Ok("running".to_string());
         }
 
-        if self.cycling_patterns.iter().any(|r| r.is_match(description)) {
+        if self
+            .cycling_patterns
+            .iter()
+            .any(|r| r.is_match(description))
+        {
             return Ok("cycling".to_string());
         }
 
-        if self.swimming_patterns.iter().any(|r| r.is_match(description)) {
+        if self
+            .swimming_patterns
+            .iter()
+            .any(|r| r.is_match(description))
+        {
             return Ok("swimming".to_string());
         }
 
-        if self.walking_patterns.iter().any(|r| r.is_match(description)) {
+        if self
+            .walking_patterns
+            .iter()
+            .any(|r| r.is_match(description))
+        {
             return Ok("walking".to_string());
         }
 
-        if self.strength_patterns.iter().any(|r| r.is_match(description)) {
+        if self
+            .strength_patterns
+            .iter()
+            .any(|r| r.is_match(description))
+        {
             return Ok("strength".to_string());
         }
 
-        Err(anyhow::anyhow!("Could not detect exercise type from description"))
+        Err(anyhow::anyhow!(
+            "Could not detect exercise type from description"
+        ))
     }
 
     fn extract_distance(&self, description: &str) -> Option<f64> {
@@ -146,7 +161,9 @@ impl WorkoutParser {
                         // Convert to km
                         return Some(match unit {
                             unit if unit.starts_with("mi") => value * 1.60934,
-                            unit if unit.starts_with('m') && !unit.starts_with("mi") => value / 1000.0,
+                            unit if unit.starts_with('m') && !unit.starts_with("mi") => {
+                                value / 1000.0
+                            }
                             _ => value, // Already in km
                         });
                     }

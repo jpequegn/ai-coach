@@ -27,9 +27,7 @@ pub async fn edit_config() -> Result<()> {
     // Open in default editor
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vim".to_string());
 
-    Command::new(editor)
-        .arg(&config_file)
-        .status()?;
+    Command::new(editor).arg(&config_file).status()?;
 
     println!("✓ Configuration saved!");
 
@@ -40,7 +38,10 @@ pub async fn init_config(force: bool) -> Result<()> {
     let config_file = Config::config_file()?;
 
     if config_file.exists() && !force {
-        println!("Configuration file already exists at: {}", config_file.display());
+        println!(
+            "Configuration file already exists at: {}",
+            config_file.display()
+        );
         println!("Use --force to overwrite");
         return Ok(());
     }

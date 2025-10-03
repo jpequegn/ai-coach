@@ -1,7 +1,7 @@
-use anyhow::Result;
-use chrono::{DateTime, Utc, Datelike};
 use crate::models::Workout;
 use crate::storage::Storage;
+use anyhow::Result;
+use chrono::{DateTime, Datelike, Utc};
 
 /// Application state for the TUI dashboard
 pub struct App {

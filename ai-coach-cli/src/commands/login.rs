@@ -14,14 +14,10 @@ impl LoginCommand {
         println!();
 
         // Get username
-        let username: String = Input::new()
-            .with_prompt("Username")
-            .interact_text()?;
+        let username: String = Input::new().with_prompt("Username").interact_text()?;
 
         // Get password
-        let password = Password::new()
-            .with_prompt("Password")
-            .interact()?;
+        let password = Password::new().with_prompt("Password").interact()?;
 
         println!();
         println!("Logging in as {}...", username);

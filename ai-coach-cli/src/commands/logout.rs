@@ -19,7 +19,10 @@ impl LogoutCommand {
         // Create API client and call logout endpoint
         let client = ApiClient::new(config)?;
 
-        match client.post("/api/v1/auth/logout", &serde_json::json!({})).await {
+        match client
+            .post("/api/v1/auth/logout", &serde_json::json!({}))
+            .await
+        {
             Ok(_) => {
                 tracing::debug!("Server-side logout successful");
             }

@@ -1,24 +1,24 @@
+mod config_cmd;
+mod dashboard;
+mod goals;
 mod login;
 mod logout;
+mod stats;
+mod sync;
 mod whoami;
 mod workout;
 mod workout_parser;
-mod goals;
-mod stats;
-mod sync;
-mod dashboard;
-mod config_cmd;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+pub use dashboard::DashboardCommand;
 pub use login::LoginCommand;
 pub use logout::LogoutCommand;
-pub use whoami::WhoamiCommand;
-pub use workout::WorkoutCommand;
 pub use stats::StatsCommand;
 pub use sync::SyncCommand;
-pub use dashboard::DashboardCommand;
+pub use whoami::WhoamiCommand;
+pub use workout::WorkoutCommand;
 
 #[derive(Parser)]
 #[command(name = "ai-coach")]
@@ -192,12 +192,17 @@ impl Cli {
             Commands::Whoami(cmd) => cmd.execute().await,
             Commands::Workout(subcmd) => match subcmd {
                 WorkoutSubcommands::Log(cmd) => cmd.execute().await,
-                WorkoutSubcommands::List { r#type, from, to, limit } => {
-                    workout::list_workouts(r#type, from, to, limit).await
-                }
+                WorkoutSubcommands::List {
+                    r#type,
+                    from,
+                    to,
+                    limit,
+                } => workout::list_workouts(r#type, from, to, limit).await,
                 WorkoutSubcommands::Show { id } => workout::show_workout(&id).await,
                 WorkoutSubcommands::Edit { id } => workout::edit_workout(&id).await,
-                WorkoutSubcommands::Delete { id, force } => workout::delete_workout(&id, force).await,
+                WorkoutSubcommands::Delete { id, force } => {
+                    workout::delete_workout(&id, force).await
+                }
             },
             Commands::Goals(subcmd) => match subcmd {
                 GoalsSubcommands::List { all } => goals::list_goals(all).await,

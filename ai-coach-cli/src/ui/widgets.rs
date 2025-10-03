@@ -3,13 +3,11 @@ use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{
-        Block, Borders, List, ListItem, Paragraph, Widget, Sparkline, BarChart,
-    },
+    widgets::{BarChart, Block, Borders, List, ListItem, Paragraph, Sparkline, Widget},
 };
 
+use super::app::{Panel, WeeklySummary};
 use crate::models::Workout;
-use super::app::{WeeklySummary, Panel};
 
 /// Render weekly summary widget
 pub fn render_weekly_summary(
@@ -75,11 +73,7 @@ pub fn render_weekly_summary(
 }
 
 /// Render weekly bar chart
-pub fn render_weekly_chart(
-    area: Rect,
-    buf: &mut Buffer,
-    summary: &WeeklySummary,
-) {
+pub fn render_weekly_chart(area: Rect, buf: &mut Buffer, summary: &WeeklySummary) {
     let block = Block::default()
         .borders(Borders::ALL)
         .title(" 📈 Weekly Workouts ")
@@ -163,7 +157,11 @@ pub fn render_recent_workouts(
 
             let content = format!(
                 "{} {} {:>8} {:>8} {}",
-                sync_icon, date_str, &workout.exercise_type[..workout.exercise_type.len().min(8)], distance_str, duration_str
+                sync_icon,
+                date_str,
+                &workout.exercise_type[..workout.exercise_type.len().min(8)],
+                distance_str,
+                duration_str
             );
 
             ListItem::new(Line::from(Span::styled(content, line_style)))
@@ -175,11 +173,7 @@ pub fn render_recent_workouts(
 }
 
 /// Render goals panel
-pub fn render_goals(
-    area: Rect,
-    buf: &mut Buffer,
-    is_selected: bool,
-) {
+pub fn render_goals(area: Rect, buf: &mut Buffer, is_selected: bool) {
     let border_style = if is_selected {
         Style::default().fg(Color::Cyan)
     } else {
@@ -237,7 +231,15 @@ pub fn render_quick_actions(
         ("L", "Log Workout", Color::Green),
         ("G", "View Goals", Color::Yellow),
         ("S", "View Stats", Color::Cyan),
-        ("Y", "Sync", if sync_pending > 0 { Color::Red } else { Color::Blue }),
+        (
+            "Y",
+            "Sync",
+            if sync_pending > 0 {
+                Color::Red
+            } else {
+                Color::Blue
+            },
+        ),
     ];
 
     let items: Vec<ListItem> = actions
@@ -287,7 +289,10 @@ pub fn render_help_overlay(area: Rect, buf: &mut Buffer) {
                 .add_modifier(Modifier::BOLD),
         )),
         Line::from(""),
-        Line::from(Span::styled("Navigation:", Style::default().fg(Color::Cyan))),
+        Line::from(Span::styled(
+            "Navigation:",
+            Style::default().fg(Color::Cyan),
+        )),
         Line::from("  ↑/k      - Move up"),
         Line::from("  ↓/j      - Move down"),
         Line::from("  ←/h      - Previous panel"),
@@ -295,7 +300,10 @@ pub fn render_help_overlay(area: Rect, buf: &mut Buffer) {
         Line::from("  Tab      - Next panel"),
         Line::from("  Shift+Tab - Previous panel"),
         Line::from(""),
-        Line::from(Span::styled("Quick Actions:", Style::default().fg(Color::Cyan))),
+        Line::from(Span::styled(
+            "Quick Actions:",
+            Style::default().fg(Color::Cyan),
+        )),
         Line::from("  L        - Log workout"),
         Line::from("  G        - View goals"),
         Line::from("  S        - View stats"),

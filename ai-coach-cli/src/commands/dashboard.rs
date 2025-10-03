@@ -1,6 +1,6 @@
+use crate::ui::Dashboard;
 use anyhow::Result;
 use clap::Args;
-use crate::ui::Dashboard;
 
 #[derive(Args)]
 pub struct DashboardCommand {}
