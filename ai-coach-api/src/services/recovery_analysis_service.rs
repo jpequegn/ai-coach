@@ -8,16 +8,25 @@ use crate::models::{
     RecoveryInsightsResponse, RecoveryPattern, RecoveryScore, RecoveryStatus,
     RecoveryStatusResponse, RecoveryTrendsResponse, Recommendation, RestingHrData, SleepData,
 };
+use crate::services::{NotificationService, RecoveryAlertService};
 
 const MODEL_VERSION: &str = "1.0.0-simple";
 
 pub struct RecoveryAnalysisService {
     db: PgPool,
+    alert_service: Option<RecoveryAlertService>,
 }
 
 impl RecoveryAnalysisService {
     pub fn new(db: PgPool) -> Self {
-        Self { db }
+        Self { db, alert_service: None }
+    }
+
+    pub fn with_alerts(db: PgPool, alert_service: RecoveryAlertService) -> Self {
+        Self {
+            db,
+            alert_service: Some(alert_service),
+        }
     }
 
     /// Calculate daily recovery score for a user
@@ -78,6 +87,25 @@ impl RecoveryAnalysisService {
                 recommended_tss_adjustment,
             )
             .await?;
+
+        // Evaluate alerts if alert service is available
+        if let Some(alert_service) = &self.alert_service {
+            match alert_service.evaluate_alerts(user_id, &score).await {
+                Ok(alerts) => {
+                    if !alerts.is_empty() {
+                        tracing::info!(
+                            "Generated {} recovery alerts for user {}",
+                            alerts.len(),
+                            user_id
+                        );
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Failed to evaluate recovery alerts: {}", e);
+                    // Don't fail the entire calculation if alerts fail
+                }
+            }
+        }
 
         Ok(score)
     }

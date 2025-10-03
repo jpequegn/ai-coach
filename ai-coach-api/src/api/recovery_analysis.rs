@@ -12,9 +12,10 @@ use uuid::Uuid;
 
 use crate::auth::{AuthService, Claims};
 use crate::models::{
-    RecoveryHistoryQuery, RecoveryInsightsResponse, RecoveryStatusResponse, RecoveryTrendsResponse,
+    RecoveryAlert, RecoveryAlertPreferences, RecoveryHistoryQuery, RecoveryInsightsResponse,
+    RecoveryStatusResponse, RecoveryTrendsResponse,
 };
-use crate::services::RecoveryAnalysisService;
+use crate::services::{NotificationService, RecoveryAlertService, RecoveryAnalysisService};
 
 #[derive(Debug, Serialize)]
 pub struct ApiError {
@@ -38,20 +39,31 @@ pub struct RecoveryAnalysisAppState {
     pub db: PgPool,
     pub auth_service: AuthService,
     pub analysis_service: RecoveryAnalysisService,
+    pub alert_service: RecoveryAlertService,
 }
 
 pub fn recovery_analysis_routes(db: PgPool, auth_service: AuthService) -> Router {
     let analysis_service = RecoveryAnalysisService::new(db.clone());
+    let notification_service = NotificationService::new(db.clone());
+    let alert_service = RecoveryAlertService::new(db.clone(), notification_service);
+
     let shared_state = RecoveryAnalysisAppState {
         db,
         auth_service,
         analysis_service,
+        alert_service,
     };
 
     Router::new()
+        // Recovery status and analysis
         .route("/status", get(get_recovery_status))
         .route("/trends", get(get_recovery_trends))
         .route("/insights", get(get_recovery_insights))
+        // Alert management
+        .route("/alerts", get(get_alerts))
+        .route("/alerts/:id/acknowledge", axum::routing::post(acknowledge_alert))
+        .route("/alerts/settings", get(get_alert_settings))
+        .route("/alerts/settings", axum::routing::patch(update_alert_settings))
         .with_state(shared_state)
 }
 
@@ -160,4 +172,153 @@ pub async fn get_recovery_insights(
 #[derive(Debug, serde::Deserialize)]
 pub struct TrendsQuery {
     pub period_days: Option<i32>,
+}
+
+// ============================================================================
+// Alert Endpoints
+// ============================================================================
+
+#[derive(Debug, serde::Deserialize)]
+pub struct AlertsQuery {
+    pub limit: Option<i64>,
+    pub include_acknowledged: Option<bool>,
+}
+
+/// Get user's recovery alerts
+pub async fn get_alerts(
+    State(state): State<RecoveryAnalysisAppState>,
+    WithRejection(claims, _): WithRejection<Claims, StatusCode>,
+    Query(query): Query<AlertsQuery>,
+) -> Result<Json<Vec<RecoveryAlert>>, (StatusCode, Json<ApiError>)> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID")),
+        )
+    })?;
+
+    let limit = query.limit.unwrap_or(50).min(200);
+    let include_acknowledged = query.include_acknowledged.unwrap_or(false);
+
+    let alerts = state
+        .alert_service
+        .get_alert_history(user_id, limit, include_acknowledged)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get alerts: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new("DATABASE_ERROR", "Failed to retrieve alerts")),
+            )
+        })?;
+
+    Ok(Json(alerts))
+}
+
+/// Acknowledge an alert
+pub async fn acknowledge_alert(
+    State(state): State<RecoveryAnalysisAppState>,
+    WithRejection(claims, _): WithRejection<Claims, StatusCode>,
+    axum::extract::Path(alert_id): axum::extract::Path<Uuid>,
+) -> Result<Json<RecoveryAlert>, (StatusCode, Json<ApiError>)> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID")),
+        )
+    })?;
+
+    let alert = state
+        .alert_service
+        .acknowledge_alert(alert_id, user_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to acknowledge alert: {}", e);
+            (
+                StatusCode::NOT_FOUND,
+                Json(ApiError::new(
+                    "ALERT_NOT_FOUND",
+                    "Alert not found or already acknowledged",
+                )),
+            )
+        })?;
+
+    Ok(Json(alert))
+}
+
+/// Get user alert settings
+pub async fn get_alert_settings(
+    State(state): State<RecoveryAnalysisAppState>,
+    WithRejection(claims, _): WithRejection<Claims, StatusCode>,
+) -> Result<Json<RecoveryAlertPreferences>, (StatusCode, Json<ApiError>)> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID")),
+        )
+    })?;
+
+    let settings = state
+        .alert_service
+        .get_preferences(user_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get alert settings: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new(
+                    "DATABASE_ERROR",
+                    "Failed to retrieve alert settings",
+                )),
+            )
+        })?;
+
+    Ok(Json(settings))
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct UpdateAlertSettingsRequest {
+    pub enabled: Option<bool>,
+    pub push_notifications: Option<bool>,
+    pub email_notifications: Option<bool>,
+    pub poor_recovery_threshold: Option<f64>,
+    pub critical_recovery_threshold: Option<f64>,
+}
+
+/// Update user alert settings
+pub async fn update_alert_settings(
+    State(state): State<RecoveryAnalysisAppState>,
+    WithRejection(claims, _): WithRejection<Claims, StatusCode>,
+    Json(request): Json<UpdateAlertSettingsRequest>,
+) -> Result<Json<RecoveryAlertPreferences>, (StatusCode, Json<ApiError>)> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID")),
+        )
+    })?;
+
+    let settings = state
+        .alert_service
+        .update_preferences(
+            user_id,
+            request.enabled,
+            request.push_notifications,
+            request.email_notifications,
+            request.poor_recovery_threshold,
+            request.critical_recovery_threshold,
+        )
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to update alert settings: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new(
+                    "DATABASE_ERROR",
+                    "Failed to update alert settings",
+                )),
+            )
+        })?;
+
+    Ok(Json(settings))
 }

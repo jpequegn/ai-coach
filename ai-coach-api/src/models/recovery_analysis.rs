@@ -50,6 +50,65 @@ pub struct AlertRecommendation {
     pub action: String,
 }
 
+/// User alert preferences
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct RecoveryAlertPreferences {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub enabled: bool,
+    pub push_notifications: bool,
+    pub email_notifications: bool,
+    pub poor_recovery_threshold: f64,
+    pub critical_recovery_threshold: f64,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Alert severity enum
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Severity {
+    Info,
+    Warning,
+    Critical,
+}
+
+impl Severity {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Severity::Info => "info",
+            Severity::Warning => "warning",
+            Severity::Critical => "critical",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "info" => Severity::Info,
+            "warning" => Severity::Warning,
+            "critical" => Severity::Critical,
+            _ => Severity::Info,
+        }
+    }
+
+    pub fn priority_level(&self) -> &str {
+        match self {
+            Severity::Critical => "critical",
+            Severity::Warning => "high",
+            Severity::Info => "medium",
+        }
+    }
+}
+
+/// Alert rule for evaluation
+pub struct RecoveryAlertRule {
+    pub alert_type: String,
+    pub severity: Severity,
+    pub condition: Box<dyn Fn(&RecoveryScore) -> bool + Send + Sync>,
+    pub message: String,
+    pub recommendation: String,
+}
+
 // ============================================================================
 // Response DTOs
 // ============================================================================
