@@ -27,6 +27,7 @@ pub mod video_processing_service;
 pub mod pose_estimation_service;
 pub mod keypoint_processor;
 pub mod recovery_data_service;
+pub mod recovery_analysis_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -55,3 +56,4 @@ pub use video_processing_service::VideoProcessingService;
 pub use pose_estimation_service::PoseEstimationService;
 pub use keypoint_processor::KeypointProcessor;
 pub use recovery_data_service::RecoveryDataService;
+pub use recovery_analysis_service::RecoveryAnalysisService;
