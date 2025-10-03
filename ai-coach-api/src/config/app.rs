@@ -8,6 +8,9 @@ pub struct AppConfig {
     pub environment: String,
     pub log_level: String,
     pub jwt_secret: String,
+    pub oura_client_id: Option<String>,
+    pub oura_client_secret: Option<String>,
+    pub oura_redirect_uri: Option<String>,
 }
 
 impl AppConfig {
@@ -22,12 +25,20 @@ impl AppConfig {
         let jwt_secret = env::var("JWT_SECRET")
             .unwrap_or_else(|_| "your-secret-key-change-in-production".to_string());
 
+        // Oura OAuth configuration (optional)
+        let oura_client_id = env::var("OURA_CLIENT_ID").ok();
+        let oura_client_secret = env::var("OURA_CLIENT_SECRET").ok();
+        let oura_redirect_uri = env::var("OURA_REDIRECT_URI").ok();
+
         Ok(AppConfig {
             host,
             port,
             environment,
             log_level,
             jwt_secret,
+            oura_client_id,
+            oura_client_secret,
+            oura_redirect_uri,
         })
     }
 

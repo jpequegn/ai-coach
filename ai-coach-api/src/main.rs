@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     run_migrations(&db).await?;
 
     // Create the application routes
-    let app = create_routes(db, &app_config.jwt_secret);
+    let app = create_routes(db, &app_config.jwt_secret, &app_config);
 
     // Start the server
     let listener = TcpListener::bind(&app_config.server_address()).await?;

@@ -18,13 +18,15 @@ use super::vision::vision_routes;
 use super::docs::docs_routes;
 use super::recovery::recovery_routes;
 use super::recovery_analysis::recovery_analysis_routes;
+use super::oura_wearable::oura_wearable_routes;
 use crate::auth::AuthService;
+use crate::config::AppConfig;
 
-pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
+pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Router {
     let auth_service = AuthService::new(db.clone(), jwt_secret);
 
     // Create v1 API routes
-    let api_v1 = Router::new()
+    let mut api_v1 = Router::new()
         .nest("/auth", auth_routes(auth_service.clone()))
         .nest("/admin", admin_routes(auth_service.clone()))
         .nest("/training", training_routes(db.clone(), auth_service.clone()))
@@ -37,7 +39,30 @@ pub fn create_routes(db: PgPool, jwt_secret: &str) -> Router {
         .nest("/plans", plan_generation_routes(db.clone(), auth_service.clone()))
         .nest("/vision", vision_routes(db.clone(), auth_service.clone()))
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()));
+
+    // Add Oura wearable routes if credentials are configured
+    if let (Some(client_id), Some(client_secret), Some(redirect_uri)) = (
+        &app_config.oura_client_id,
+        &app_config.oura_client_secret,
+        &app_config.oura_redirect_uri,
+    ) {
+        api_v1 = api_v1.nest(
+            "/recovery/wearables/oura",
+            oura_wearable_routes(
+                db.clone(),
+                auth_service.clone(),
+                client_id.clone(),
+                client_secret.clone(),
+                redirect_uri.clone(),
+            ),
+        );
+        tracing::info!("Oura wearable integration enabled");
+    } else {
+        tracing::warn!("Oura wearable integration disabled (missing OAuth credentials)");
+    }
+
+    api_v1 = api_v1
         // Documentation routes
         .merge(docs_routes())
         // Legacy routes for backward compatibility
