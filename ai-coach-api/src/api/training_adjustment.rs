@@ -63,6 +63,7 @@ pub fn training_adjustment_routes(db: PgPool, auth_service: AuthService) -> Rout
             "/recovery-settings",
             get(get_recovery_settings).patch(update_recovery_settings),
         )
+        .route("/recommended-adjustment", get(get_recommended_adjustment))
         .with_state(shared_state)
 }
 
@@ -272,4 +273,127 @@ pub async fn update_recovery_settings(
             get_recovery_settings(State(state), WithRejection(claims, StatusCode::OK)).await
         }
     }
+}
+
+// ============================================================================
+// Adjustment Recommendation Endpoints
+// ============================================================================
+
+use chrono::Utc;
+use crate::services::training_adjustment_service::TssAdjustment;
+
+#[derive(Debug, Serialize)]
+pub struct RecommendedAdjustmentResponse {
+    pub date: String,
+    pub has_recovery_data: bool,
+    pub tss_adjustment: Option<TssAdjustment>,
+    pub rest_recommendation: Option<RestDayInfo>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RestDayInfo {
+    pub should_rest: bool,
+    pub confidence: f64,
+    pub reasoning: String,
+    pub alternative_action: Option<String>,
+}
+
+/// Get today's recommended TSS adjustment
+pub async fn get_recommended_adjustment(
+    State(state): State<TrainingAdjustmentAppState>,
+    WithRejection(claims, _): WithRejection<Claims, StatusCode>,
+) -> Result<Json<RecommendedAdjustmentResponse>, (StatusCode, Json<ApiError>)> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID")),
+        )
+    })?;
+
+    let today = Utc::now().date_naive();
+
+    // Check if recovery data exists for today
+    let has_recovery = sqlx::query_scalar!(
+        r#"
+        SELECT EXISTS(
+            SELECT 1 FROM recovery_scores
+            WHERE user_id = $1 AND score_date = $2
+        )
+        "#,
+        user_id,
+        today
+    )
+    .fetch_one(&state.db)
+    .await
+    .map_err(|e| {
+        tracing::error!("Failed to check recovery data: {}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiError::new(
+                "DATABASE_ERROR",
+                "Failed to check recovery data",
+            )),
+        )
+    })?
+    .unwrap_or(false);
+
+    if !has_recovery {
+        return Ok(Json(RecommendedAdjustmentResponse {
+            date: today.to_string(),
+            has_recovery_data: false,
+            tss_adjustment: None,
+            rest_recommendation: None,
+        }));
+    }
+
+    // Get rest day recommendation
+    let rest_rec = state
+        .adjustment_service
+        .should_schedule_rest_day(user_id, today)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to get rest day recommendation: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new(
+                    "SERVICE_ERROR",
+                    "Failed to calculate rest recommendation",
+                )),
+            )
+        })?;
+
+    // If rest is strongly recommended, include that in response
+    let rest_info = if rest_rec.should_rest {
+        Some(RestDayInfo {
+            should_rest: rest_rec.should_rest,
+            confidence: rest_rec.confidence,
+            reasoning: rest_rec.reasoning,
+            alternative_action: rest_rec.alternative_action,
+        })
+    } else {
+        None
+    };
+
+    // Get TSS adjustment for a hypothetical 100 TSS workout
+    let tss_adj = state
+        .adjustment_service
+        .calculate_daily_tss_adjustment(user_id, today, 100.0)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to calculate TSS adjustment: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiError::new(
+                    "SERVICE_ERROR",
+                    "Failed to calculate TSS adjustment",
+                )),
+            )
+        })?;
+
+    Ok(Json(RecommendedAdjustmentResponse {
+        date: today.to_string(),
+        has_recovery_data: true,
+        tss_adjustment: Some(tss_adj),
+        rest_recommendation: rest_info,
+    }))
 }
