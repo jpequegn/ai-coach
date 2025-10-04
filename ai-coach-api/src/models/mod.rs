@@ -19,6 +19,7 @@ pub mod validation;
 pub mod keypoint;
 pub mod recovery_data;
 pub mod recovery_analysis;
+pub mod training_recovery_settings;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -44,3 +45,4 @@ pub use keypoint::{
 };
 pub use recovery_data::*;
 pub use recovery_analysis::*;
+pub use training_recovery_settings::*;

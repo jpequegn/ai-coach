@@ -19,6 +19,7 @@ use super::docs::docs_routes;
 use super::recovery::recovery_routes;
 use super::recovery_analysis::recovery_analysis_routes;
 use super::oura_wearable::oura_wearable_routes;
+use super::training_adjustment::training_adjustment_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
 
@@ -39,7 +40,8 @@ pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Ro
         .nest("/plans", plan_generation_routes(db.clone(), auth_service.clone()))
         .nest("/vision", vision_routes(db.clone(), auth_service.clone()))
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()));
+        .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
+        .nest("/training/adjustment", training_adjustment_routes(db.clone(), auth_service.clone()));
 
     // Add Oura wearable routes if credentials are configured
     if let (Some(client_id), Some(client_secret), Some(redirect_uri)) = (
