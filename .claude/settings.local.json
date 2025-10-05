@@ -38,7 +38,8 @@
       "Bash(export DATABASE_URL=postgresql://postgres:password@localhost:5432/ai_coach)",
       "Bash(sqlx database:*)",
       "Bash(docker-compose up:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
