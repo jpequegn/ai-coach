@@ -22,3 +22,4 @@ pub mod oura_wearable;
 pub mod training_adjustment;
 pub mod validation;
 pub mod recommendation_tracking;
+pub mod recommendation_engine;

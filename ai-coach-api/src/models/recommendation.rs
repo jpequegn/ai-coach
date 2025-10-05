@@ -277,3 +277,109 @@ pub struct UserRecommendationWithTemplate {
     pub user_recommendation: UserRecommendation,
     pub template: RecommendationTemplate,
 }
+
+// ============================================================================
+// Recommendation Engine Models
+// ============================================================================
+
+/// Identified recovery issues based on current metrics
+#[derive(Debug, Clone, Default)]
+pub struct RecoveryIssues {
+    pub poor_sleep: bool,
+    pub low_hrv: bool,
+    pub high_rhr: bool,
+    pub accumulated_fatigue: bool,
+    pub high_stress: bool,
+}
+
+/// Context for recommendation generation
+#[derive(Debug, Clone)]
+pub struct RecommendationContext {
+    pub time_of_day: Option<TimeOfDay>,
+    pub location: Option<Location>,
+    pub weather: Option<String>,
+    pub time_constraints: Option<i32>, // minutes available
+    pub equipment_available: Vec<String>,
+}
+
+impl Default for RecommendationContext {
+    fn default() -> Self {
+        Self {
+            time_of_day: None,
+            location: None,
+            weather: None,
+            time_constraints: None,
+            equipment_available: Vec::new(),
+        }
+    }
+}
+
+/// Time of day for context-aware recommendations
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum TimeOfDay {
+    Morning,
+    PreWorkout,
+    PostWorkout,
+    Evening,
+}
+
+/// Location context for recommendations
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum Location {
+    Home,
+    Gym,
+    Travel,
+    Outdoor,
+}
+
+/// Scored recommendation ready for presentation
+#[derive(Debug, Clone, Serialize)]
+pub struct ScoredRecommendation {
+    #[serde(flatten)]
+    pub template: RecommendationTemplate,
+    pub score: f64,
+    pub priority: RecommendationPriority,
+    pub why_this_matters: String,
+    pub recovery_score_id: Option<Uuid>,
+}
+
+/// Current recommendations query parameters
+#[derive(Debug, Deserialize)]
+pub struct CurrentRecommendationsQuery {
+    pub limit: Option<i32>,
+    pub category: Option<RecommendationCategory>,
+}
+
+/// Response for current recommendations endpoint
+#[derive(Debug, Serialize)]
+pub struct CurrentRecommendationsResponse {
+    pub recommendations: Vec<RecommendationOutput>,
+}
+
+/// Individual recommendation in output format
+#[derive(Debug, Serialize)]
+pub struct RecommendationOutput {
+    pub id: Uuid,
+    pub category: RecommendationCategory,
+    pub priority: RecommendationPriority,
+    pub title: String,
+    pub description: String,
+    pub action: String,
+    pub why_this_matters: String,
+    pub expected_impact: Option<String>,
+    pub time_required: Option<String>,
+    pub difficulty: RecommendationDifficulty,
+    pub score: f64,
+}
+
+/// User recommendation history for scoring
+#[derive(Debug, Clone)]
+pub struct UserRecommendationHistory {
+    pub completed_templates: Vec<Uuid>,
+    pub skipped_templates: Vec<Uuid>,
+    pub recent_categories: Vec<RecommendationCategory>,
+    pub last_shown_dates: std::collections::HashMap<Uuid, DateTime<Utc>>,
+    pub completion_rate_by_template: std::collections::HashMap<Uuid, f64>,
+}
