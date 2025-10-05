@@ -21,3 +21,4 @@ pub mod recovery_analysis;
 pub mod oura_wearable;
 pub mod training_adjustment;
 pub mod validation;
+pub mod recommendation_tracking;

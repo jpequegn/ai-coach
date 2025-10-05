@@ -193,3 +193,87 @@ pub struct RecommendationFilter {
     pub difficulty: Option<RecommendationDifficulty>,
     pub is_active: Option<bool>,
 }
+
+/// User recommendation status enum
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
+#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+pub enum UserRecommendationStatus {
+    #[serde(rename = "pending")]
+    Pending,
+    #[serde(rename = "completed")]
+    Completed,
+    #[serde(rename = "skipped")]
+    Skipped,
+    #[serde(rename = "expired")]
+    Expired,
+}
+
+impl std::fmt::Display for UserRecommendationStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pending => write!(f, "pending"),
+            Self::Completed => write!(f, "completed"),
+            Self::Skipped => write!(f, "skipped"),
+            Self::Expired => write!(f, "expired"),
+        }
+    }
+}
+
+/// User recommendation model
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct UserRecommendation {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub recommendation_template_id: Uuid,
+    pub recovery_score_id: Option<Uuid>,
+    pub status: UserRecommendationStatus,
+    pub effectiveness_rating: Option<i32>,
+    pub user_feedback: Option<String>,
+    pub skip_reason: Option<String>,
+    pub shown_at: DateTime<Utc>,
+    pub completed_at: Option<DateTime<Utc>>,
+    pub skipped_at: Option<DateTime<Utc>>,
+    pub expired_at: Option<DateTime<Utc>>,
+    pub rated_at: Option<DateTime<Utc>>,
+    pub metadata: JsonValue,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+/// Request to complete a recommendation
+#[derive(Debug, Deserialize)]
+pub struct CompleteRecommendationRequest {
+    pub completed_at: Option<DateTime<Utc>>,
+}
+
+/// Request to skip a recommendation
+#[derive(Debug, Deserialize)]
+pub struct SkipRecommendationRequest {
+    pub reason: Option<String>,
+}
+
+/// Request to rate a recommendation
+#[derive(Debug, Deserialize)]
+pub struct RateRecommendationRequest {
+    pub rating: i32,
+    pub feedback: Option<String>,
+}
+
+/// Filter options for recommendation history
+#[derive(Debug, Deserialize)]
+pub struct HistoryFilter {
+    pub status: Option<UserRecommendationStatus>,
+    pub category: Option<RecommendationCategory>,
+    pub from_date: Option<DateTime<Utc>>,
+    pub to_date: Option<DateTime<Utc>>,
+    pub page: Option<i64>,
+    pub page_size: Option<i64>,
+}
+
+/// User recommendation with template details
+#[derive(Debug, Serialize)]
+pub struct UserRecommendationWithTemplate {
+    #[serde(flatten)]
+    pub user_recommendation: UserRecommendation,
+    pub template: RecommendationTemplate,
+}
