@@ -21,6 +21,7 @@ pub mod recovery_data;
 pub mod recovery_analysis;
 pub mod training_recovery_settings;
 pub mod validation_framework;
+pub mod recommendation;
 
 pub use user::*;
 pub use athlete_profile::*;
