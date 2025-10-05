@@ -33,6 +33,9 @@ pub mod recovery_alert_service;
 pub mod oura_api_client;
 pub mod oura_integration_service;
 pub mod validation_service;
+pub mod performance_profiler;
+pub mod processing_config;
+pub mod performance_benchmark;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
