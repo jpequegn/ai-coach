@@ -1,5 +1,4 @@
-use crate::auth::{Claims, AuthService};
-use crate::middleware::auth::auth_middleware;
+use crate::auth::{Claims, AuthService, jwt_auth_middleware};
 use crate::models::{
     CompleteRecommendationRequest, HistoryFilter, RateRecommendationRequest,
     SkipRecommendationRequest, UserRecommendation, UserRecommendationWithTemplate,
@@ -105,7 +104,7 @@ pub fn recommendation_tracking_routes(db: PgPool, auth_service: Arc<AuthService>
         .route("/history", get(get_recommendation_history))
         .layer(middleware::from_fn_with_state(
             auth_service.clone(),
-            auth_middleware,
+            jwt_auth_middleware,
         ))
         .with_state(service)
 }

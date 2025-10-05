@@ -49,3 +49,4 @@ pub use recovery_data::*;
 pub use recovery_analysis::*;
 pub use training_recovery_settings::*;
 pub use validation_framework::*;
+pub use recommendation::*;
