@@ -4,3 +4,4 @@
 pub mod api_endpoints_test;
 pub mod auth_integration_test;
 pub mod notification_integration_test;
+pub mod vision_pipeline_test;

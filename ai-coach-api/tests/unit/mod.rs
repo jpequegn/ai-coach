@@ -6,3 +6,4 @@ pub mod event_service_test;
 pub mod user_service_test;
 pub mod training_session_service_test;
 pub mod notification_service_test;
+pub mod keypoint_processor_test;
