@@ -1,8 +1,8 @@
 use crate::auth::{AuthService, Claims, jwt_auth_middleware};
-use crate::models::{
-    CurrentRecommendationsQuery, CurrentRecommendationsResponse, RecoveryScore,
-    RecommendationContext,
+use crate::models::recommendation::{
+    CurrentRecommendationsQuery, CurrentRecommendationsResponse, RecommendationContext,
 };
+use crate::models::RecoveryScore;
 use crate::services::RecommendationEngine;
 use axum::{
     extract::{Query, State},

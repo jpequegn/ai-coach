@@ -1,14 +1,15 @@
-use crate::models::{
+use crate::models::recommendation::{
     CurrentRecommendationsResponse, RecommendationCategory, RecommendationContext,
-    RecommendationDifficulty, RecommendationOutput, RecommendationPriority,
-    RecommendationTemplate, RecoveryIssues, RecoveryScore, ScoredRecommendation, TimeOfDay,
+    RecommendationOutput, RecommendationPriority,
+    RecommendationTemplate, RecoveryIssues, ScoredRecommendation,
     UserRecommendation, UserRecommendationHistory, UserRecommendationStatus,
 };
+use crate::models::RecoveryScore;
 use anyhow::{Context, Result};
-use chrono::{DateTime, Duration, Utc};
+use chrono::{Duration, Utc};
 use sqlx::PgPool;
 use std::collections::HashMap;
-use tracing::{info, warn};
+use tracing::info;
 use uuid::Uuid;
 
 pub struct RecommendationEngine {
