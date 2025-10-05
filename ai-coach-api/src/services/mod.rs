@@ -37,6 +37,7 @@ pub mod performance_profiler;
 pub mod processing_config;
 pub mod performance_benchmark;
 pub mod recommendation_tracking_service;
+pub mod recommendation_engine_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -72,3 +73,4 @@ pub use oura_api_client::OuraApiClient;
 pub use oura_integration_service::OuraIntegrationService;
 pub use validation_service::ValidationService;
 pub use recommendation_tracking_service::RecommendationTrackingService;
+pub use recommendation_engine_service::RecommendationEngine;

@@ -22,6 +22,7 @@ use super::oura_wearable::oura_wearable_routes;
 use super::training_adjustment::training_adjustment_routes;
 use super::validation::validation_routes;
 use super::recommendation_tracking::recommendation_tracking_routes;
+use super::recommendation_engine::recommendation_engine_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
 
@@ -44,6 +45,7 @@ pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Ro
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/recommendations", recommendation_tracking_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/recommendations", recommendation_engine_routes(db.clone(), auth_service.clone()))
         .nest("/training/adjustment", training_adjustment_routes(db.clone(), auth_service.clone()))
         .nest("/validation", validation_routes(db.clone(), auth_service.clone()));
 
