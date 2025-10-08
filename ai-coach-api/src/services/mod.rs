@@ -39,6 +39,7 @@ pub mod performance_benchmark;
 pub mod recommendation_tracking_service;
 pub mod recommendation_engine_service;
 pub mod user_recovery_profile_service;
+pub mod recommendation_effectiveness_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -76,3 +77,4 @@ pub use validation_service::ValidationService;
 pub use recommendation_tracking_service::RecommendationTrackingService;
 pub use recommendation_engine_service::RecommendationEngine;
 pub use user_recovery_profile_service::UserRecoveryProfileService;
+pub use recommendation_effectiveness_service::RecommendationEffectivenessService;

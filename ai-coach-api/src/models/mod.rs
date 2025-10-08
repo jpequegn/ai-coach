@@ -23,6 +23,7 @@ pub mod training_recovery_settings;
 pub mod validation_framework;
 pub mod recommendation;
 pub mod user_recovery_profile;
+pub mod recommendation_outcome;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -52,3 +53,4 @@ pub use training_recovery_settings::*;
 pub use validation_framework::*;
 pub use recommendation::*;
 pub use user_recovery_profile::*;
+pub use recommendation_outcome::*;
