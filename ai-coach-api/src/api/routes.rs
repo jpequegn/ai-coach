@@ -18,6 +18,7 @@ use super::vision::vision_routes;
 use super::docs::docs_routes;
 use super::recovery::recovery_routes;
 use super::recovery_analysis::recovery_analysis_routes;
+use super::recovery_profile::recovery_profile_routes;
 use super::oura_wearable::oura_wearable_routes;
 use super::training_adjustment::training_adjustment_routes;
 use super::validation::validation_routes;
@@ -44,6 +45,7 @@ pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Ro
         .nest("/vision", vision_routes(db.clone(), auth_service.clone()))
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/profile", recovery_profile_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/recommendations", recommendation_tracking_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/recommendations", recommendation_engine_routes(db.clone(), auth_service.clone()))
         .nest("/training/adjustment", training_adjustment_routes(db.clone(), auth_service.clone()))
