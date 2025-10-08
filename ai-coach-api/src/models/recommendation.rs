@@ -33,7 +33,7 @@ impl std::fmt::Display for RecommendationCategory {
 }
 
 /// Priority level for recommendations
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, sqlx::Type, PartialEq)]
 #[sqlx(type_name = "varchar", rename_all = "snake_case")]
 pub enum RecommendationPriority {
     #[serde(rename = "low")]
