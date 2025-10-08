@@ -376,7 +376,7 @@ impl RecommendationEngine {
                 other => other,
             }
         } else {
-            template.priority_default.clone()
+            template.priority_default
         }
     }
 
