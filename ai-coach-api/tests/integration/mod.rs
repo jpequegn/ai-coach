@@ -6,3 +6,4 @@ pub mod auth_integration_test;
 pub mod notification_integration_test;
 pub mod vision_pipeline_test;
 pub mod recommendation_engine_integration_test;
+pub mod recovery_profile_integration_test;

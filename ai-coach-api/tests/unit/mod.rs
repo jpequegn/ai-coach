@@ -8,3 +8,4 @@ pub mod training_session_service_test;
 pub mod notification_service_test;
 pub mod keypoint_processor_test;
 pub mod recommendation_engine_test;
+pub mod user_recovery_profile_service_test;
