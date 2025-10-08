@@ -1,10 +1,12 @@
 use anyhow::Result;
 use chrono::Utc;
+use serde_json::json;
 use sqlx::PgPool;
+use tracing::info;
 use uuid::Uuid;
 
 use crate::auth::password::hash_password;
-use crate::models::{CreateUser, UpdateUser, UserResponse};
+use crate::models::{CreateUser, UpdateUser, UserResponse, DietaryPreferences, SleepSchedule};
 
 pub struct UserService {
     db: PgPool,
@@ -19,6 +21,9 @@ impl UserService {
         let password_hash = hash_password(&user_data.password)
             .map_err(|e| anyhow::anyhow!("Failed to hash password: {}", e))?;
 
+        // Start a transaction to ensure user and profile are created together
+        let mut tx = self.db.begin().await?;
+
         let user = sqlx::query_as!(
             User,
             r#"
@@ -30,8 +35,40 @@ impl UserService {
             password_hash,
             Utc::now()
         )
-        .fetch_one(&self.db)
+        .fetch_one(&mut *tx)
         .await?;
+
+        // Create default recovery profile for the new user
+        sqlx::query!(
+            r#"
+            INSERT INTO user_recovery_profiles (
+                user_id,
+                preferred_recovery_activities,
+                available_equipment,
+                dietary_preferences,
+                sleep_schedule,
+                stress_triggers,
+                effective_techniques,
+                completion_stats
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            "#,
+            user.id,
+            json!([]),
+            json!([]),
+            json!(DietaryPreferences::default()),
+            json!(SleepSchedule::default()),
+            json!([]),
+            json!([]),
+            json!({})
+        )
+        .execute(&mut *tx)
+        .await?;
+
+        // Commit transaction
+        tx.commit().await?;
+
+        info!("Created user {} with default recovery profile", user.id);
 
         Ok(UserResponse {
             id: user.id,

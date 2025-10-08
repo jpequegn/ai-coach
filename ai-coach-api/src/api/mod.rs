@@ -18,6 +18,7 @@ pub mod vision;
 pub mod docs;
 pub mod recovery;
 pub mod recovery_analysis;
+pub mod recovery_profile;
 pub mod oura_wearable;
 pub mod training_adjustment;
 pub mod validation;
