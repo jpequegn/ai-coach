@@ -3,19 +3,25 @@ use crate::models::{
     SkipRecommendationRequest, UserRecommendation, UserRecommendationStatus,
     UserRecommendationWithTemplate, RecommendationTemplate,
 };
+use crate::services::RecommendationEffectivenessService;
 use anyhow::{Context, Result};
 use chrono::Utc;
 use sqlx::PgPool;
+use std::sync::Arc;
 use tracing::{info, warn};
 use uuid::Uuid;
 
 pub struct RecommendationTrackingService {
     db: PgPool,
+    effectiveness_service: Option<Arc<RecommendationEffectivenessService>>,
 }
 
 impl RecommendationTrackingService {
     pub fn new(db: PgPool) -> Self {
-        Self { db }
+        Self {
+            db: db.clone(),
+            effectiveness_service: Some(Arc::new(RecommendationEffectivenessService::new(db))),
+        }
     }
 
     /// Complete a recommendation
@@ -49,7 +55,55 @@ impl RecommendationTrackingService {
             user_id, recommendation_id
         );
 
+        // Track outcome for effectiveness measurement
+        if let Some(effectiveness_service) = &self.effectiveness_service {
+            // Get baseline recovery score at the time recommendation was shown
+            if let Ok(Some((score_id, score_value))) = self.get_recovery_score_at_time(
+                user_id,
+                recommendation.shown_at,
+            ).await {
+                if let Err(e) = effectiveness_service
+                    .track_outcome(&recommendation, Some(score_id), score_value)
+                    .await
+                {
+                    warn!(
+                        "Failed to track outcome for recommendation {}: {}",
+                        recommendation_id, e
+                    );
+                }
+            } else {
+                warn!(
+                    "No recovery score found for user {} at time {}",
+                    user_id, recommendation.shown_at
+                );
+            }
+        }
+
         Ok(recommendation)
+    }
+
+    /// Get recovery score closest to a specific time
+    async fn get_recovery_score_at_time(
+        &self,
+        user_id: Uuid,
+        target_time: chrono::DateTime<Utc>,
+    ) -> Result<Option<(Uuid, f64)>> {
+        let result = sqlx::query!(
+            r#"
+            SELECT id, overall_readiness
+            FROM recovery_scores
+            WHERE user_id = $1
+              AND score_date <= $2
+            ORDER BY score_date DESC
+            LIMIT 1
+            "#,
+            user_id,
+            target_time
+        )
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(result.map(|r| (r.id, r.overall_readiness)))
     }
 
     /// Skip a recommendation
