@@ -1,5 +1,7 @@
 use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
+use ai_coach::services::RecoveryJobScheduler;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::{info, instrument};
 use tracing_subscriber;
@@ -20,8 +22,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Run migrations
     run_migrations(&db).await?;
 
+    // Create and start the recovery job scheduler
+    let scheduler = Arc::new(RecoveryJobScheduler::new(db.clone()).await?);
+    scheduler.start().await?;
+    info!("Recovery job scheduler started");
+
     // Create the application routes
-    let app = create_routes(db, &app_config.jwt_secret, &app_config);
+    let app = create_routes(db, &app_config.jwt_secret, &app_config, Some(scheduler.clone()));
 
     // Start the server
     let listener = TcpListener::bind(&app_config.server_address()).await?;

@@ -25,3 +25,5 @@ pub mod validation;
 pub mod recommendation_tracking;
 pub mod recommendation_engine;
 pub mod recommendation_effectiveness;
+pub mod job_admin;
+pub mod job_admin_routes;

@@ -24,6 +24,7 @@ pub mod validation_framework;
 pub mod recommendation;
 pub mod user_recovery_profile;
 pub mod recommendation_outcome;
+pub mod job_execution;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -54,3 +55,4 @@ pub use validation_framework::*;
 pub use recommendation::*;
 pub use user_recovery_profile::*;
 pub use recommendation_outcome::*;
+pub use job_execution::*;
