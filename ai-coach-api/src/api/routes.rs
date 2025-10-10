@@ -2,7 +2,7 @@ use axum::{routing::get, Router};
 use sqlx::PgPool;
 
 use super::auth::{admin_routes, auth_routes};
-use super::health::health_check;
+use super::health::{health_check, health_check_detailed, HealthState};
 use super::training::training_routes;
 use super::ml_predictions::ml_prediction_routes;
 use super::workout_recommendations::workout_recommendation_routes;
@@ -25,10 +25,18 @@ use super::validation::validation_routes;
 use super::recommendation_tracking::recommendation_tracking_routes;
 use super::recommendation_engine::recommendation_engine_routes;
 use super::recommendation_effectiveness::recommendation_effectiveness_routes;
+use super::job_admin_routes::job_admin_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
+use crate::services::RecoveryJobScheduler;
+use std::sync::Arc;
 
-pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Router {
+pub fn create_routes(
+    db: PgPool,
+    jwt_secret: &str,
+    app_config: &AppConfig,
+    scheduler: Option<Arc<RecoveryJobScheduler>>,
+) -> Router {
     let auth_service = AuthService::new(db.clone(), jwt_secret);
 
     // Create v1 API routes
@@ -74,6 +82,12 @@ pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Ro
         tracing::warn!("Oura wearable integration disabled (missing OAuth credentials)");
     }
 
+    // Add job admin routes if scheduler is provided
+    if let Some(scheduler) = scheduler {
+        api_v1 = api_v1.nest("/admin/jobs", job_admin_routes(scheduler, auth_service.clone()));
+        tracing::info!("Job administration endpoints enabled at /api/v1/admin/jobs");
+    }
+
     api_v1 = api_v1
         // Documentation routes
         .merge(docs_routes())
@@ -82,8 +96,17 @@ pub fn create_routes(db: PgPool, jwt_secret: &str, app_config: &AppConfig) -> Ro
         .nest("/workouts", workout_recommendation_routes(db.clone(), auth_service.clone()))
         .nest("/performance", performance_insights_routes(db.clone(), auth_service.clone()));
 
+    // Create health state
+    let health_state = Arc::new(HealthState {
+        scheduler: scheduler.clone(),
+    });
+
     Router::new()
         .route("/health", get(health_check))
+        .route(
+            "/health/detailed",
+            get(health_check_detailed).with_state(health_state),
+        )
         .nest("/api/v1", api_v1)
         // Maintain backward compatibility with existing routes
         .nest("/api/auth", auth_routes(auth_service.clone()))
