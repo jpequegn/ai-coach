@@ -41,6 +41,7 @@ pub mod recommendation_engine_service;
 pub mod user_recovery_profile_service;
 pub mod recommendation_effectiveness_service;
 pub mod recovery_job_scheduler;
+pub mod daily_recovery_calculation_job;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -80,3 +81,4 @@ pub use recommendation_engine_service::RecommendationEngine;
 pub use user_recovery_profile_service::UserRecoveryProfileService;
 pub use recommendation_effectiveness_service::RecommendationEffectivenessService;
 pub use recovery_job_scheduler::RecoveryJobScheduler;
+pub use daily_recovery_calculation_job::DailyRecoveryCalculationJob;

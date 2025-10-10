@@ -27,3 +27,5 @@ pub mod recommendation_engine;
 pub mod recommendation_effectiveness;
 pub mod job_admin;
 pub mod job_admin_routes;
+pub mod daily_recovery_job_admin;
+pub mod daily_recovery_job_admin_routes;
