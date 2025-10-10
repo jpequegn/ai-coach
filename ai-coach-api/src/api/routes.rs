@@ -26,9 +26,10 @@ use super::recommendation_tracking::recommendation_tracking_routes;
 use super::recommendation_engine::recommendation_engine_routes;
 use super::recommendation_effectiveness::recommendation_effectiveness_routes;
 use super::job_admin_routes::job_admin_routes;
+use super::daily_recovery_job_admin_routes::daily_recovery_job_admin_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
-use crate::services::RecoveryJobScheduler;
+use crate::services::{DailyRecoveryCalculationJob, RecoveryJobScheduler};
 use std::sync::Arc;
 
 pub fn create_routes(
@@ -36,6 +37,7 @@ pub fn create_routes(
     jwt_secret: &str,
     app_config: &AppConfig,
     scheduler: Option<Arc<RecoveryJobScheduler>>,
+    recovery_job: Option<Arc<DailyRecoveryCalculationJob>>,
 ) -> Router {
     let auth_service = AuthService::new(db.clone(), jwt_secret);
 
@@ -86,6 +88,15 @@ pub fn create_routes(
     if let Some(scheduler) = scheduler {
         api_v1 = api_v1.nest("/admin/jobs", job_admin_routes(scheduler, auth_service.clone()));
         tracing::info!("Job administration endpoints enabled at /api/v1/admin/jobs");
+    }
+
+    // Add recovery job admin routes if job is provided
+    if let Some(job) = recovery_job {
+        api_v1 = api_v1.nest(
+            "/admin/jobs/daily-recovery",
+            daily_recovery_job_admin_routes(job, auth_service.clone()),
+        );
+        tracing::info!("Daily recovery job administration endpoints enabled at /api/v1/admin/jobs/daily-recovery");
     }
 
     api_v1 = api_v1

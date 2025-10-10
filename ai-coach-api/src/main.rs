@@ -1,6 +1,9 @@
 use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
-use ai_coach::services::RecoveryJobScheduler;
+use ai_coach::services::{
+    DailyRecoveryCalculationJob, NotificationService, RecoveryAlertService,
+    RecoveryAnalysisService, RecoveryJobScheduler,
+};
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::{info, instrument};
@@ -27,8 +30,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     scheduler.start().await?;
     info!("Recovery job scheduler started");
 
+    // Create recovery analysis service with alert service
+    let notification_service = NotificationService::new(db.clone());
+    let alert_service = RecoveryAlertService::new(db.clone(), notification_service);
+    let analysis_service = RecoveryAnalysisService::with_alerts(db.clone(), alert_service);
+
+    // Create and register daily recovery calculation job
+    let redis_url = std::env::var("REDIS_URL").ok();
+    let recovery_job = Arc::new(DailyRecoveryCalculationJob::new(
+        db.clone(),
+        analysis_service,
+        redis_url,
+    )?);
+
+    // Register the job to run hourly (at the top of each hour)
+    let recovery_job_clone = recovery_job.clone();
+    scheduler
+        .register_job("daily_recovery_calculation", "0 0 * * * *", move || {
+            let job = recovery_job_clone.clone();
+            Box::pin(async move { job.execute().await })
+        })
+        .await?;
+
+    info!("Daily recovery calculation job registered (runs hourly)");
+
     // Create the application routes
-    let app = create_routes(db, &app_config.jwt_secret, &app_config, Some(scheduler.clone()));
+    let app = create_routes(
+        db,
+        &app_config.jwt_secret,
+        &app_config,
+        Some(scheduler.clone()),
+        Some(recovery_job.clone()),
+    );
 
     // Start the server
     let listener = TcpListener::bind(&app_config.server_address()).await?;
