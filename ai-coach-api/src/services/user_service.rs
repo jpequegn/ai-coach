@@ -6,7 +6,7 @@ use tracing::info;
 use uuid::Uuid;
 
 use crate::auth::password::hash_password;
-use crate::models::{CreateUser, UpdateUser, UserResponse, DietaryPreferences, SleepSchedule};
+use crate::models::{CreateUser, UpdateUser, User, UserResponse, DietaryPreferences, SleepSchedule};
 
 pub struct UserService {
     db: PgPool,
@@ -27,9 +27,9 @@ impl UserService {
         let user = sqlx::query_as!(
             User,
             r#"
-            INSERT INTO users (email, password_hash, created_at, updated_at)
-            VALUES ($1, $2, $3, $3)
-            RETURNING id, email, password_hash, created_at, updated_at
+            INSERT INTO users (email, password_hash, timezone, active, created_at, updated_at)
+            VALUES ($1, $2, 'UTC', true, $3, $3)
+            RETURNING id, email, password_hash, timezone, active, created_at, updated_at
             "#,
             user_data.email,
             password_hash,
@@ -73,6 +73,8 @@ impl UserService {
         Ok(UserResponse {
             id: user.id,
             email: user.email,
+            timezone: user.timezone,
+            active: user.active,
             created_at: user.created_at,
             updated_at: user.updated_at,
         })
@@ -81,7 +83,7 @@ impl UserService {
     pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserResponse>> {
         let user = sqlx::query_as!(
             User,
-            "SELECT id, email, password_hash, created_at, updated_at FROM users WHERE id = $1",
+            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE id = $1",
             user_id
         )
         .fetch_optional(&self.db)
@@ -90,6 +92,8 @@ impl UserService {
         Ok(user.map(|u| UserResponse {
             id: u.id,
             email: u.email,
+            timezone: u.timezone,
+            active: u.active,
             created_at: u.created_at,
             updated_at: u.updated_at,
         }))
@@ -98,7 +102,7 @@ impl UserService {
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<UserResponse>> {
         let user = sqlx::query_as!(
             User,
-            "SELECT id, email, password_hash, created_at, updated_at FROM users WHERE email = $1",
+            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE email = $1",
             email
         )
         .fetch_optional(&self.db)
@@ -107,6 +111,8 @@ impl UserService {
         Ok(user.map(|u| UserResponse {
             id: u.id,
             email: u.email,
+            timezone: u.timezone,
+            active: u.active,
             created_at: u.created_at,
             updated_at: u.updated_at,
         }))
