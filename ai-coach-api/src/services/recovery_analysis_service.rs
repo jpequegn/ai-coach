@@ -763,3 +763,12 @@ impl RecoveryAnalysisService {
         Ok(recommendations)
     }
 }
+
+impl Clone for RecoveryAnalysisService {
+    fn clone(&self) -> Self {
+        Self {
+            db: self.db.clone(),
+            alert_service: self.alert_service.clone(),
+        }
+    }
+}
