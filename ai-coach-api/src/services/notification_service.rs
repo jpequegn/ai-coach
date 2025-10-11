@@ -12,7 +12,7 @@ use crate::models::{
     UpdateNotificationPreferencesRequest,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NotificationService {
     db: PgPool,
     email_service: Option<EmailService>,
@@ -556,7 +556,7 @@ struct MockWorkout {
     duration_minutes: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct EmailService;
 
 impl EmailService {
@@ -571,7 +571,7 @@ impl EmailService {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct PushNotificationService;
 
 impl PushNotificationService {
