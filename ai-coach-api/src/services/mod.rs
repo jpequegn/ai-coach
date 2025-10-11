@@ -43,6 +43,7 @@ pub mod recommendation_effectiveness_service;
 pub mod recovery_job_scheduler;
 pub mod daily_recovery_calculation_job;
 pub mod alert_delivery_queue_service;
+pub mod alert_delivery_job;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -84,3 +85,4 @@ pub use recommendation_effectiveness_service::RecommendationEffectivenessService
 pub use recovery_job_scheduler::RecoveryJobScheduler;
 pub use daily_recovery_calculation_job::DailyRecoveryCalculationJob;
 pub use alert_delivery_queue_service::AlertDeliveryQueueService;
+pub use alert_delivery_job::AlertDeliveryJob;

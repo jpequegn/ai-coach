@@ -472,6 +472,15 @@ impl MethodCounter {
     }
 }
 
+impl Clone for AlertDeliveryQueueService {
+    fn clone(&self) -> Self {
+        Self {
+            db: self.db.clone(),
+            notification_service: self.notification_service.clone(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
