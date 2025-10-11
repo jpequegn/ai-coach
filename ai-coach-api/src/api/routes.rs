@@ -27,9 +27,13 @@ use super::recommendation_engine::recommendation_engine_routes;
 use super::recommendation_effectiveness::recommendation_effectiveness_routes;
 use super::job_admin_routes::job_admin_routes;
 use super::daily_recovery_job_admin_routes::daily_recovery_job_admin_routes;
+use super::alert_delivery_admin_routes::alert_delivery_admin_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
-use crate::services::{DailyRecoveryCalculationJob, RecoveryJobScheduler};
+use crate::services::{
+    AlertDeliveryQueueService, DailyRecoveryCalculationJob, NotificationService,
+    RecoveryJobScheduler,
+};
 use std::sync::Arc;
 
 pub fn create_routes(
@@ -98,6 +102,15 @@ pub fn create_routes(
         );
         tracing::info!("Daily recovery job administration endpoints enabled at /api/v1/admin/jobs/daily-recovery");
     }
+
+    // Add alert delivery admin routes
+    let notification_service = NotificationService::new(db.clone());
+    let queue_service = AlertDeliveryQueueService::new(db.clone(), notification_service);
+    api_v1 = api_v1.nest(
+        "/admin/alerts/delivery",
+        alert_delivery_admin_routes(queue_service, db.clone(), auth_service.clone()),
+    );
+    tracing::info!("Alert delivery administration endpoints enabled at /api/v1/admin/alerts/delivery");
 
     api_v1 = api_v1
         // Documentation routes
