@@ -1,8 +1,8 @@
 use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
 use ai_coach::services::{
-    DailyRecoveryCalculationJob, NotificationService, RecoveryAlertService,
-    RecoveryAnalysisService, RecoveryJobScheduler,
+    AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
+    NotificationService, RecoveryAlertService, RecoveryAnalysisService, RecoveryJobScheduler,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -53,6 +53,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     info!("Daily recovery calculation job registered (runs hourly)");
+
+    // Create alert delivery queue service and job
+    let queue_service = AlertDeliveryQueueService::new(db.clone(), notification_service.clone());
+    let alert_delivery_job = Arc::new(AlertDeliveryJob::new(queue_service));
+
+    // Register alert delivery job to run every 5 minutes
+    let alert_job_clone = alert_delivery_job.clone();
+    scheduler
+        .register_job(
+            AlertDeliveryJob::get_job_name(),
+            AlertDeliveryJob::get_schedule(),
+            move || {
+                let job = alert_job_clone.clone();
+                Box::pin(async move { job.execute().await })
+            },
+        )
+        .await?;
+
+    info!(
+        "Alert delivery job registered (schedule: {})",
+        AlertDeliveryJob::get_schedule()
+    );
 
     // Create the application routes
     let app = create_routes(
