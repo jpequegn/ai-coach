@@ -26,6 +26,7 @@ pub mod user_recovery_profile;
 pub mod recommendation_outcome;
 pub mod job_execution;
 pub mod alert_delivery;
+pub mod data_quality;
 
 pub use user::*;
 pub use athlete_profile::*;
@@ -58,3 +59,4 @@ pub use user_recovery_profile::*;
 pub use recommendation_outcome::*;
 pub use job_execution::*;
 pub use alert_delivery::*;
+pub use data_quality::*;
