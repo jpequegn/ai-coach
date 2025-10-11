@@ -2,7 +2,8 @@ use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
 use ai_coach::services::{
     AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
-    NotificationService, RecoveryAlertService, RecoveryAnalysisService, RecoveryJobScheduler,
+    DataQualityCheckJob, NotificationService, RecoveryAlertService, RecoveryAnalysisService,
+    RecoveryJobScheduler,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -74,6 +75,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!(
         "Alert delivery job registered (schedule: {})",
         AlertDeliveryJob::get_schedule()
+    );
+
+    // Create and register data quality check job
+    let data_quality_job = Arc::new(DataQualityCheckJob::new(
+        db.clone(),
+        notification_service.clone(),
+    ));
+
+    let data_quality_job_clone = data_quality_job.clone();
+    scheduler
+        .register_job(
+            DataQualityCheckJob::get_job_name(),
+            DataQualityCheckJob::get_schedule(),
+            move || {
+                let job = data_quality_job_clone.clone();
+                Box::pin(async move { job.execute().await })
+            },
+        )
+        .await?;
+
+    info!(
+        "Data quality check job registered (schedule: {})",
+        DataQualityCheckJob::get_schedule()
     );
 
     // Create the application routes

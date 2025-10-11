@@ -45,6 +45,7 @@ pub mod daily_recovery_calculation_job;
 pub mod alert_delivery_queue_service;
 pub mod alert_delivery_job;
 pub mod email_batching_service;
+pub mod data_quality_check_job;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
@@ -88,3 +89,4 @@ pub use daily_recovery_calculation_job::DailyRecoveryCalculationJob;
 pub use alert_delivery_queue_service::AlertDeliveryQueueService;
 pub use alert_delivery_job::AlertDeliveryJob;
 pub use email_batching_service::{EmailBatchConfig, EmailBatchingService};
+pub use data_quality_check_job::DataQualityCheckJob;
