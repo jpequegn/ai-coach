@@ -53,7 +53,10 @@
       "Bash(do file=\"migrations/$num_\"*.sql)",
       "Bash(if [ -f \"$file\" ])",
       "Bash(then cat \"$file\")",
-      "Bash(bash -c 'for num in 025 026 027 028 029; do cat migrations/${num}_*.sql | docker exec -i ai-coach-db-1 psql -U postgres -d ai_coach > /dev/null 2>&1 && echo \"\"✓ ${num}\"\" || echo \"\"✗ ${num}\"\"; done')"
+      "Bash(bash -c 'for num in 025 026 027 028 029; do cat migrations/${num}_*.sql | docker exec -i ai-coach-db-1 psql -U postgres -d ai_coach > /dev/null 2>&1 && echo \"\"✓ ${num}\"\" || echo \"\"✗ ${num}\"\"; done')",
+      "Bash(find-skills:*)",
+      "Bash(/Users/julienpequegnot/.claude/plugins/cache/superpowers/scripts/find-skills simplify extend architecture)",
+      "Bash(cloc:*)"
     ],
     "deny": [],
     "ask": []
