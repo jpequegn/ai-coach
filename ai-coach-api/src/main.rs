@@ -2,8 +2,9 @@ use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
 use ai_coach::services::{
     AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
-    DataQualityCheckJob, NotificationService, RecoveryAlertService, RecoveryAnalysisService,
-    RecoveryDataService, RecoveryJobScheduler, WeeklyBaselineRecalculationJob,
+    DataQualityCheckJob, JobRegistry, NotificationService, RecoveryAlertService,
+    RecoveryAnalysisService, RecoveryDataService, RecoveryJobScheduler,
+    WeeklyBaselineRecalculationJob,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -36,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let alert_service = RecoveryAlertService::new(db.clone(), notification_service);
     let analysis_service = RecoveryAnalysisService::with_alerts(db.clone(), alert_service);
 
-    // Create and register daily recovery calculation job
+    // Create all background jobs
     let redis_url = std::env::var("REDIS_URL").ok();
     let recovery_job = Arc::new(DailyRecoveryCalculationJob::new(
         db.clone(),
@@ -44,88 +45,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         redis_url,
     )?);
 
-    // Register the job to run hourly (at the top of each hour)
-    let recovery_job_clone = recovery_job.clone();
-    scheduler
-        .register_job("daily_recovery_calculation", "0 0 * * * *", move || {
-            let job = recovery_job_clone.clone();
-            Box::pin(async move { job.execute().await })
-        })
-        .await?;
-
-    info!("Daily recovery calculation job registered (runs hourly)");
-
-    // Create alert delivery queue service and job
     let queue_service = AlertDeliveryQueueService::new(db.clone(), notification_service.clone());
-    let alert_delivery_job = Arc::new(AlertDeliveryJob::new(queue_service));
-
-    // Register alert delivery job to run every 5 minutes
-    let alert_job_clone = alert_delivery_job.clone();
-    scheduler
-        .register_job(
-            AlertDeliveryJob::get_job_name(),
-            AlertDeliveryJob::get_schedule(),
-            move || {
-                let job = alert_job_clone.clone();
-                Box::pin(async move { job.execute().await })
-            },
-        )
-        .await?;
-
-    info!(
-        "Alert delivery job registered (schedule: {})",
-        AlertDeliveryJob::get_schedule()
-    );
-
-    // Create and register data quality check job
-    let data_quality_job = Arc::new(DataQualityCheckJob::new(
-        db.clone(),
-        notification_service.clone(),
-    ));
-
-    let data_quality_job_clone = data_quality_job.clone();
-    scheduler
-        .register_job(
-            DataQualityCheckJob::get_job_name(),
-            DataQualityCheckJob::get_schedule(),
-            move || {
-                let job = data_quality_job_clone.clone();
-                Box::pin(async move { job.execute().await })
-            },
-        )
-        .await?;
-
-    info!(
-        "Data quality check job registered (schedule: {})",
-        DataQualityCheckJob::get_schedule()
-    );
-
-    // Create recovery data service for baseline recalculation
     let recovery_data_service = RecoveryDataService::new(db.clone());
 
-    // Create and register weekly baseline recalculation job
-    let baseline_recalc_job = Arc::new(WeeklyBaselineRecalculationJob::new(
-        db.clone(),
-        recovery_data_service,
-        notification_service.clone(),
-    ));
-
-    let baseline_recalc_job_clone = baseline_recalc_job.clone();
-    scheduler
-        .register_job(
-            WeeklyBaselineRecalculationJob::get_job_name(),
-            WeeklyBaselineRecalculationJob::get_schedule(),
-            move || {
-                let job = baseline_recalc_job_clone.clone();
-                Box::pin(async move { job.execute().await })
-            },
-        )
+    // Register all jobs using JobRegistry
+    JobRegistry::new(scheduler.clone())
+        .register_job(recovery_job.as_ref().clone())
+        .register_job(AlertDeliveryJob::new(queue_service))
+        .register_job(DataQualityCheckJob::new(
+            db.clone(),
+            notification_service.clone(),
+        ))
+        .register_job(WeeklyBaselineRecalculationJob::new(
+            db.clone(),
+            recovery_data_service,
+            notification_service.clone(),
+        ))
+        .start_all()
         .await?;
 
-    info!(
-        "Weekly baseline recalculation job registered (schedule: {})",
-        WeeklyBaselineRecalculationJob::get_schedule()
-    );
+    info!("All background jobs registered successfully");
 
     // Create the application routes
     let app = create_routes(

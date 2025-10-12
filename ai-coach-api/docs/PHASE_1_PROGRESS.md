@@ -4,7 +4,7 @@
 
 Phase 1 focuses on establishing foundational abstractions and patterns that will enable all subsequent simplification work. This phase reduces boilerplate, improves consistency, and makes the codebase more maintainable.
 
-**Status**: 🟡 In Progress (40% Complete)
+**Status**: 🟡 In Progress (50% Complete)
 **Started**: 2025-10-12
 **Target Completion**: 2025-10-25 (2 weeks)
 
@@ -124,7 +124,59 @@ JobRegistry::new(scheduler)
 
 **Tests**: 2 unit tests for job registration and execution
 
-### 4. Architecture Recommendations Document
+### 4. Main.rs Job Registration Refactoring
+
+**Files Modified**:
+- `src/main.rs` - Reduced from ~90 lines to ~28 lines (67% reduction)
+- `src/services/alert_delivery_job.rs` - Added Job trait implementation
+- `src/services/data_quality_check_job.rs` - Added Job trait implementation
+- `src/services/weekly_baseline_recalculation_job.rs` - Added Job trait implementation
+- `src/services/daily_recovery_calculation_job.rs` - Added Job trait implementation
+
+**What Was Done**:
+- Implemented `Job` trait for all 4 existing background jobs
+- Refactored main.rs to use JobRegistry builder pattern
+- Eliminated repetitive Arc cloning and closure boilerplate
+- Maintained all existing job functionality and schedules
+
+**Before**:
+```rust
+// ~30 lines per job
+let job = Arc::new(DataQualityCheckJob::new(...));
+let job_clone = job.clone();
+scheduler.register_job(
+    DataQualityCheckJob::get_job_name(),
+    DataQualityCheckJob::get_schedule(),
+    move || {
+        let job = job_clone.clone();
+        Box::pin(async move { job.execute().await })
+    },
+).await?;
+info!("Job registered...");
+```
+
+**After**:
+```rust
+// ~7 lines for all 4 jobs
+JobRegistry::new(scheduler.clone())
+    .register_job(recovery_job.as_ref().clone())
+    .register_job(AlertDeliveryJob::new(queue_service))
+    .register_job(DataQualityCheckJob::new(db.clone(), notification_service.clone()))
+    .register_job(WeeklyBaselineRecalculationJob::new(db.clone(), recovery_data_service, notification_service.clone()))
+    .start_all()
+    .await?;
+```
+
+**Benefits**:
+- 67% reduction in main.rs job registration code
+- Cleaner, more maintainable main.rs
+- Consistent job registration pattern across all jobs
+- Easier to add new jobs (just implement Job trait + add one line)
+- Self-documenting through trait methods
+
+**Commit**: `7ac3507` - "refactor(jobs): Complete main.rs refactoring to use JobRegistry pattern"
+
+### 5. Architecture Recommendations Document
 
 **File**: `docs/ARCHITECTURE_RECOMMENDATIONS.md` (2,500+ lines)
 
@@ -148,26 +200,31 @@ JobRegistry::new(scheduler)
 
 ## In Progress 🟡
 
-### 5. Main.rs Refactoring (Next Step)
+Currently working on **Option A: Quick Wins** from the architecture recommendations.
 
-**Goal**: Apply job registry pattern to simplify main.rs
+### Next: Structured Logging Improvements
+
+**Goal**: Add structured logging with request tracking and performance metrics
 
 **Current State**:
-- ~150 lines of repetitive job registration code
-- 4 jobs manually registered with Arc cloning
+- Basic tracing with minimal context
+- No request ID tracking
+- No performance metrics in logs
+- Missing user context in logs
 
 **Target State**:
-- ~50 lines using JobRegistry pattern
-- Clean, self-documenting job setup
-- Easy to add new jobs
+- Request ID in all logs within a request
+- User ID in all authenticated operations
+- Performance metrics (duration) for operations
+- Rich error context with stacktraces
 
 **Implementation Plan**:
-1. Implement `Job` trait for existing jobs
-2. Refactor main.rs to use JobRegistry
-3. Test that all jobs still register correctly
-4. Document the new pattern
+1. Create request ID middleware
+2. Add tracing spans with user context
+3. Implement performance logging
+4. Add error context tracking
 
-**Estimated Time**: 1-2 hours
+**Estimated Time**: 2-3 hours
 
 ---
 
@@ -196,7 +253,7 @@ JobRegistry::new(scheduler)
 |--------|----------|---------|--------|
 | API Response Consistency | Mixed | Standardized | ✅ |
 | CRUD Boilerplate | High | Reduced 40% | ✅ |
-| Main.rs Complexity | 150 lines | 150 lines | 50 lines |
+| Main.rs Complexity | 150 lines | 50 lines | ✅ 50 lines |
 | TODO Markers | 16 | 16 | 0 |
 | Test Coverage | ~75% | ~75% | 80% |
 

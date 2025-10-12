@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use async_trait::async_trait;
 use chrono::Utc;
 use sqlx::PgPool;
 use std::time::Instant;
@@ -6,7 +7,7 @@ use tracing::{error, info, warn};
 use uuid::Uuid;
 
 use crate::models::{BaselineChange, ChangeSignificance, JobExecutionStats, RecoveryBaseline};
-use crate::services::{NotificationService, RecoveryDataService};
+use crate::services::{Job, NotificationService, RecoveryDataService};
 
 const BATCH_SIZE: usize = 50;
 const BATCH_DELAY_MS: u64 = 100;
@@ -424,6 +425,22 @@ impl Clone for WeeklyBaselineRecalculationJob {
             recovery_data_service: self.recovery_data_service.clone(),
             notification_service: self.notification_service.clone(),
         }
+    }
+}
+
+#[async_trait]
+impl Job for WeeklyBaselineRecalculationJob {
+    fn name(&self) -> &'static str {
+        Self::get_job_name()
+    }
+
+    fn schedule(&self) -> &'static str {
+        Self::get_schedule()
+    }
+
+    async fn execute(&self) -> Result<()> {
+        self.execute().await?;
+        Ok(())
     }
 }
 

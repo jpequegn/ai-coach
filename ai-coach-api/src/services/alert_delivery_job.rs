@@ -1,10 +1,11 @@
 use anyhow::Result;
+use async_trait::async_trait;
 use sqlx::PgPool;
 use std::time::Instant;
 use tracing::{error, info, warn};
 
 use crate::models::JobExecutionStats;
-use crate::services::AlertDeliveryQueueService;
+use crate::services::{AlertDeliveryQueueService, Job};
 
 const HIGH_FAILURE_RATE_THRESHOLD: f64 = 0.20; // 20%
 
@@ -113,6 +114,22 @@ impl Clone for AlertDeliveryJob {
         Self {
             queue_service: self.queue_service.clone(),
         }
+    }
+}
+
+#[async_trait]
+impl Job for AlertDeliveryJob {
+    fn name(&self) -> &'static str {
+        Self::get_job_name()
+    }
+
+    fn schedule(&self) -> &'static str {
+        Self::get_schedule()
+    }
+
+    async fn execute(&self) -> Result<()> {
+        self.execute().await?;
+        Ok(())
     }
 }
 

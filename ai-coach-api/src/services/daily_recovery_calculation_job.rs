@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use async_trait::async_trait;
 use chrono::{Datelike, NaiveDate, Timelike, Utc};
 use redis::{AsyncCommands, Client as RedisClient};
 use sqlx::PgPool;
@@ -7,7 +8,7 @@ use tracing::{error, info, warn};
 use uuid::Uuid;
 
 use crate::models::{JobExecutionStats, RecoveryScore};
-use crate::services::{RecoveryAlertService, RecoveryAnalysisService};
+use crate::services::{Job, RecoveryAlertService, RecoveryAnalysisService};
 
 const BATCH_SIZE: usize = 100;
 const BATCH_DELAY_MS: u64 = 100;
@@ -325,5 +326,21 @@ impl Clone for DailyRecoveryCalculationJob {
             analysis_service: self.analysis_service.clone(),
             redis_client: self.redis_client.clone(),
         }
+    }
+}
+
+#[async_trait]
+impl Job for DailyRecoveryCalculationJob {
+    fn name(&self) -> &'static str {
+        "daily_recovery_calculation"
+    }
+
+    fn schedule(&self) -> &'static str {
+        "0 0 * * * *" // Hourly at top of hour
+    }
+
+    async fn execute(&self) -> Result<()> {
+        self.execute().await?;
+        Ok(())
     }
 }
