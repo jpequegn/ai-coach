@@ -1,5 +1,6 @@
 // API routes and handlers
 
+pub mod response;  // Standardized API responses
 pub mod health;
 pub mod routes;
 pub mod auth;

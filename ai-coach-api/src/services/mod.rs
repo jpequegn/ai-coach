@@ -1,5 +1,7 @@
 // Business logic services
 
+pub mod crud_service;  // Generic CRUD trait and utilities
+pub mod job_registry;   // Background job registry
 pub mod user_service;
 pub mod athlete_profile_service;
 pub mod training_session_service;
@@ -92,3 +94,9 @@ pub use alert_delivery_job::AlertDeliveryJob;
 pub use email_batching_service::{EmailBatchConfig, EmailBatchingService};
 pub use data_quality_check_job::DataQualityCheckJob;
 pub use weekly_baseline_recalculation_job::WeeklyBaselineRecalculationJob;
+
+// Export job registry types
+pub use job_registry::{Job, JobRegistry};
+
+// Export CRUD utilities
+pub use crud_service::{CrudService, ListParams, PaginatedResult, SortOrder};
