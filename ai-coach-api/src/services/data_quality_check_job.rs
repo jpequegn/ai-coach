@@ -1,11 +1,12 @@
 use anyhow::{Context, Result};
+use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use sqlx::PgPool;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
 use crate::models::{DataQualityMetrics, DataSourceStatus, JobExecutionStats, MissingDataReport};
-use crate::services::NotificationService;
+use crate::services::{Job, NotificationService};
 
 /// Data quality check job
 ///
@@ -481,6 +482,22 @@ impl Clone for DataQualityCheckJob {
             db: self.db.clone(),
             notification_service: self.notification_service.clone(),
         }
+    }
+}
+
+#[async_trait]
+impl Job for DataQualityCheckJob {
+    fn name(&self) -> &'static str {
+        Self::get_job_name()
+    }
+
+    fn schedule(&self) -> &'static str {
+        Self::get_schedule()
+    }
+
+    async fn execute(&self) -> Result<()> {
+        self.execute().await?;
+        Ok(())
     }
 }
 
