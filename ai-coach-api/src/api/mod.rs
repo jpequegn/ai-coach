@@ -31,3 +31,5 @@ pub mod daily_recovery_job_admin;
 pub mod daily_recovery_job_admin_routes;
 pub mod alert_delivery_admin;
 pub mod alert_delivery_admin_routes;
+pub mod data_quality_admin;
+pub mod data_quality_admin_routes;
