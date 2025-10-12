@@ -28,6 +28,7 @@ use super::recommendation_effectiveness::recommendation_effectiveness_routes;
 use super::job_admin_routes::job_admin_routes;
 use super::daily_recovery_job_admin_routes::daily_recovery_job_admin_routes;
 use super::alert_delivery_admin_routes::alert_delivery_admin_routes;
+use super::data_quality_admin_routes::data_quality_admin_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
 use crate::services::{
@@ -111,6 +112,13 @@ pub fn create_routes(
         alert_delivery_admin_routes(queue_service, db.clone(), auth_service.clone()),
     );
     tracing::info!("Alert delivery administration endpoints enabled at /api/v1/admin/alerts/delivery");
+
+    // Add data quality admin routes
+    api_v1 = api_v1.nest(
+        "/admin/data-quality",
+        data_quality_admin_routes(db.clone(), auth_service.clone()),
+    );
+    tracing::info!("Data quality administration endpoints enabled at /api/v1/admin/data-quality");
 
     api_v1 = api_v1
         // Documentation routes
