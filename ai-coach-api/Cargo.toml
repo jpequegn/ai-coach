@@ -16,13 +16,13 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 # API-specific dependencies
-axum = "0.7"
+axum = { version = "0.7", features = ["multipart"] }
 axum-extra = { version = "0.9", features = ["typed-header", "multipart"] }
-sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate"] }
+sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate", "macros"] }
 jsonwebtoken = "9.0"
 bcrypt = "0.15"
 tower = "0.5"
-tower-http = { version = "0.5", features = ["cors", "trace", "auth", "set-header", "request-id"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "auth", "set-header", "request-id", "limit"] }
 rand = "0.8"
 lettre = "0.11"
 regex = "1.0"
