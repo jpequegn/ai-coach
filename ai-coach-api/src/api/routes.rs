@@ -1,5 +1,6 @@
-use axum::{routing::get, Router};
+use axum::{middleware, routing::get, Router};
 use sqlx::PgPool;
+use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
 
 use super::auth::{admin_routes, auth_routes};
 use super::health::{health_check, health_check_detailed, HealthState};
@@ -30,6 +31,7 @@ use super::daily_recovery_job_admin_routes::daily_recovery_job_admin_routes;
 use super::alert_delivery_admin_routes::alert_delivery_admin_routes;
 use crate::auth::AuthService;
 use crate::config::AppConfig;
+use crate::middleware::{UuidRequestIdGenerator, logging_middleware};
 use crate::services::{
     AlertDeliveryQueueService, DailyRecoveryCalculationJob, NotificationService,
     RecoveryJobScheduler,
@@ -139,4 +141,14 @@ pub fn create_routes(
         .nest("/api/ml", ml_prediction_routes(db.clone(), auth_service.clone()))
         .nest("/api/workouts", workout_recommendation_routes(db.clone(), auth_service.clone()))
         .nest("/api/performance", performance_insights_routes(db.clone(), auth_service.clone()))
+        // Add request ID generation and propagation
+        .layer(SetRequestIdLayer::new(
+            axum::http::header::HeaderName::from_static("x-request-id"),
+            UuidRequestIdGenerator::default(),
+        ))
+        .layer(PropagateRequestIdLayer::new(
+            axum::http::header::HeaderName::from_static("x-request-id"),
+        ))
+        // Add logging middleware
+        .layer(middleware::from_fn(logging_middleware))
 }
