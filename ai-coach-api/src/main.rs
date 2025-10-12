@@ -3,7 +3,7 @@ use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
 use ai_coach::services::{
     AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
     DataQualityCheckJob, NotificationService, RecoveryAlertService, RecoveryAnalysisService,
-    RecoveryJobScheduler,
+    RecoveryDataService, RecoveryJobScheduler, WeeklyBaselineRecalculationJob,
 };
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -98,6 +98,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!(
         "Data quality check job registered (schedule: {})",
         DataQualityCheckJob::get_schedule()
+    );
+
+    // Create recovery data service for baseline recalculation
+    let recovery_data_service = RecoveryDataService::new(db.clone());
+
+    // Create and register weekly baseline recalculation job
+    let baseline_recalc_job = Arc::new(WeeklyBaselineRecalculationJob::new(
+        db.clone(),
+        recovery_data_service,
+        notification_service.clone(),
+    ));
+
+    let baseline_recalc_job_clone = baseline_recalc_job.clone();
+    scheduler
+        .register_job(
+            WeeklyBaselineRecalculationJob::get_job_name(),
+            WeeklyBaselineRecalculationJob::get_schedule(),
+            move || {
+                let job = baseline_recalc_job_clone.clone();
+                Box::pin(async move { job.execute().await })
+            },
+        )
+        .await?;
+
+    info!(
+        "Weekly baseline recalculation job registered (schedule: {})",
+        WeeklyBaselineRecalculationJob::get_schedule()
     );
 
     // Create the application routes

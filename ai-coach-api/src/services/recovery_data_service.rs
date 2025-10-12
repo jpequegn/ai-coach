@@ -10,6 +10,7 @@ use crate::models::{
     RestingHrResponse, SleepData, SleepDataListResponse, SleepDataResponse,
 };
 
+#[derive(Clone)]
 pub struct RecoveryDataService {
     db: PgPool,
 }
