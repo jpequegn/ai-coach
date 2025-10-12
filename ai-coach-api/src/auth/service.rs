@@ -185,6 +185,30 @@ impl AuthService {
         Ok(session)
     }
 
+    /// Get user info by ID (includes timestamps from database)
+    pub async fn get_user_info(&self, user_id: Uuid) -> Result<UserInfo, AuthError> {
+        // Get user from database
+        let user = sqlx::query_as::<_, User>(
+            "SELECT id, email, password_hash, created_at, updated_at FROM users WHERE id = $1"
+        )
+        .bind(user_id)
+        .fetch_optional(&self.db)
+        .await
+        .map_err(AuthError::Database)?
+        .ok_or(AuthError::UserNotFound)?;
+
+        // Get user role
+        let role = self.get_user_role(user.id).await?.unwrap_or(UserRole::Athlete);
+
+        Ok(UserInfo {
+            id: user.id,
+            email: user.email,
+            role,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+        })
+    }
+
     // Private helper methods
 
     async fn get_user_by_email(&self, email: &str) -> Result<Option<User>, AuthError> {

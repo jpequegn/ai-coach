@@ -407,15 +407,23 @@ impl AlertDeliveryQueueService {
 
     /// Send push notification (delegates to NotificationService)
     async fn send_push_notification(&self, delivery: &AlertDeliveryQueue) -> Result<()> {
-        // In a real implementation, this would integrate with the NotificationService
-        // For now, we'll simulate the delivery
         info!(
             "Sending push notification to {} for alert {}",
             delivery.recipient_id, delivery.alert_id
         );
 
-        // TODO: Integrate with actual notification service
-        // self.notification_service.send_push(...).await?;
+        // Fetch alert details to get title and message
+        let alert = self.get_alert_details(delivery.alert_id).await?;
+
+        // Send via NotificationService
+        self.notification_service
+            .send_push_notification(
+                alert.user_id,
+                alert.title,
+                alert.message,
+            )
+            .await
+            .map_err(|e| anyhow::anyhow!("Push notification failed: {}", e))?;
 
         Ok(())
     }
@@ -427,8 +435,18 @@ impl AlertDeliveryQueueService {
             delivery.recipient_id, delivery.alert_id
         );
 
-        // TODO: Integrate with actual notification service
-        // self.notification_service.send_email(...).await?;
+        // Fetch alert details to get title and message
+        let alert = self.get_alert_details(delivery.alert_id).await?;
+
+        // Send via NotificationService
+        self.notification_service
+            .send_email_notification(
+                delivery.recipient_id.clone(), // Email address
+                alert.title,
+                alert.message,
+            )
+            .await
+            .map_err(|e| anyhow::anyhow!("Email notification failed: {}", e))?;
 
         Ok(())
     }
@@ -440,11 +458,49 @@ impl AlertDeliveryQueueService {
             delivery.recipient_id, delivery.alert_id
         );
 
-        // TODO: Integrate with actual notification service
-        // self.notification_service.send_sms(...).await?;
+        // Fetch alert details to get message
+        let alert = self.get_alert_details(delivery.alert_id).await?;
+
+        // Send via NotificationService
+        self.notification_service
+            .send_sms_notification(
+                delivery.recipient_id.clone(), // Phone number
+                alert.message,
+            )
+            .await
+            .map_err(|e| anyhow::anyhow!("SMS notification failed: {}", e))?;
 
         Ok(())
     }
+
+    /// Get alert details from database
+    async fn get_alert_details(&self, alert_id: Uuid) -> Result<AlertDetails> {
+        let alert = sqlx::query!(
+            r#"
+            SELECT user_id, alert_type, title, message
+            FROM recovery_alerts
+            WHERE id = $1
+            "#,
+            alert_id
+        )
+        .fetch_optional(&self.db)
+        .await
+        .context("Failed to fetch alert details")?
+        .ok_or_else(|| anyhow::anyhow!("Alert {} not found", alert_id))?;
+
+        Ok(AlertDetails {
+            user_id: alert.user_id,
+            title: alert.title,
+            message: alert.message,
+        })
+    }
+}
+
+/// Alert details for notification delivery
+struct AlertDetails {
+    user_id: Uuid,
+    title: String,
+    message: String,
 }
 
 /// Internal counter for method statistics

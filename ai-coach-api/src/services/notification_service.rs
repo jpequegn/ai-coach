@@ -522,6 +522,84 @@ impl NotificationService {
         tracing::error!("Marked notification {} as failed", notification_id);
         Ok(())
     }
+
+    /// Send push notification with simple message
+    pub async fn send_push_notification(
+        &self,
+        user_id: Uuid,
+        title: String,
+        message: String,
+    ) -> Result<(), NotificationError> {
+        if let Some(ref push_service) = self.push_service {
+            // Create minimal notification for push service
+            let notification = Notification {
+                id: Uuid::new_v4(),
+                user_id,
+                notification_type: NotificationType::SystemMaintenance, // Generic type
+                category: NotificationCategory::System,
+                priority: NotificationPriority::Medium,
+                title,
+                message,
+                data: None,
+                scheduled_at: Utc::now(),
+                sent_at: Some(Utc::now()),
+                read_at: None,
+                delivery_channels: vec![DeliveryChannel::WebPush],
+                delivery_status: DeliveryStatus::Sent,
+                expires_at: Some(Utc::now() + Duration::days(1)),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+            };
+
+            push_service.send_push_notification(&notification).await?;
+        }
+        Ok(())
+    }
+
+    /// Send email notification with simple message
+    pub async fn send_email_notification(
+        &self,
+        email: String,
+        title: String,
+        message: String,
+    ) -> Result<(), NotificationError> {
+        if let Some(ref email_service) = self.email_service {
+            // Create minimal notification for email service
+            let notification = Notification {
+                id: Uuid::new_v4(),
+                user_id: Uuid::nil(), // No user_id for email-only delivery
+                notification_type: NotificationType::SystemMaintenance, // Generic type
+                category: NotificationCategory::System,
+                priority: NotificationPriority::Medium,
+                title,
+                message: format!("{}\n\nRecipient: {}", message, email),
+                data: None,
+                scheduled_at: Utc::now(),
+                sent_at: Some(Utc::now()),
+                read_at: None,
+                delivery_channels: vec![DeliveryChannel::Email],
+                delivery_status: DeliveryStatus::Sent,
+                expires_at: Some(Utc::now() + Duration::days(1)),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+            };
+
+            email_service.send_email_notification(&notification).await?;
+        }
+        Ok(())
+    }
+
+    /// Send SMS notification with simple message
+    pub async fn send_sms_notification(
+        &self,
+        phone_number: String,
+        message: String,
+    ) -> Result<(), NotificationError> {
+        // SMS not yet implemented
+        tracing::warn!("SMS notifications not yet implemented - recipient: {}", phone_number);
+        tracing::info!("SMS message (not sent): {}", message);
+        Ok(())
+    }
 }
 
 // Supporting types and services

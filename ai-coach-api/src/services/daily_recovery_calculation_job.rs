@@ -139,8 +139,7 @@ impl DailyRecoveryCalculationJob {
         let target_hour = 6u32;
         let target_utc_offset = (current_utc_hour as i32 - target_hour as i32 + 24) % 24;
 
-        // This is a simplified approach - in production, you'd want to use proper timezone library
-        // For now, we'll fetch all active users and filter based on their timezone
+        // Fetch all active users with their timezones
         let users = sqlx::query_as!(
             UserForCalculation,
             r#"
@@ -153,9 +152,23 @@ impl DailyRecoveryCalculationJob {
         .await
         .context("Failed to fetch active users")?;
 
-        // TODO: Implement proper timezone filtering using chrono_tz or similar
-        // For now, return all active users
-        Ok(users)
+        // Filter users whose local time is 6 AM
+        let filtered_users: Vec<UserForCalculation> = users
+            .into_iter()
+            .filter(|user| {
+                // Convert timezone name to UTC offset and check if it's 6 AM local time
+                if let Some(offset) = Self::timezone_to_utc_offset(&user.timezone) {
+                    let local_hour = (current_utc_hour as i32 + offset + 24) % 24;
+                    local_hour == target_hour as i32
+                } else {
+                    // Unknown timezone - log warning and skip user
+                    warn!("Unknown timezone for user {}: {}", user.id, user.timezone);
+                    false
+                }
+            })
+            .collect();
+
+        Ok(filtered_users)
     }
 
     /// Process a batch of users
@@ -316,6 +329,56 @@ impl DailyRecoveryCalculationJob {
         }
 
         serde_json::to_value(timezone_counts).unwrap_or(serde_json::json!({}))
+    }
+
+    /// Convert timezone name to UTC offset in hours
+    ///
+    /// Maps common timezone names to their standard UTC offsets.
+    /// Note: This is a simplified mapping that doesn't handle DST.
+    /// For full DST support, use chrono-tz crate.
+    fn timezone_to_utc_offset(timezone: &str) -> Option<i32> {
+        match timezone {
+            // UTC and variants
+            "UTC" | "GMT" | "Etc/UTC" | "Etc/GMT" => Some(0),
+
+            // Americas
+            "America/New_York" | "US/Eastern" => Some(-5),
+            "America/Chicago" | "US/Central" => Some(-6),
+            "America/Denver" | "US/Mountain" => Some(-7),
+            "America/Los_Angeles" | "US/Pacific" => Some(-8),
+            "America/Anchorage" | "US/Alaska" => Some(-9),
+            "Pacific/Honolulu" | "US/Hawaii" => Some(-10),
+            "America/Toronto" => Some(-5),
+            "America/Vancouver" => Some(-8),
+            "America/Mexico_City" => Some(-6),
+            "America/Sao_Paulo" => Some(-3),
+            "America/Argentina/Buenos_Aires" => Some(-3),
+
+            // Europe
+            "Europe/London" | "GB" => Some(0),
+            "Europe/Paris" | "Europe/Berlin" | "Europe/Madrid" | "Europe/Rome" => Some(1),
+            "Europe/Athens" | "Europe/Helsinki" | "Europe/Istanbul" => Some(2),
+            "Europe/Moscow" => Some(3),
+
+            // Asia
+            "Asia/Dubai" => Some(4),
+            "Asia/Karachi" => Some(5),
+            "Asia/Kolkata" | "Asia/Calcutta" => Some(5), // India uses +5:30 but simplified
+            "Asia/Dhaka" => Some(6),
+            "Asia/Bangkok" => Some(7),
+            "Asia/Shanghai" | "Asia/Hong_Kong" | "Asia/Singapore" => Some(8),
+            "Asia/Tokyo" => Some(9),
+            "Asia/Seoul" => Some(9),
+
+            // Australia & Pacific
+            "Australia/Sydney" | "Australia/Melbourne" => Some(10),
+            "Australia/Brisbane" => Some(10),
+            "Australia/Perth" => Some(8),
+            "Pacific/Auckland" | "NZ" => Some(12),
+
+            // Unknown timezone
+            _ => None,
+        }
     }
 }
 

@@ -411,11 +411,28 @@ impl DataQualityCheckJob {
         .await
         .context("Failed to check wearable connection")?;
 
+        // Check if user has training sessions in last 7 days
+        let has_training = sqlx::query_scalar!(
+            r#"
+            SELECT EXISTS(
+                SELECT 1
+                FROM training_sessions
+                WHERE user_id = $1
+                    AND date >= $2
+            ) as "has_training!"
+            "#,
+            user_id,
+            recent_cutoff
+        )
+        .fetch_one(&self.db)
+        .await
+        .context("Failed to check training sessions")?;
+
         let status = DataSourceStatus {
             hrv: sources.has_hrv.unwrap_or(false),
             sleep: sources.has_sleep.unwrap_or(false),
             rhr: sources.has_rhr.unwrap_or(false),
-            training: false, // TODO: Check training sessions table
+            training: has_training,
             wearable_connected,
             last_sync: sources.last_sync,
         };
