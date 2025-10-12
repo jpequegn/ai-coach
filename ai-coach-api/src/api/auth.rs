@@ -91,17 +91,15 @@ async fn logout(
 }
 
 /// Get user profile
-#[tracing::instrument(skip(request))]
-async fn get_profile(request: Request) -> Result<Json<UserInfo>, AuthError> {
+#[tracing::instrument(skip(auth_service, request))]
+async fn get_profile(
+    State(auth_service): State<AuthService>,
+    request: Request,
+) -> Result<Json<UserInfo>, AuthError> {
     let session = extract_user_session(&request)?;
 
-    let user_info = UserInfo {
-        id: session.user_id,
-        email: session.email.clone(),
-        role: session.role.clone(),
-        created_at: chrono::Utc::now(), // TODO: Get from database
-        updated_at: chrono::Utc::now(), // TODO: Get from database
-    };
+    // Get user info from database with actual timestamps
+    let user_info = auth_service.get_user_info(session.user_id).await?;
 
     Ok(Json(user_info))
 }
