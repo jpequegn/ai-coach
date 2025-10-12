@@ -122,9 +122,10 @@ pub fn create_routes(
         .nest("/workouts", workout_recommendation_routes(db.clone(), auth_service.clone()))
         .nest("/performance", performance_insights_routes(db.clone(), auth_service.clone()));
 
-    // Create health state
+    // Create health state with database pool
     let health_state = Arc::new(HealthState {
         scheduler: scheduler.clone(),
+        db: db.clone(),
     });
 
     Router::new()
