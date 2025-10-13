@@ -20,7 +20,7 @@ impl CoachingRecommendationService {
             r#"
             INSERT INTO coaching_recommendations (user_id, recommendation_type, content, confidence, metadata, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $6)
-            RETURNING id, user_id, recommendation_type, content, confidence, metadata, applied, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", recommendation_type as "recommendation_type!", content as "content!", confidence, metadata, applied as "applied!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             rec_data.user_id,
             rec_data.recommendation_type,
@@ -38,7 +38,7 @@ impl CoachingRecommendationService {
     pub async fn get_recommendation_by_id(&self, rec_id: Uuid) -> Result<Option<CoachingRecommendation>> {
         let recommendation = sqlx::query_as!(
             CoachingRecommendation,
-            "SELECT id, user_id, recommendation_type, content, confidence, metadata, applied, created_at, updated_at FROM coaching_recommendations WHERE id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", recommendation_type as \"recommendation_type!\", content as \"content!\", confidence, metadata, applied as \"applied!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM coaching_recommendations WHERE id = $1",
             rec_id
         )
         .fetch_optional(&self.db)
@@ -52,7 +52,7 @@ impl CoachingRecommendationService {
 
         let recommendations = sqlx::query_as!(
             CoachingRecommendation,
-            "SELECT id, user_id, recommendation_type, content, confidence, metadata, applied, created_at, updated_at FROM coaching_recommendations WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2",
+            "SELECT id as \"id!\", user_id as \"user_id!\", recommendation_type as \"recommendation_type!\", content as \"content!\", confidence, metadata, applied as \"applied!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM coaching_recommendations WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2",
             user_id,
             limit
         )
@@ -76,7 +76,7 @@ impl CoachingRecommendationService {
                 applied = COALESCE($6, applied),
                 updated_at = $7
             WHERE id = $1
-            RETURNING id, user_id, recommendation_type, content, confidence, metadata, applied, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", recommendation_type as "recommendation_type!", content as "content!", confidence, metadata, applied as "applied!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             rec_id,
             rec_data.recommendation_type,
