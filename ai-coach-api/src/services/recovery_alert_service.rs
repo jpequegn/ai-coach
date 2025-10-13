@@ -74,8 +74,8 @@ impl RecoveryAlertService {
             sqlx::query_as!(
                 RecoveryAlert,
                 r#"
-                SELECT id, user_id, alert_type, severity, recovery_score_id,
-                       message, recommendations, acknowledged_at, created_at
+                SELECT id as "id!", user_id as "user_id!", alert_type as "alert_type!", severity as "severity!", recovery_score_id as "recovery_score_id!",
+                       message as "message!", recommendations as "recommendations!", acknowledged_at, created_at as "created_at!"
                 FROM recovery_alerts
                 WHERE user_id = $1
                 ORDER BY created_at DESC
@@ -90,8 +90,8 @@ impl RecoveryAlertService {
             sqlx::query_as!(
                 RecoveryAlert,
                 r#"
-                SELECT id, user_id, alert_type, severity, recovery_score_id,
-                       message, recommendations, acknowledged_at, created_at
+                SELECT id as "id!", user_id as "user_id!", alert_type as "alert_type!", severity as "severity!", recovery_score_id as "recovery_score_id!",
+                       message as "message!", recommendations as "recommendations!", acknowledged_at, created_at as "created_at!"
                 FROM recovery_alerts
                 WHERE user_id = $1 AND acknowledged_at IS NULL
                 ORDER BY created_at DESC
@@ -115,8 +115,8 @@ impl RecoveryAlertService {
             UPDATE recovery_alerts
             SET acknowledged_at = NOW()
             WHERE id = $1 AND user_id = $2 AND acknowledged_at IS NULL
-            RETURNING id, user_id, alert_type, severity, recovery_score_id,
-                      message, recommendations, acknowledged_at, created_at
+            RETURNING id as "id!", user_id as "user_id!", alert_type as "alert_type!", severity as "severity!", recovery_score_id as "recovery_score_id!",
+                      message as "message!", recommendations as "recommendations!", acknowledged_at, created_at as "created_at!"
             "#,
             alert_id,
             user_id
@@ -154,9 +154,9 @@ impl RecoveryAlertService {
                 critical_recovery_threshold = COALESCE($6, critical_recovery_threshold),
                 updated_at = NOW()
             WHERE user_id = $1
-            RETURNING id, user_id, enabled, push_notifications, email_notifications,
-                      poor_recovery_threshold, critical_recovery_threshold,
-                      created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", enabled as "enabled!", push_notifications as "push_notifications!", email_notifications as "email_notifications!",
+                      poor_recovery_threshold as "poor_recovery_threshold!", critical_recovery_threshold as "critical_recovery_threshold!",
+                      created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             enabled,
@@ -181,9 +181,9 @@ impl RecoveryAlertService {
         let existing = sqlx::query_as!(
             RecoveryAlertPreferences,
             r#"
-            SELECT id, user_id, enabled, push_notifications, email_notifications,
-                   poor_recovery_threshold, critical_recovery_threshold,
-                   created_at, updated_at
+            SELECT id as "id!", user_id as "user_id!", enabled as "enabled!", push_notifications as "push_notifications!", email_notifications as "email_notifications!",
+                   poor_recovery_threshold as "poor_recovery_threshold!", critical_recovery_threshold as "critical_recovery_threshold!",
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_alert_preferences
             WHERE user_id = $1
             "#,
@@ -202,9 +202,9 @@ impl RecoveryAlertService {
             r#"
             INSERT INTO recovery_alert_preferences (user_id)
             VALUES ($1)
-            RETURNING id, user_id, enabled, push_notifications, email_notifications,
-                      poor_recovery_threshold, critical_recovery_threshold,
-                      created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", enabled as "enabled!", push_notifications as "push_notifications!", email_notifications as "email_notifications!",
+                      poor_recovery_threshold as "poor_recovery_threshold!", critical_recovery_threshold as "critical_recovery_threshold!",
+                      created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id
         )
@@ -303,10 +303,10 @@ impl RecoveryAlertService {
         let scores = sqlx::query_as!(
             RecoveryScore,
             r#"
-            SELECT id, user_id, score_date, readiness_score, hrv_trend, hrv_deviation,
+            SELECT id as "id!", user_id as "user_id!", score_date as "score_date!", readiness_score as "readiness_score!", hrv_trend as "hrv_trend!", hrv_deviation,
                    sleep_quality_score, recovery_adequacy, rhr_deviation, training_strain,
-                   recovery_status, recommended_tss_adjustment, calculated_at, model_version,
-                   created_at, updated_at
+                   recovery_status as "recovery_status!", recommended_tss_adjustment, calculated_at as "calculated_at!", model_version as "model_version!",
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_scores
             WHERE user_id = $1 AND score_date >= $2 AND score_date <= $3
             ORDER BY score_date DESC
@@ -370,8 +370,8 @@ impl RecoveryAlertService {
                 message, recommendations
             )
             VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id, user_id, alert_type, severity, recovery_score_id,
-                      message, recommendations, acknowledged_at, created_at
+            RETURNING id as "id!", user_id as "user_id!", alert_type as "alert_type!", severity as "severity!", recovery_score_id as "recovery_score_id!",
+                      message as "message!", recommendations as "recommendations!", acknowledged_at, created_at as "created_at!"
             "#,
             user_id,
             rule.alert_type,
