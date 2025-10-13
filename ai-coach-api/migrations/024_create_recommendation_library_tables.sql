@@ -64,10 +64,10 @@ CREATE TABLE IF NOT EXISTS recommendation_templates (
 );
 
 -- Indexes for efficient querying
-CREATE INDEX idx_recommendation_templates_category ON recommendation_templates(category);
-CREATE INDEX idx_recommendation_templates_active ON recommendation_templates(is_active);
-CREATE INDEX idx_recommendation_templates_effectiveness ON recommendation_templates(effectiveness_score DESC);
-CREATE INDEX idx_recommendation_templates_trigger_conditions ON recommendation_templates USING gin(trigger_conditions);
+CREATE INDEX IF NOT EXISTS idx_recommendation_templates_category ON recommendation_templates(category);
+CREATE INDEX IF NOT EXISTS idx_recommendation_templates_active ON recommendation_templates(is_active);
+CREATE INDEX IF NOT EXISTS idx_recommendation_templates_effectiveness ON recommendation_templates(effectiveness_score DESC);
+CREATE INDEX IF NOT EXISTS idx_recommendation_templates_trigger_conditions ON recommendation_templates USING gin(trigger_conditions);
 
 -- Recommendation Content Table
 -- Links educational content to recommendation templates
@@ -97,8 +97,8 @@ CREATE TABLE IF NOT EXISTS recommendation_content (
 );
 
 -- Indexes for content lookups
-CREATE INDEX idx_recommendation_content_template_id ON recommendation_content(recommendation_template_id);
-CREATE INDEX idx_recommendation_content_type ON recommendation_content(content_type);
+CREATE INDEX IF NOT EXISTS idx_recommendation_content_template_id ON recommendation_content(recommendation_template_id);
+CREATE INDEX IF NOT EXISTS idx_recommendation_content_type ON recommendation_content(content_type);
 
 -- Update timestamp trigger for recommendation_templates
 CREATE OR REPLACE FUNCTION update_recommendation_template_updated_at()
@@ -109,6 +109,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_recommendation_template_updated_at ON recommendation_templates;
 CREATE TRIGGER trigger_update_recommendation_template_updated_at
     BEFORE UPDATE ON recommendation_templates
     FOR EACH ROW
