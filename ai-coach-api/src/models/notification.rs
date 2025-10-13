@@ -70,7 +70,7 @@ pub enum NotificationPriority {
     Critical,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq, Eq, Hash)]
 #[sqlx(type_name = "delivery_channel", rename_all = "snake_case")]
 pub enum DeliveryChannel {
     InApp,
