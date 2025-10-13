@@ -140,6 +140,8 @@ impl UserService {
         Ok(user.map(|u| UserResponse {
             id: u.id,
             email: u.email,
+            timezone: u.timezone,
+            active: u.active,
             created_at: u.created_at,
             updated_at: u.updated_at,
         }))
@@ -172,6 +174,8 @@ impl UserService {
         Ok(users.into_iter().map(|u| UserResponse {
             id: u.id,
             email: u.email,
+            timezone: u.timezone,
+            active: u.active,
             created_at: u.created_at,
             updated_at: u.updated_at,
         }).collect())

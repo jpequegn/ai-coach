@@ -68,7 +68,7 @@ pub enum EventStatus {
     Missed,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "event_priority", rename_all = "snake_case")]
 pub enum EventPriority {
     Low,     // Fun events, social rides
@@ -213,7 +213,7 @@ pub enum ConflictType {
     TravelConflict,   // Travel schedule conflicts
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "conflict_severity", rename_all = "snake_case")]
 pub enum ConflictSeverity {
     Low,

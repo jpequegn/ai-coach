@@ -241,6 +241,7 @@ pub async fn upload_training_file(
             let session_data = CreateTrainingSession {
                 user_id,
                 date: chrono::Utc::now().date_naive(),
+                trainrs_data: None,
                 uploaded_file_path: Some(file_path.clone()),
                 session_type: Some("uploaded".to_string()),
                 duration_seconds: None,
@@ -259,6 +260,7 @@ pub async fn upload_training_file(
                 file_path,
                 processing_status: "uploaded".to_string(),
                 metrics: None,
+                job_id: None,
             };
 
             // Process immediately if requested

@@ -318,7 +318,7 @@ impl UserRecoveryProfileService {
                 existing.last_completed = Some(Utc::now());
 
                 // Recalculate effectiveness score
-                existing.effectiveness_score = calculate_effectiveness_score(
+                existing.effectiveness_score = calculate_profile_effectiveness_score(
                     existing.completion_rate,
                     existing.average_rating,
                     existing.total_shown,
@@ -335,7 +335,7 @@ impl UserRecoveryProfileService {
                     average_rating: rating as f64,
                     total_ratings: 1,
                     last_completed: Some(Utc::now()),
-                    effectiveness_score: calculate_effectiveness_score(1.0, rating as f64, 1),
+                    effectiveness_score: calculate_profile_effectiveness_score(1.0, rating as f64, 1),
                 };
                 techniques.push(new_technique);
             }
@@ -395,7 +395,7 @@ impl UserRecoveryProfileService {
         &self,
         profile: &UserRecoveryProfile,
         recommendations: &[UserRecommendation],
-    ) -> Result<Vec<RecoveryInsight>> {
+    ) -> Result<Vec<ProfileRecoveryInsight>> {
         let mut insights = Vec::new();
 
         // Parse effective techniques
@@ -405,7 +405,7 @@ impl UserRecoveryProfileService {
         // Insight: Most effective category
         if let Some(top_technique) = techniques.first() {
             if top_technique.effectiveness_score > 0.7 {
-                insights.push(RecoveryInsight {
+                insights.push(ProfileRecoveryInsight {
                     insight_type: "effective_category".to_string(),
                     title: format!("{} works well for you", top_technique.category),
                     description: format!(
@@ -431,7 +431,7 @@ impl UserRecoveryProfileService {
             let completion_rate = completed_count as f64 / total_count as f64;
 
             if completion_rate > 0.7 {
-                insights.push(RecoveryInsight {
+                insights.push(ProfileRecoveryInsight {
                     insight_type: "high_engagement".to_string(),
                     title: "High engagement with recommendations".to_string(),
                     description: format!(
@@ -442,7 +442,7 @@ impl UserRecoveryProfileService {
                     actionable: false,
                 });
             } else if completion_rate < 0.3 {
-                insights.push(RecoveryInsight {
+                insights.push(ProfileRecoveryInsight {
                     insight_type: "low_engagement".to_string(),
                     title: "Consider trying more recovery activities".to_string(),
                     description: format!(
@@ -460,7 +460,7 @@ impl UserRecoveryProfileService {
             serde_json::from_value(profile.available_equipment.clone()).unwrap_or_default();
 
         if equipment.is_empty() && total_count > 3 {
-            insights.push(RecoveryInsight {
+            insights.push(ProfileRecoveryInsight {
                 insight_type: "equipment_suggestion".to_string(),
                 title: "Add equipment to your profile".to_string(),
                 description: "Specifying available equipment helps us recommend more suitable recovery activities.".to_string(),
@@ -477,7 +477,7 @@ impl UserRecoveryProfileService {
         &self,
         _profile: &UserRecoveryProfile,
         recommendations: &[UserRecommendation],
-    ) -> Result<Vec<RecoveryPattern>> {
+    ) -> Result<Vec<ProfileRecoveryPattern>> {
         let mut patterns = Vec::new();
 
         // Pattern: Consistent completion
@@ -494,7 +494,7 @@ impl UserRecoveryProfileService {
                 .count();
 
             if recent_completed >= 7 {
-                patterns.push(RecoveryPattern {
+                patterns.push(ProfileRecoveryPattern {
                     pattern_type: "consistent_engagement".to_string(),
                     description: "You consistently complete recovery recommendations".to_string(),
                     frequency: "High".to_string(),
