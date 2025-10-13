@@ -21,7 +21,7 @@ impl TrainingSessionService {
             r#"
             INSERT INTO training_sessions (user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
-            RETURNING id, user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", date as "date!", trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             session_data.user_id,
             session_data.date,
@@ -41,7 +41,7 @@ impl TrainingSessionService {
     pub async fn get_session_by_id(&self, session_id: Uuid) -> Result<Option<TrainingSession>> {
         let session = sqlx::query_as!(
             TrainingSession,
-            "SELECT id, user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at FROM training_sessions WHERE id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", date as \"date!\", trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM training_sessions WHERE id = $1",
             session_id
         )
         .fetch_optional(&self.db)
@@ -56,7 +56,7 @@ impl TrainingSessionService {
 
         let sessions = sqlx::query_as!(
             TrainingSession,
-            "SELECT id, user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at FROM training_sessions WHERE user_id = $1 ORDER BY date DESC LIMIT $2 OFFSET $3",
+            "SELECT id as \"id!\", user_id as \"user_id!\", date as \"date!\", trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM training_sessions WHERE user_id = $1 ORDER BY date DESC LIMIT $2 OFFSET $3",
             user_id,
             limit,
             offset
@@ -70,7 +70,7 @@ impl TrainingSessionService {
     pub async fn get_sessions_by_date_range(&self, user_id: Uuid, start_date: NaiveDate, end_date: NaiveDate) -> Result<Vec<TrainingSession>> {
         let sessions = sqlx::query_as!(
             TrainingSession,
-            "SELECT id, user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at FROM training_sessions WHERE user_id = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC",
+            "SELECT id as \"id!\", user_id as \"user_id!\", date as \"date!\", trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM training_sessions WHERE user_id = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC",
             user_id,
             start_date,
             end_date
@@ -96,7 +96,7 @@ impl TrainingSessionService {
                 distance_meters = COALESCE($7, distance_meters),
                 updated_at = $8
             WHERE id = $1
-            RETURNING id, user_id, date, trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", date as "date!", trainrs_data, uploaded_file_path, session_type, duration_seconds, distance_meters, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             session_id,
             session_data.date,
