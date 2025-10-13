@@ -10,7 +10,7 @@ pub struct Event {
     pub name: String,
     pub description: Option<String>,
     pub event_type: EventType,
-    pub sport: Sport,
+    pub sport: EventSport,
     pub event_date: NaiveDate,
     pub event_time: Option<NaiveTime>,
     pub location: Option<String>,
@@ -44,7 +44,7 @@ pub enum EventType {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "sport", rename_all = "snake_case")]
-pub enum Sport {
+pub enum EventSport {
     Cycling,
     Running,
     Swimming,
@@ -82,7 +82,7 @@ pub struct CreateEventRequest {
     pub name: String,
     pub description: Option<String>,
     pub event_type: EventType,
-    pub sport: Sport,
+    pub sport: EventSport,
     pub event_date: NaiveDate,
     pub event_time: Option<NaiveTime>,
     pub location: Option<String>,
@@ -159,7 +159,7 @@ pub struct TrainingPhase {
     pub end_date: NaiveDate,
     pub weeks: i32,
     pub weekly_volume_range: (f64, f64), // min, max hours or TSS
-    pub intensity_distribution: IntensityDistribution,
+    pub intensity_distribution: EventIntensityDistribution,
     pub focus_areas: Vec<String>,
     pub key_workouts: Vec<String>,
 }
@@ -176,7 +176,7 @@ pub enum PhaseType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct IntensityDistribution {
+pub struct EventIntensityDistribution {
     pub zone1_percentage: f64, // Easy/Recovery
     pub zone2_percentage: f64, // Aerobic base
     pub zone3_percentage: f64, // Tempo
