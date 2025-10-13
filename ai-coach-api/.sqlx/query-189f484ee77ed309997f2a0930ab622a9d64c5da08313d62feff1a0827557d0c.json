@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                rt.id,\n                rt.title,\n                rt.category::text as category,\n                COUNT(DISTINCT ro.id) as completions,\n                COUNT(DISTINCT ur.id) as total_suggestions,\n                AVG(ro.user_rating) as avg_rating,\n                AVG(ro.effectiveness_score) as avg_effectiveness\n            FROM recommendation_templates rt\n            LEFT JOIN user_recommendations ur ON ur.recommendation_template_id = rt.id\n            LEFT JOIN recommendation_outcomes ro ON ro.recommendation_template_id = rt.id\n            WHERE rt.is_active = true\n            GROUP BY rt.id, rt.title, rt.category\n            HAVING\n                (COUNT(DISTINCT ro.id) >= 5 AND AVG(ro.effectiveness_score) < 0.3)\n                OR (COUNT(DISTINCT ur.id) >= 10 AND COUNT(DISTINCT ro.id)::float / COUNT(DISTINCT ur.id) < 0.1)\n                OR (COUNT(DISTINCT ro.id) >= 5 AND AVG(ro.user_rating) < 2.0)\n            ORDER BY AVG(ro.effectiveness_score) ASC NULLS FIRST\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "completions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "total_suggestions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "avg_rating",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "avg_effectiveness",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "189f484ee77ed309997f2a0930ab622a9d64c5da08313d62feff1a0827557d0c"
+}

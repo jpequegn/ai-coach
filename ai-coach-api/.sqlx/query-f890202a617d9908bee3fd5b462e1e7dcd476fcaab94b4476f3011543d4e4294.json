@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                COUNT(*) as \"total_executions!\",\n                COUNT(*) FILTER (WHERE status = 'success') as \"success_count!\",\n                COUNT(*) FILTER (WHERE status = 'failed') as \"failed_count!\",\n                AVG(execution_time_ms) FILTER (WHERE status = 'success') as \"avg_execution_time\",\n                MAX(completed_at) FILTER (WHERE status = 'success') as \"last_success_at\",\n                MAX(completed_at) FILTER (WHERE status = 'failed') as \"last_failure_at\"\n            FROM job_execution_log\n            WHERE job_name = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_executions!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "success_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "failed_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "avg_execution_time",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_success_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "last_failure_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "f890202a617d9908bee3fd5b462e1e7dcd476fcaab94b4476f3011543d4e4294"
+}

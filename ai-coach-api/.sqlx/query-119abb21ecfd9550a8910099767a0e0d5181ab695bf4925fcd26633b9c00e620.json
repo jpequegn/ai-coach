@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                COUNT(DISTINCT ur.id) as total_shown,\n                COUNT(DISTINCT ro.id) as total_completed,\n                AVG(ro.user_rating) as avg_rating,\n                AVG(ro.effectiveness_score) as avg_effectiveness\n            FROM user_recommendations ur\n            LEFT JOIN recommendation_outcomes ro ON ro.user_recommendation_id = ur.id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_shown",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "total_completed",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "avg_rating",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 3,
+        "name": "avg_effectiveness",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "119abb21ecfd9550a8910099767a0e0d5181ab695bf4925fcd26633b9c00e620"
+}

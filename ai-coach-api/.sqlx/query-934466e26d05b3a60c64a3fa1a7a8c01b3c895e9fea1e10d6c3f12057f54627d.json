@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, user_id, date, trainrs_data, uploaded_file_path,\n                   session_type, duration_seconds, distance_meters,\n                   created_at, updated_at\n            FROM training_sessions\n            WHERE user_id = $1 AND date >= $2 AND date <= $3\n            ORDER BY date ASC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "trainrs_data",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "uploaded_file_path",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "session_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "duration_seconds",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "distance_meters",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "934466e26d05b3a60c64a3fa1a7a8c01b3c895e9fea1e10d6c3f12057f54627d"
+}

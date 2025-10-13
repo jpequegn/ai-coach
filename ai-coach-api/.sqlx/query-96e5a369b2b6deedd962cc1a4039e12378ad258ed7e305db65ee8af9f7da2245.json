@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                readiness_score,\n                recovery_status,\n                recommended_tss_adjustment,\n                hrv_trend,\n                sleep_quality_score,\n                rhr_deviation\n            FROM recovery_scores\n            WHERE user_id = $1 AND score_date = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "readiness_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 1,
+        "name": "recovery_status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "recommended_tss_adjustment",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 3,
+        "name": "hrv_trend",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "sleep_quality_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "rhr_deviation",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "96e5a369b2b6deedd962cc1a4039e12378ad258ed7e305db65ee8af9f7da2245"
+}

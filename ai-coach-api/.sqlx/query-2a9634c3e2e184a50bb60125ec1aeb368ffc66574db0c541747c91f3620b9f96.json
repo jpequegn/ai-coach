@@ -1,0 +1,119 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id, event_id, user_id, training_phases, peak_date, taper_start_date,\n                base_training_weeks, build_training_weeks, peak_training_weeks,\n                taper_weeks, recovery_weeks, travel_considerations, logistics_notes,\n                equipment_checklist, nutrition_plan, created_at, updated_at\n            FROM event_plans\n            WHERE event_id = $1 AND user_id = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "training_phases",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "peak_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 5,
+        "name": "taper_start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "base_training_weeks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "build_training_weeks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "peak_training_weeks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "taper_weeks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "recovery_weeks",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "travel_considerations",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "logistics_notes",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "equipment_checklist",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 14,
+        "name": "nutrition_plan",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 15,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 16,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "2a9634c3e2e184a50bb60125ec1aeb368ffc66574db0c541747c91f3620b9f96"
+}

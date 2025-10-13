@@ -1,0 +1,180 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id, user_id, title, description,\n                goal_type as \"goal_type: GoalType\",\n                goal_category as \"goal_category: GoalCategory\",\n                target_value, current_value, unit, target_date,\n                status as \"status: GoalStatus\",\n                priority as \"priority: GoalPriority\",\n                event_id, parent_goal_id, created_at, updated_at\n            FROM goals\n            WHERE id = $1 AND user_id = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "goal_type: GoalType",
+        "type_info": {
+          "Custom": {
+            "name": "goal_type",
+            "kind": {
+              "Enum": [
+                "power",
+                "pace",
+                "race_time",
+                "distance",
+                "heart_rate",
+                "consistency",
+                "weekly_tss",
+                "weekly_volume",
+                "recovery_metrics",
+                "event_preparation",
+                "peak_performance",
+                "taper_execution",
+                "weight",
+                "body_composition",
+                "strength",
+                "flexibility",
+                "custom"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "goal_category: GoalCategory",
+        "type_info": {
+          "Custom": {
+            "name": "goal_category",
+            "kind": {
+              "Enum": [
+                "performance",
+                "process",
+                "event",
+                "health",
+                "training",
+                "competition"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "target_value",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 7,
+        "name": "current_value",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 8,
+        "name": "unit",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "target_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 10,
+        "name": "status: GoalStatus",
+        "type_info": {
+          "Custom": {
+            "name": "goal_status",
+            "kind": {
+              "Enum": [
+                "draft",
+                "active",
+                "on_track",
+                "at_risk",
+                "completed",
+                "failed",
+                "paused",
+                "cancelled"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "priority: GoalPriority",
+        "type_info": {
+          "Custom": {
+            "name": "goal_priority",
+            "kind": {
+              "Enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "parent_goal_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 14,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 15,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "d6aa16d7e76cfb3cbee2e3691637899a941d5a0e2bd53888f3bbcd0d8c8a88ed"
+}

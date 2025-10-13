@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE wearable_connections\n            SET is_active = FALSE, updated_at = NOW()\n            WHERE user_id = $1 AND provider = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7180660b5c714897491b356a4133c67625c5dcf0aedf38dc8b9b25b1c082316e"
+}

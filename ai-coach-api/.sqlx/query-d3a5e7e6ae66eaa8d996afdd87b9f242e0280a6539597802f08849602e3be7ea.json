@@ -1,0 +1,126 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                available_days_per_week, preferred_workout_duration, max_workout_duration,\n                intensity_preference, preferred_training_times, equipment_available,\n                training_location, experience_level, injury_history, recovery_needs\n            FROM user_training_preferences\n            WHERE user_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "available_days_per_week",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "preferred_workout_duration",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "max_workout_duration",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "intensity_preference",
+        "type_info": {
+          "Custom": {
+            "name": "intensity_preference",
+            "kind": {
+              "Enum": [
+                "low_intensity_high_volume",
+                "moderate_intensity_moderate_volume",
+                "high_intensity_low_volume",
+                "polarized",
+                "pyramidal"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "preferred_training_times",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "equipment_available",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 6,
+        "name": "training_location",
+        "type_info": {
+          "Custom": {
+            "name": "training_location",
+            "kind": {
+              "Enum": [
+                "outdoor",
+                "indoor",
+                "mixed",
+                "gym",
+                "home"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "experience_level",
+        "type_info": {
+          "Custom": {
+            "name": "experience_level",
+            "kind": {
+              "Enum": [
+                "beginner",
+                "intermediate",
+                "advanced",
+                "expert"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "injury_history",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 9,
+        "name": "recovery_needs",
+        "type_info": {
+          "Custom": {
+            "name": "recovery_level",
+            "kind": {
+              "Enum": [
+                "fast",
+                "normal",
+                "slow",
+                "variable"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d3a5e7e6ae66eaa8d996afdd87b9f242e0280a6539597802f08849602e3be7ea"
+}

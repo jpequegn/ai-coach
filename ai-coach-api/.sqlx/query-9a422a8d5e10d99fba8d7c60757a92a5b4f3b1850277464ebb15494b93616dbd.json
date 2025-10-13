@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT DISTINCT ON (m.user_id)\n            m.user_id,\n            u.email,\n            m.days_without_data,\n            m.last_data_timestamp,\n            m.data_sources\n        FROM data_quality_metrics m\n        JOIN users u ON m.user_id = u.id\n        WHERE m.days_without_data >= $1\n        ORDER BY m.user_id, m.metric_date DESC, m.days_without_data DESC\n        LIMIT $2 OFFSET $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "days_without_data",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_data_timestamp",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "data_sources",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "9a422a8d5e10d99fba8d7c60757a92a5b4f3b1850277464ebb15494b93616dbd"
+}

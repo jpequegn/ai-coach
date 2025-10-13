@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE recovery_alerts\n            SET acknowledged_at = NOW()\n            WHERE id = $1 AND user_id = $2 AND acknowledged_at IS NULL\n            RETURNING id, user_id, alert_type, severity, recovery_score_id,\n                      message, recommendations, acknowledged_at, created_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "alert_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "severity",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "recovery_score_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "recommendations",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "acknowledged_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "7123e194fc4cb72243c3e758d7fff654b29e45cb534c468eb906172619fa17f0"
+}

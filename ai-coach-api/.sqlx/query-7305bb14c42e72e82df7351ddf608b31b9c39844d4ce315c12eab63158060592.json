@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                rt.id,\n                rt.title,\n                rt.category::text as category,\n                COUNT(DISTINCT ro.id) as completions,\n                COUNT(DISTINCT ur.id) as total_suggestions,\n                AVG(ro.user_rating) as avg_rating,\n                AVG(ro.effectiveness_score) as avg_effectiveness\n            FROM recommendation_templates rt\n            LEFT JOIN user_recommendations ur ON ur.recommendation_template_id = rt.id\n            LEFT JOIN recommendation_outcomes ro ON ro.recommendation_template_id = rt.id\n            WHERE rt.is_active = true\n            GROUP BY rt.id, rt.title, rt.category\n            HAVING COUNT(DISTINCT ro.id) >= 5\n            ORDER BY AVG(ro.effectiveness_score) DESC NULLS LAST\n            LIMIT $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "completions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "total_suggestions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "avg_rating",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 6,
+        "name": "avg_effectiveness",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "7305bb14c42e72e82df7351ddf608b31b9c39844d4ce315c12eab63158060592"
+}
