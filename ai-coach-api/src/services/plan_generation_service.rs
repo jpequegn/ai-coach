@@ -77,11 +77,11 @@ impl PlanGenerationService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'draft', $12, $13, $14, $14)
             RETURNING
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             goals.get(0).map(|g| g.id),
@@ -129,9 +129,9 @@ impl PlanGenerationService {
             )
             VALUES ($1, $2, $3, $4, $5, $5)
             RETURNING
-                id, plan_id,
-                adaptation_type as "adaptation_type: AdaptationType",
-                trigger_reason, changes_made, effectiveness_score, applied_date, created_at
+                id as "id!", plan_id as "plan_id!",
+                adaptation_type as "adaptation_type!: AdaptationType",
+                trigger_reason as "trigger_reason!", changes_made as "changes_made!", effectiveness_score, applied_date as "applied_date!", created_at as "created_at!"
             "#,
             plan_id,
             adaptation_type as AdaptationType,
@@ -153,11 +153,11 @@ impl PlanGenerationService {
                 updated_at = $4
             WHERE id = $1 AND user_id = $5
             RETURNING
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             plan_id,
             serde_json::to_value(&plan_structure)?,
@@ -350,11 +350,11 @@ impl PlanGenerationService {
             GeneratedPlan,
             r#"
             SELECT
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             FROM generated_plans
             WHERE id = $1 AND user_id = $2
             "#,
@@ -367,7 +367,7 @@ impl PlanGenerationService {
         Ok(plan)
     }
 
-    async fn get_user_preferences(&self, user_id: Uuid) -> Result<UserTrainingPreferences> {
+    pub async fn get_user_preferences(&self, user_id: Uuid) -> Result<UserTrainingPreferences> {
         // Try to get existing preferences, otherwise return defaults
         let preferences = sqlx::query!(
             r#"
@@ -413,7 +413,7 @@ impl PlanGenerationService {
         }
     }
 
-    async fn get_user_constraints(&self, user_id: Uuid) -> Result<TrainingConstraints> {
+    pub async fn get_user_constraints(&self, user_id: Uuid) -> Result<TrainingConstraints> {
         let constraints = sqlx::query!(
             r#"
             SELECT
