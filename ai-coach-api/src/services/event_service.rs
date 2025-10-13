@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     Event, EventPlan, CreateEventRequest, UpdateEventRequest, CreateEventPlanRequest,
     EventCalendar, EventConflict, EventRecommendation, EventStatus, EventPriority,
-    EventType, Sport, PhaseType, TrainingPhase, IntensityDistribution, ConflictType,
+    EventType, EventSport, PhaseType, TrainingPhase, IntensityDistribution, ConflictType,
     ConflictSeverity, EventRecommendationType
 };
 
@@ -35,7 +35,7 @@ impl EventService {
             RETURNING
                 id, user_id, name, description,
                 event_type as "event_type: EventType",
-                sport as "sport: Sport",
+                sport as "sport: EventSport",
                 event_date, event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
@@ -47,7 +47,7 @@ impl EventService {
             request.name,
             request.description,
             request.event_type as EventType,
-            request.sport as Sport,
+            request.sport as EventSport,
             request.event_date,
             request.event_time,
             request.location,
@@ -75,7 +75,7 @@ impl EventService {
             SELECT
                 id, user_id, name, description,
                 event_type as "event_type: EventType",
-                sport as "sport: Sport",
+                sport as "sport: EventSport",
                 event_date, event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
@@ -104,7 +104,7 @@ impl EventService {
             SELECT
                 id, user_id, name, description,
                 event_type as "event_type: EventType",
-                sport as "sport: Sport",
+                sport as "sport: EventSport",
                 event_date, event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
@@ -152,7 +152,7 @@ impl EventService {
             RETURNING
                 id, user_id, name, description,
                 event_type as "event_type: EventType",
-                sport as "sport: Sport",
+                sport as "sport: EventSport",
                 event_date, event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
@@ -275,7 +275,7 @@ impl EventService {
             SELECT
                 id, user_id, name, description,
                 event_type as "event_type: EventType",
-                sport as "sport: Sport",
+                sport as "sport: EventSport",
                 event_date, event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,

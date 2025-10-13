@@ -64,7 +64,9 @@
       "Bash(rustc --version)",
       "Read(//Users/julienpequegnot/.cargo/registry/src/**)",
       "Bash(timeout 30 cargo check)",
-      "Bash(timeout 60 cargo check)"
+      "Bash(timeout 60 cargo check)",
+      "Read(//private/tmp/**)",
+      "Bash(xargs cat:*)"
     ],
     "deny": [],
     "ask": []
