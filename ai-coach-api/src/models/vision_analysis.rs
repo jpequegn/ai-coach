@@ -140,23 +140,23 @@ pub enum IssueSeverity {
     Minor,
 }
 
+/// Priority level of recommendations (vision analysis)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum VisionRecommendationPriority {
+    High,
+    Medium,
+    Low,
+}
+
 /// Recommendation for improvement
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MovementRecommendation {
-    pub priority: RecommendationPriority,
+    pub priority: VisionRecommendationPriority,
     pub issue: String,
     pub suggestion: String,
     pub exercises: Vec<String>,
     pub cue: String,
-}
-
-/// Priority level of recommendations
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum RecommendationPriority {
-    High,
-    Medium,
-    Low,
 }
 
 /// Movement quality scores and feedback

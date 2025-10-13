@@ -266,7 +266,7 @@ impl ModelTrainingService {
             user_id,
             prediction_type: "ModelMetrics".to_string(),
             data: prediction_data,
-            confidence: Some(metrics.r_squared),
+            confidence: Some(metrics.r_squared as f64),
             model_version: Some(metrics.model_version.clone()),
         };
 

@@ -267,7 +267,7 @@ pub struct CoachingInsight {
     pub generated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "insight_type", rename_all = "snake_case")]
 pub enum InsightType {
     ProgressOptimization,
@@ -279,7 +279,7 @@ pub enum InsightType {
     OpportunityHighlight,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "importance_level", rename_all = "snake_case")]
 pub enum ImportanceLevel {
     Low,

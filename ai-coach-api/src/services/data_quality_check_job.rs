@@ -73,21 +73,15 @@ impl DataQualityCheckJob {
         );
 
         Ok(JobExecutionStats {
-            job_name: Self::get_job_name().to_string(),
-            execution_time: start_time,
-            duration_seconds: duration,
             records_processed: processed,
             records_failed: errors,
-            status: if errors == 0 {
-                "success".to_string()
-            } else {
-                "completed_with_errors".to_string()
-            },
+            execution_time_ms: duration * 1000, // Convert seconds to milliseconds
             error_message: if errors > 0 {
                 Some(format!("{} users failed data quality check", errors))
             } else {
                 None
             },
+            metadata: None,
         })
     }
 

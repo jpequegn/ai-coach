@@ -1,4 +1,4 @@
-use crate::auth::{AuthService, Claims, RoleGuard, jwt_auth_middleware};
+use crate::auth::{AuthService, Claims, jwt_auth_middleware};
 use crate::models::{EffectivenessFilter, ProcessOutcomesResult};
 use crate::services::RecommendationEffectivenessService;
 use axum::{
@@ -59,7 +59,7 @@ pub async fn process_daily_outcomes(
     Extension(claims): Extension<Claims>,
 ) -> impl IntoResponse {
     // Admin role check
-    if claims.role != "admin" {
+    if !matches!(claims.role, crate::auth::UserRole::Admin) {
         return (
             StatusCode::FORBIDDEN,
             Json(json!({"error": "Admin access required"})),

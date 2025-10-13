@@ -152,24 +152,24 @@ pub enum TrendDirection {
     Insufficient, // Not enough data
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GoalRecommendation {
-    pub goal_id: Uuid,
-    pub recommendation_type: RecommendationType,
-    pub title: String,
-    pub description: String,
-    pub priority: GoalPriority,
-    pub suggested_actions: Vec<String>,
-    pub generated_at: DateTime<Utc>,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[sqlx(type_name = "recommendation_type", rename_all = "snake_case")]
-pub enum RecommendationType {
+pub enum GoalRecommendationType {
     AdjustTarget,    // Suggest adjusting goal target
     ExtendDeadline,  // Suggest extending deadline
     IncreaseEffort,  // Suggest increasing training effort
     ChangeStrategy,  // Suggest changing approach
     Celebration,     // Acknowledge achievement
     Warning,         // Warn about potential failure
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GoalRecommendation {
+    pub goal_id: Uuid,
+    pub recommendation_type: GoalRecommendationType,
+    pub title: String,
+    pub description: String,
+    pub priority: GoalPriority,
+    pub suggested_actions: Vec<String>,
+    pub generated_at: DateTime<Utc>,
 }

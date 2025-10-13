@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::models::{DataSource, HrvReading, RestingHrData, SleepData, WearableConnection};
 use crate::services::oura_api_client::{OuraApiClient, OuraTokenResponse};
 
+#[derive(Clone)]
 pub struct OuraIntegrationService {
     db: PgPool,
     api_client: OuraApiClient,
@@ -66,11 +67,11 @@ impl OuraIntegrationService {
                 is_active = TRUE,
                 updated_at = NOW()
             RETURNING
-                id, user_id, provider, access_token, refresh_token,
+                id as "id!", user_id as "user_id!", provider as "provider!", access_token, refresh_token,
                 token_expires_at, provider_user_id, scopes, connected_at,
-                last_sync_at, is_active,
+                last_sync_at, is_active as "is_active!",
                 metadata as "metadata: sqlx::types::Json<serde_json::Value>",
-                created_at, updated_at
+                created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             DataSource::Oura.as_str(),
@@ -380,11 +381,11 @@ impl OuraIntegrationService {
             WearableConnection,
             r#"
             SELECT
-                id, user_id, provider, access_token, refresh_token,
+                id as "id!", user_id as "user_id!", provider as "provider!", access_token, refresh_token,
                 token_expires_at, provider_user_id, scopes, connected_at,
-                last_sync_at, is_active,
+                last_sync_at, is_active as "is_active!",
                 metadata as "metadata: sqlx::types::Json<serde_json::Value>",
-                created_at, updated_at
+                created_at as "created_at!", updated_at as "updated_at!"
             FROM wearable_connections
             WHERE user_id = $1 AND provider = $2 AND is_active = TRUE
             "#,

@@ -24,8 +24,19 @@ pub async fn complete_recommendation(
     Path(recommendation_id): Path<Uuid>,
     Json(request): Json<CompleteRecommendationRequest>,
 ) -> impl IntoResponse {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
     match service
-        .complete_recommendation(recommendation_id, claims.sub, request)
+        .complete_recommendation(recommendation_id, user_id, request)
         .await
     {
         Ok(recommendation) => (StatusCode::OK, Json(recommendation)).into_response(),
@@ -44,8 +55,19 @@ pub async fn skip_recommendation(
     Path(recommendation_id): Path<Uuid>,
     Json(request): Json<SkipRecommendationRequest>,
 ) -> impl IntoResponse {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
     match service
-        .skip_recommendation(recommendation_id, claims.sub, request)
+        .skip_recommendation(recommendation_id, user_id, request)
         .await
     {
         Ok(recommendation) => (StatusCode::OK, Json(recommendation)).into_response(),
@@ -64,8 +86,19 @@ pub async fn rate_recommendation(
     Path(recommendation_id): Path<Uuid>,
     Json(request): Json<RateRecommendationRequest>,
 ) -> impl IntoResponse {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
     match service
-        .rate_recommendation(recommendation_id, claims.sub, request)
+        .rate_recommendation(recommendation_id, user_id, request)
         .await
     {
         Ok(recommendation) => (StatusCode::OK, Json(recommendation)).into_response(),
@@ -83,7 +116,18 @@ pub async fn get_recommendation_history(
     Extension(claims): Extension<Claims>,
     Query(filters): Query<HistoryFilter>,
 ) -> impl IntoResponse {
-    match service.get_user_history(claims.sub, filters).await {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
+    match service.get_user_history(user_id, filters).await {
         Ok(history) => (StatusCode::OK, Json(history)).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,

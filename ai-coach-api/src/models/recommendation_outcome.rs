@@ -131,7 +131,7 @@ pub struct ProcessOutcomesResult {
 /// - Recovery improvement: normalized 0-1 based on score change
 /// - User rating: normalized 0-1 (rating / 5)
 /// - Time factor: 1.0 if completed within 24h, 0.8 otherwise
-pub fn calculate_effectiveness_score(
+pub fn calculate_outcome_effectiveness_score(
     baseline_score: f64,
     next_day_score: f64,
     user_rating: Option<i32>,
@@ -200,7 +200,7 @@ mod tests {
     #[test]
     fn test_calculate_effectiveness_score_positive_improvement() {
         // Baseline 60, next day 80, rating 5, completed in 12h
-        let score = calculate_effectiveness_score(60.0, 80.0, Some(5), 12.0);
+        let score = calculate_outcome_effectiveness_score(60.0, 80.0, Some(5), 12.0);
 
         // Recovery: (80-60)/100 = 0.2, normalized: (0.2+0.5) = 0.7
         // Rating: 5/5 = 1.0
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn test_calculate_effectiveness_score_negative_improvement() {
         // Baseline 70, next day 60, rating 2, completed in 30h
-        let score = calculate_effectiveness_score(70.0, 60.0, Some(2), 30.0);
+        let score = calculate_outcome_effectiveness_score(70.0, 60.0, Some(2), 30.0);
 
         // Recovery: (60-70)/100 = -0.1, normalized: (-0.1+0.5) = 0.4
         // Rating: 2/5 = 0.4
@@ -224,7 +224,7 @@ mod tests {
     #[test]
     fn test_calculate_effectiveness_score_no_rating() {
         // Baseline 65, next day 75, no rating, completed in 18h
-        let score = calculate_effectiveness_score(65.0, 75.0, None, 18.0);
+        let score = calculate_outcome_effectiveness_score(65.0, 75.0, None, 18.0);
 
         // Recovery: (75-65)/100 = 0.1, normalized: (0.1+0.5) = 0.6
         // Rating: default 0.5

@@ -207,7 +207,7 @@ pub async fn upload_training_file(
     Query(query): Query<UploadQuery>,
     mut multipart: Multipart,
 ) -> Result<Json<FileUploadResponse>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     while let Some(field) = multipart.next_field().await.map_err(|_| StatusCode::BAD_REQUEST)? {
         let name = field.name().unwrap_or("").to_string();
@@ -241,6 +241,7 @@ pub async fn upload_training_file(
             let session_data = CreateTrainingSession {
                 user_id,
                 date: chrono::Utc::now().date_naive(),
+                trainrs_data: None,
                 uploaded_file_path: Some(file_path.clone()),
                 session_type: Some("uploaded".to_string()),
                 duration_seconds: None,
@@ -259,6 +260,7 @@ pub async fn upload_training_file(
                 file_path,
                 processing_status: "uploaded".to_string(),
                 metrics: None,
+                job_id: None,
             };
 
             // Process immediately if requested
@@ -309,7 +311,7 @@ pub async fn get_training_metrics(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Path(session_id): Path<Uuid>,
 ) -> Result<Json<TrainingMetricsResponse>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     // Get the training session
     let session = state
@@ -336,6 +338,7 @@ pub async fn get_training_metrics(
         session_id: session.id,
         metrics: session.trainrs_data.unwrap_or_else(|| serde_json::json!({})),
         processing_status: processing_status.to_string(),
+        last_updated: Some(session.updated_at),
     };
 
     Ok(Json(response))
@@ -347,7 +350,7 @@ pub async fn get_training_sessions(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Query(pagination): Query<PaginationQuery>,
 ) -> Result<Json<Vec<TrainingSession>>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     // Validate pagination parameters
     if let Err(_) = pagination.validate() {
@@ -372,7 +375,7 @@ pub async fn get_performance_management_chart(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Query(query): Query<PMCQuery>,
 ) -> Result<Json<PMCResponse>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     // Validate query parameters
     if let Err(_) = query.validate() {
@@ -414,7 +417,7 @@ pub async fn process_training_session(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Path(session_id): Path<Uuid>,
 ) -> Result<Json<TrainingMetricsResponse>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     // Get the training session
     let session = state
@@ -472,6 +475,7 @@ pub async fn process_training_session(
         session_id: session.id,
         metrics: metrics_json,
         processing_status: "processed".to_string(),
+        last_updated: Some(chrono::Utc::now()),
     };
 
     Ok(Json(response))
@@ -483,7 +487,7 @@ pub async fn get_job_status(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Path(job_id): Path<Uuid>,
 ) -> Result<Json<serde_json::Value>, StatusCode> {
-    let _user_id = claims.sub; // Could be used for additional authorization
+    let _user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?; // Could be used for additional authorization
 
     let job = state
         .background_job_service
@@ -510,7 +514,7 @@ pub async fn get_user_jobs(
     State(state): State<AppState>,
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
 ) -> Result<Json<Vec<serde_json::Value>>, StatusCode> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let jobs = state
         .background_job_service

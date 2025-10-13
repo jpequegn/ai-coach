@@ -10,6 +10,7 @@ use tracing::{error, info, warn};
 /// Implements OAuth 2.0 flow and data synchronization with Oura Ring API.
 /// Rate limit: 5,000 requests per day per user
 /// API Documentation: https://cloud.ouraring.com/v2/docs
+#[derive(Clone)]
 pub struct OuraApiClient {
     client: Client,
     client_id: String,

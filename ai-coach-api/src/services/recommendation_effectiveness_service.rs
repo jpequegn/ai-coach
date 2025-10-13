@@ -1,7 +1,7 @@
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use tracing::{info, warn};
 use uuid::Uuid;
 
@@ -12,6 +12,7 @@ use crate::models::{
     UserRecommendationStatus,
 };
 
+#[derive(Clone)]
 pub struct RecommendationEffectivenessService {
     db: PgPool,
 }
@@ -512,8 +513,8 @@ impl RecommendationEffectivenessService {
                     category: row.category.clone().unwrap_or_default(),
                     completions,
                     completion_rate,
-                    avg_rating: row.avg_rating,
-                    avg_effectiveness: row.avg_effectiveness,
+                    avg_rating: row.avg_rating.flatten(),
+                    avg_effectiveness: row.avg_effectiveness.flatten(),
                 }
             })
             .collect();
@@ -528,8 +529,8 @@ impl RecommendationEffectivenessService {
             total_recommendations_shown,
             total_recommendations_completed,
             overall_completion_rate,
-            overall_avg_rating: overall.avg_rating,
-            overall_avg_effectiveness: overall.avg_effectiveness,
+            overall_avg_rating: overall.avg_rating.flatten(),
+            overall_avg_effectiveness: overall.avg_effectiveness.flatten(),
             category_analytics,
             top_performing_templates: top_performing,
             underperforming_templates: underperforming,
@@ -538,7 +539,7 @@ impl RecommendationEffectivenessService {
 
     /// Get top performing templates
     async fn get_top_performing_templates(&self, limit: i32) -> Result<Vec<TemplatePerformance>> {
-        let rows = sqlx::query!(
+        let rows = sqlx::query(
             r#"
             SELECT
                 rt.id,
@@ -556,9 +557,9 @@ impl RecommendationEffectivenessService {
             HAVING COUNT(DISTINCT ro.id) >= 5
             ORDER BY AVG(ro.effectiveness_score) DESC NULLS LAST
             LIMIT $1
-            "#,
-            limit
+            "#
         )
+        .bind(limit as i64)
         .fetch_all(&self.db)
         .await?;
 
@@ -567,7 +568,7 @@ impl RecommendationEffectivenessService {
 
     /// Get underperforming templates that need review
     async fn get_underperforming_templates(&self) -> Result<Vec<TemplatePerformance>> {
-        let rows = sqlx::query!(
+        let rows = sqlx::query(
             r#"
             SELECT
                 rt.id,
@@ -629,8 +630,6 @@ impl RecommendationEffectivenessService {
         &self,
         rows: Vec<sqlx::postgres::PgRow>,
     ) -> Vec<TemplatePerformance> {
-        use sqlx::Row;
-
         rows.iter()
             .map(|row| {
                 let template_id: Uuid = row.get("id");

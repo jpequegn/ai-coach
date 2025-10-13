@@ -404,7 +404,7 @@ pub async fn update_thresholds(
     tracing::info!("Updating thresholds for user {}", user_id);
 
     // Return updated thresholds
-    get_thresholds(State(state), WithRejection(claims, StatusCode::UNAUTHORIZED)).await
+    get_thresholds(State(state), WithRejection(claims, _)).await
 }
 
 /// Update training preferences

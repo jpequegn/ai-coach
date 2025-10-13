@@ -423,7 +423,7 @@ impl TrainingRecommendationService {
             user_id: recommendation.user_id,
             prediction_type: "TrainingRecommendation".to_string(),
             data: analytics_data,
-            confidence: Some(recommendation.prediction.confidence),
+            confidence: Some(recommendation.prediction.confidence as f64),
             model_version: Some(recommendation.prediction.model_version.clone()),
         };
 

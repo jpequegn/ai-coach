@@ -21,7 +21,7 @@ impl ModelPredictionService {
             r#"
             INSERT INTO model_predictions (user_id, prediction_type, data, confidence, model_version, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $6)
-            RETURNING id, user_id, prediction_type, data, confidence, model_version, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", prediction_type as "prediction_type!", data as "data!", confidence, model_version, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             pred_data.user_id,
             pred_data.prediction_type,
@@ -39,7 +39,7 @@ impl ModelPredictionService {
     pub async fn get_prediction_by_id(&self, pred_id: Uuid) -> Result<Option<ModelPrediction>> {
         let prediction = sqlx::query_as!(
             ModelPrediction,
-            "SELECT id, user_id, prediction_type, data, confidence, model_version, created_at, updated_at FROM model_predictions WHERE id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", prediction_type as \"prediction_type!\", data as \"data!\", confidence, model_version, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM model_predictions WHERE id = $1",
             pred_id
         )
         .fetch_optional(&self.db)
@@ -55,7 +55,7 @@ impl ModelPredictionService {
             Some(pred_type) => {
                 sqlx::query_as!(
                     ModelPrediction,
-                    "SELECT id, user_id, prediction_type, data, confidence, model_version, created_at, updated_at FROM model_predictions WHERE user_id = $1 AND prediction_type = $2 ORDER BY created_at DESC LIMIT $3",
+                    "SELECT id as \"id!\", user_id as \"user_id!\", prediction_type as \"prediction_type!\", data as \"data!\", confidence, model_version, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM model_predictions WHERE user_id = $1 AND prediction_type = $2 ORDER BY created_at DESC LIMIT $3",
                     user_id,
                     pred_type,
                     limit
@@ -66,7 +66,7 @@ impl ModelPredictionService {
             None => {
                 sqlx::query_as!(
                     ModelPrediction,
-                    "SELECT id, user_id, prediction_type, data, confidence, model_version, created_at, updated_at FROM model_predictions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2",
+                    "SELECT id as \"id!\", user_id as \"user_id!\", prediction_type as \"prediction_type!\", data as \"data!\", confidence, model_version, created_at as \"created_at!\", updated_at as \"updated_at!\" FROM model_predictions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2",
                     user_id,
                     limit
                 )
@@ -91,7 +91,7 @@ impl ModelPredictionService {
                 model_version = COALESCE($5, model_version),
                 updated_at = $6
             WHERE id = $1
-            RETURNING id, user_id, prediction_type, data, confidence, model_version, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", prediction_type as "prediction_type!", data as "data!", confidence, model_version, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             pred_id,
             pred_data.prediction_type,

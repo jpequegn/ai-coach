@@ -95,11 +95,23 @@ pub struct UpdatePlanRequest {
     pub status: Option<PlanStatus>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CoachingRecommendationType {
+    Training,
+    Recovery,
+    Nutrition,
+    Equipment,
+    Technique,
+    Goal,
+    Health,
+}
+
 #[derive(Debug, Serialize)]
 pub struct CoachingRecommendation {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub recommendation_type: RecommendationType,
+    pub recommendation_type: CoachingRecommendationType,
     pub priority: Priority,
     pub title: String,
     pub description: String,
@@ -108,18 +120,6 @@ pub struct CoachingRecommendation {
     pub expected_benefit: String,
     pub created_at: DateTime<Utc>,
     pub valid_until: Option<DateTime<Utc>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum RecommendationType {
-    Training,
-    Recovery,
-    Nutrition,
-    Equipment,
-    Technique,
-    Goal,
-    Health,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -512,7 +512,7 @@ pub async fn get_recommendations(
         CoachingRecommendation {
             id: Uuid::new_v4(),
             user_id: Uuid::parse_str(&user_id).unwrap_or_default(),
-            recommendation_type: RecommendationType::Recovery,
+            recommendation_type: CoachingRecommendationType::Recovery,
             priority: Priority::High,
             title: "Take a Recovery Day".to_string(),
             description: "Your training load has been high. A recovery day will help adaptation.".to_string(),
@@ -529,7 +529,7 @@ pub async fn get_recommendations(
         CoachingRecommendation {
             id: Uuid::new_v4(),
             user_id: Uuid::parse_str(&user_id).unwrap_or_default(),
-            recommendation_type: RecommendationType::Training,
+            recommendation_type: CoachingRecommendationType::Training,
             priority: Priority::Medium,
             title: "Add Threshold Work".to_string(),
             description: "Your threshold power could be improved with targeted training.".to_string(),

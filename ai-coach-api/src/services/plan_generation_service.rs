@@ -77,11 +77,11 @@ impl PlanGenerationService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'draft', $12, $13, $14, $14)
             RETURNING
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             goals.get(0).map(|g| g.id),
@@ -129,9 +129,9 @@ impl PlanGenerationService {
             )
             VALUES ($1, $2, $3, $4, $5, $5)
             RETURNING
-                id, plan_id,
-                adaptation_type as "adaptation_type: AdaptationType",
-                trigger_reason, changes_made, effectiveness_score, applied_date, created_at
+                id as "id!", plan_id as "plan_id!",
+                adaptation_type as "adaptation_type!: AdaptationType",
+                trigger_reason as "trigger_reason!", changes_made as "changes_made!", effectiveness_score, applied_date as "applied_date!", created_at as "created_at!"
             "#,
             plan_id,
             adaptation_type as AdaptationType,
@@ -153,11 +153,11 @@ impl PlanGenerationService {
                 updated_at = $4
             WHERE id = $1 AND user_id = $5
             RETURNING
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             plan_id,
             serde_json::to_value(&plan_structure)?,
@@ -350,11 +350,11 @@ impl PlanGenerationService {
             GeneratedPlan,
             r#"
             SELECT
-                id, user_id, goal_id, event_id, plan_name,
-                plan_type as "plan_type: PlanType",
-                start_date, end_date, total_weeks, plan_structure,
-                generation_parameters, adaptation_history, status,
-                confidence_score, success_prediction, created_at, updated_at
+                id as "id!", user_id as "user_id!", goal_id, event_id, plan_name as "plan_name!",
+                plan_type as "plan_type!: PlanType",
+                start_date as "start_date!", end_date as "end_date!", total_weeks as "total_weeks!", plan_structure as "plan_structure!",
+                generation_parameters as "generation_parameters!", adaptation_history as "adaptation_history!", status as "status!",
+                confidence_score as "confidence_score!", success_prediction as "success_prediction!", created_at as "created_at!", updated_at as "updated_at!"
             FROM generated_plans
             WHERE id = $1 AND user_id = $2
             "#,
@@ -367,7 +367,7 @@ impl PlanGenerationService {
         Ok(plan)
     }
 
-    async fn get_user_preferences(&self, user_id: Uuid) -> Result<UserTrainingPreferences> {
+    pub async fn get_user_preferences(&self, user_id: Uuid) -> Result<UserTrainingPreferences> {
         // Try to get existing preferences, otherwise return defaults
         let preferences = sqlx::query!(
             r#"
@@ -388,13 +388,22 @@ impl PlanGenerationService {
                 available_days_per_week: prefs.available_days_per_week,
                 preferred_workout_duration: prefs.preferred_workout_duration,
                 max_workout_duration: prefs.max_workout_duration,
-                intensity_preference: serde_json::from_str(&prefs.intensity_preference.unwrap_or_else(|| "moderate_intensity_moderate_volume".to_string()))?,
-                preferred_training_times: serde_json::from_value(prefs.preferred_training_times)?,
-                equipment_available: serde_json::from_value(prefs.equipment_available)?,
-                training_location: serde_json::from_str(&prefs.training_location.unwrap_or_else(|| "mixed".to_string()))?,
-                experience_level: serde_json::from_str(&prefs.experience_level.unwrap_or_else(|| "intermediate".to_string()))?,
-                injury_history: serde_json::from_value(prefs.injury_history)?,
-                recovery_needs: serde_json::from_str(&prefs.recovery_needs.unwrap_or_else(|| "normal".to_string()))?,
+                intensity_preference: IntensityPreference::ModerateIntensityModerateVolume,
+                preferred_training_times: prefs.preferred_training_times
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(|| vec!["morning".to_string()]),
+                equipment_available: prefs.equipment_available
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(|| vec![Equipment::Road, Equipment::HeartRateMonitor]),
+                training_location: crate::models::TrainingLocation::Mixed,
+                experience_level: ExperienceLevel::Intermediate,
+                injury_history: prefs.injury_history
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                recovery_needs: crate::models::RecoveryLevel::Normal,
             })
         } else {
             // Return default preferences
@@ -413,7 +422,7 @@ impl PlanGenerationService {
         }
     }
 
-    async fn get_user_constraints(&self, user_id: Uuid) -> Result<TrainingConstraints> {
+    pub async fn get_user_constraints(&self, user_id: Uuid) -> Result<TrainingConstraints> {
         let constraints = sqlx::query!(
             r#"
             SELECT
@@ -430,15 +439,30 @@ impl PlanGenerationService {
 
         if let Some(cons) = constraints {
             Ok(TrainingConstraints {
-                max_weekly_hours: cons.max_weekly_hours,
-                min_weekly_hours: cons.min_weekly_hours,
+                max_weekly_hours: cons.max_weekly_hours.unwrap_or(10.0),
+                min_weekly_hours: cons.min_weekly_hours.unwrap_or(3.0),
                 max_consecutive_hard_days: cons.max_consecutive_hard_days,
                 required_rest_days: cons.required_rest_days,
-                travel_dates: serde_json::from_value(cons.travel_dates)?,
-                blackout_dates: serde_json::from_value(cons.blackout_dates)?,
-                priority_dates: serde_json::from_value(cons.priority_dates)?,
-                equipment_limitations: serde_json::from_value(cons.equipment_limitations)?,
-                health_considerations: serde_json::from_value(cons.health_considerations)?,
+                travel_dates: cons.travel_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                blackout_dates: cons.blackout_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                priority_dates: cons.priority_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                equipment_limitations: cons.equipment_limitations
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                health_considerations: cons.health_considerations
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
             })
         } else {
             // Return default constraints

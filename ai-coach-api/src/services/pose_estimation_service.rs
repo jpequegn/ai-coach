@@ -15,8 +15,9 @@
 use anyhow::{Context, Result};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
 use ndarray::{s, Array, Array2, Array3, Array4};
-use ort::{GraphOptimizationLevel, Session};
+use ort::session::{builder::GraphOptimizationLevel, Session};
 use std::path::Path;
+use std::sync::Arc;
 
 /// COCO keypoint names (17 keypoints)
 pub const COCO_KEYPOINT_NAMES: [&str; 17] = [
@@ -101,8 +102,9 @@ pub struct PoseEstimationResult {
 }
 
 /// Pose Estimation Service
+#[derive(Clone)]
 pub struct PoseEstimationService {
-    session: Session,
+    session: Arc<Session>,
     model_input_size: u32,
     confidence_threshold: f32,
     nms_iou_threshold: f32,
@@ -142,7 +144,7 @@ impl PoseEstimationService {
         );
 
         Ok(Self {
-            session,
+            session: Arc::new(session),
             model_input_size: 640,
             confidence_threshold: 0.5,
             nms_iou_threshold: 0.45,

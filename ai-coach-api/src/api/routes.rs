@@ -47,6 +47,7 @@ pub fn create_routes(
     recovery_job: Option<Arc<DailyRecoveryCalculationJob>>,
 ) -> Router {
     let auth_service = AuthService::new(db.clone(), jwt_secret);
+    let auth_service_arc = Arc::new(auth_service.clone());
 
     // Create v1 API routes
     let mut api_v1 = Router::new()
@@ -63,10 +64,10 @@ pub fn create_routes(
         .nest("/vision", vision_routes(db.clone(), auth_service.clone()))
         .nest("/recovery", recovery_routes(db.clone(), auth_service.clone()))
         .nest("/recovery/analysis", recovery_analysis_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/profile", recovery_profile_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/recommendations", recommendation_tracking_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/recommendations", recommendation_engine_routes(db.clone(), auth_service.clone()))
-        .nest("/recovery/recommendations", recommendation_effectiveness_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/profile", recovery_profile_routes(db.clone(), auth_service_arc.clone()))
+        .nest("/recovery/recommendations", recommendation_tracking_routes(db.clone(), auth_service_arc.clone()))
+        .nest("/recovery/recommendations", recommendation_engine_routes(db.clone(), auth_service_arc.clone()))
+        .nest("/recovery/recommendations", recommendation_effectiveness_routes(db.clone(), auth_service_arc.clone()))
         .nest("/training/adjustment", training_adjustment_routes(db.clone(), auth_service.clone()))
         .nest("/validation", validation_routes(db.clone(), auth_service.clone()));
 

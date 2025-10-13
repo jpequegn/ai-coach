@@ -101,7 +101,19 @@ impl JobRegistry {
 
             self.scheduler
                 .register_job(registered_job.name, registered_job.schedule, move || {
-                    factory()
+                    let factory = factory.clone();
+                    Box::pin(async move {
+                        // Execute the job factory and get the future
+                        let job_future = (factory)();
+                        // Await the job execution
+                        job_future.await?;
+                        // Return empty stats for now
+                        Ok(crate::services::JobExecutionStats {
+                            duration_ms: 0,
+                            success: true,
+                            error_message: None,
+                        })
+                    })
                 })
                 .await?;
 

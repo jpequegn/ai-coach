@@ -8,15 +8,16 @@ use tracing::{info, warn};
 use crate::models::{
     PerformanceInsights, PerformanceInsightsRequest, FitnessTrends, PerformanceTrends,
     TrainingConsistency, PowerCurveAnalysis, ZoneDistributionAnalysis, RecoveryAnalysis,
-    GoalProgress, RaceTimePrediction, TrainingPlanAdherence, InsightMessage, RecommendationMessage,
+    PerformanceGoalProgress, RaceTimePrediction, TrainingPlanAdherence, InsightMessage, RecommendationMessage,
     WarningMessage, AchievementMessage, PeerComparison, AgeGroupBenchmarks, HistoricalComparison,
     TsbTrend, FitnessTrajectory, SeasonalPattern, BestPerformance, DurationStrength,
     DurationWeakness, PowerProfileType, CriticalPowerEstimates, ZoneDistribution,
-    ZoneImbalance, RiskLevel, HrvTrends, GoalType, InsightCategory, RecommendationPriority,
-    WarningSeverity, AchievementType, RankingEstimate, PerformanceComparison, TrendDirection,
+    ZoneImbalance, RiskLevel, HrvTrends, InsightGoalType, InsightCategory,
+    WarningSeverity, AchievementType, RankingEstimate, PerformanceComparison, PerformanceTrendDirection,
     CareerHighlight, StrengthLevel, ImbalanceSeverity, TrainingFeatures, TrainingMetrics,
     PowerZoneDistribution, HeartRateZoneDistribution
 };
+use crate::models::recommendation::RecommendationPriority;
 
 use crate::services::{
     FeatureEngineeringService, TrainingAnalysisService, TrainingSessionService
@@ -460,7 +461,7 @@ impl PerformanceInsightsService {
     async fn identify_achievements(
         &self,
         performance_trends: &PerformanceTrends,
-        goal_progress: &[GoalProgress],
+        goal_progress: &[PerformanceGoalProgress],
     ) -> Result<Vec<AchievementMessage>> {
         let mut achievements = Vec::new();
 
@@ -656,7 +657,7 @@ impl PerformanceInsightsService {
     fn assess_overreaching_risk(&self, _historical_data: &[HistoricalDataPoint]) -> RiskLevel { RiskLevel::Low }
     fn generate_recovery_recommendations(&self, _risk: &RiskLevel) -> Vec<String> { vec!["Get adequate sleep".to_string()] }
 
-    async fn analyze_goal_progress(&self, _user_id: Uuid) -> Result<Vec<GoalProgress>> { Ok(vec![]) }
+    async fn analyze_goal_progress(&self, _user_id: Uuid) -> Result<Vec<PerformanceGoalProgress>> { Ok(vec![]) }
     async fn predict_race_times(&self, _features: &TrainingFeatures, _power_analysis: &PowerCurveAnalysis) -> Result<Vec<RaceTimePrediction>> { Ok(vec![]) }
     async fn analyze_training_plan_adherence(&self, _user_id: Uuid, _start: NaiveDate, _end: NaiveDate) -> Result<TrainingPlanAdherence> {
         Ok(TrainingPlanAdherence {
@@ -697,7 +698,7 @@ impl PerformanceInsightsService {
                 volume_change: -8.0,
                 consistency_change: 10.0,
             },
-            long_term_trend: TrendDirection::Improving,
+            long_term_trend: PerformanceTrendDirection::Improving,
             career_highlights: vec![],
         })
     }

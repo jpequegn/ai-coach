@@ -480,7 +480,7 @@ impl ModelVersioningService {
             user_id: Uuid::new_v4(), // System user ID
             prediction_type: "ModelVersion".to_string(),
             data: model_data,
-            confidence: Some(model.metrics.r_squared),
+            confidence: Some(model.metrics.r_squared as f64),
             model_version: Some(model.version.clone()),
         };
 
@@ -496,7 +496,7 @@ impl ModelVersioningService {
             user_id: Uuid::new_v4(), // System user ID
             prediction_type: "ABTest".to_string(),
             data: test_data,
-            confidence: Some(test.traffic_split),
+            confidence: Some(test.traffic_split as f64),
             model_version: Some(format!("{}_{}", test.champion_version, test.challenger_version)),
         };
 

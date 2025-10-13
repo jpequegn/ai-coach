@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::models::validation_framework::*;
 
 /// Service for managing validation framework operations
+#[derive(Clone)]
 pub struct ValidationService {
     pub db: PgPool,
 }

@@ -15,7 +15,7 @@ use tracing::{error, info};
 use uuid::Uuid;
 
 use crate::{
-    auth::{middleware::auth_middleware, models::Claims, AuthService},
+    auth::{jwt_auth_middleware, Claims, AuthService},
     models::vision_analysis::*,
     services::{VisionAnalysisService, VideoProcessingService, VideoStorageService},
 };
@@ -357,6 +357,6 @@ pub fn vision_routes(_db: PgPool, auth_service: AuthService) -> Router {
         // .route("/:id", delete(delete_analysis))
         .layer(middleware::from_fn_with_state(
             auth_service.clone(),
-            auth_middleware,
+            jwt_auth_middleware,
         ))
 }

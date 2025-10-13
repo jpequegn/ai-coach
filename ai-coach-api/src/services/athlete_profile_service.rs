@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{AthleteProfile, CreateAthleteProfile, UpdateAthleteProfile};
 
+#[derive(Clone)]
 pub struct AthleteProfileService {
     db: PgPool,
 }
@@ -20,7 +21,7 @@ impl AthleteProfileService {
             r#"
             INSERT INTO athlete_profiles (user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
-            RETURNING id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", sport as "sport!", ftp, lthr, max_heart_rate, threshold_pace, zones as "zones!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             profile_data.user_id,
             profile_data.sport,
@@ -40,7 +41,7 @@ impl AthleteProfileService {
     pub async fn get_profile_by_id(&self, profile_id: Uuid) -> Result<Option<AthleteProfile>> {
         let profile = sqlx::query_as!(
             AthleteProfile,
-            "SELECT id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at FROM athlete_profiles WHERE id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE id = $1",
             profile_id
         )
         .fetch_optional(&self.db)
@@ -52,7 +53,7 @@ impl AthleteProfileService {
     pub async fn get_profile_by_user_id(&self, user_id: Uuid) -> Result<Option<AthleteProfile>> {
         let profile = sqlx::query_as!(
             AthleteProfile,
-            "SELECT id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at FROM athlete_profiles WHERE user_id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE user_id = $1",
             user_id
         )
         .fetch_optional(&self.db)
@@ -64,7 +65,7 @@ impl AthleteProfileService {
     pub async fn get_profiles_by_sport(&self, sport: &str) -> Result<Vec<AthleteProfile>> {
         let profiles = sqlx::query_as!(
             AthleteProfile,
-            "SELECT id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at FROM athlete_profiles WHERE sport = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE sport = $1",
             sport
         )
         .fetch_all(&self.db)
@@ -88,7 +89,7 @@ impl AthleteProfileService {
                 zones = COALESCE($7, zones),
                 updated_at = $8
             WHERE id = $1
-            RETURNING id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", sport as "sport!", ftp, lthr, max_heart_rate, threshold_pace, zones as "zones!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             profile_id,
             profile_data.sport,
@@ -122,7 +123,7 @@ impl AthleteProfileService {
 
         let profiles = sqlx::query_as!(
             AthleteProfile,
-            "SELECT id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at FROM athlete_profiles ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+            "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles ORDER BY created_at DESC LIMIT $1 OFFSET $2",
             limit,
             offset
         )

@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::models::vision_analysis::*;
 
 /// Service for managing vision analysis database operations
+#[derive(Clone)]
 pub struct VisionAnalysisService {
     pub db: PgPool,
 }

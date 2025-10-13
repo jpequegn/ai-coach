@@ -6,7 +6,7 @@ use crate::models::{
 use crate::services::RecommendationEffectivenessService;
 use anyhow::{Context, Result};
 use chrono::Utc;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use std::sync::Arc;
 use tracing::{info, warn};
 use uuid::Uuid;

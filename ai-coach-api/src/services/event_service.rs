@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     Event, EventPlan, CreateEventRequest, UpdateEventRequest, CreateEventPlanRequest,
     EventCalendar, EventConflict, EventRecommendation, EventStatus, EventPriority,
-    EventType, Sport, PhaseType, TrainingPhase, IntensityDistribution, ConflictType,
+    EventType, EventSport, PhaseType, TrainingPhase, EventIntensityDistribution, ConflictType,
     ConflictSeverity, EventRecommendationType
 };
 
@@ -33,21 +33,21 @@ impl EventService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'planned', $18, $18)
             RETURNING
-                id, user_id, name, description,
-                event_type as "event_type: EventType",
-                sport as "sport: Sport",
-                event_date, event_time, location, distance, distance_unit,
+                id as "id!", user_id as "user_id!", name as "name!", description,
+                event_type as "event_type!: EventType",
+                sport as "sport!: EventSport",
+                event_date as "event_date!", event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
-                status as "status: EventStatus",
-                priority as "priority: EventPriority",
-                created_at, updated_at
+                status as "status!: EventStatus",
+                priority as "priority!: EventPriority",
+                created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             request.name,
             request.description,
             request.event_type as EventType,
-            request.sport as Sport,
+            request.sport as EventSport,
             request.event_date,
             request.event_time,
             request.location,
@@ -73,15 +73,15 @@ impl EventService {
             Event,
             r#"
             SELECT
-                id, user_id, name, description,
-                event_type as "event_type: EventType",
-                sport as "sport: Sport",
-                event_date, event_time, location, distance, distance_unit,
+                id as "id!", user_id as "user_id!", name as "name!", description,
+                event_type as "event_type!: EventType",
+                sport as "sport!: EventSport",
+                event_date as "event_date!", event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
-                status as "status: EventStatus",
-                priority as "priority: EventPriority",
-                created_at, updated_at
+                status as "status!: EventStatus",
+                priority as "priority!: EventPriority",
+                created_at as "created_at!", updated_at as "updated_at!"
             FROM events
             WHERE id = $1 AND user_id = $2
             "#,
@@ -102,15 +102,15 @@ impl EventService {
             Event,
             r#"
             SELECT
-                id, user_id, name, description,
-                event_type as "event_type: EventType",
-                sport as "sport: Sport",
-                event_date, event_time, location, distance, distance_unit,
+                id as "id!", user_id as "user_id!", name as "name!", description,
+                event_type as "event_type!: EventType",
+                sport as "sport!: EventSport",
+                event_date as "event_date!", event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
-                status as "status: EventStatus",
-                priority as "priority: EventPriority",
-                created_at, updated_at
+                status as "status!: EventStatus",
+                priority as "priority!: EventPriority",
+                created_at as "created_at!", updated_at as "updated_at!"
             FROM events
             WHERE user_id = $1
             ORDER BY event_date ASC, priority DESC
@@ -150,15 +150,15 @@ impl EventService {
                 updated_at = $18
             WHERE id = $1 AND user_id = $2
             RETURNING
-                id, user_id, name, description,
-                event_type as "event_type: EventType",
-                sport as "sport: Sport",
-                event_date, event_time, location, distance, distance_unit,
+                id as "id!", user_id as "user_id!", name as "name!", description,
+                event_type as "event_type!: EventType",
+                sport as "sport!: EventSport",
+                event_date as "event_date!", event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
-                status as "status: EventStatus",
-                priority as "priority: EventPriority",
-                created_at, updated_at
+                status as "status!: EventStatus",
+                priority as "priority!: EventPriority",
+                created_at as "created_at!", updated_at as "updated_at!"
             "#,
             event_id,
             user_id,
@@ -219,10 +219,10 @@ impl EventService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $15)
             RETURNING
-                id, event_id, user_id, training_phases, peak_date, taper_start_date,
-                base_training_weeks, build_training_weeks, peak_training_weeks,
-                taper_weeks, recovery_weeks, travel_considerations, logistics_notes,
-                equipment_checklist, nutrition_plan, created_at, updated_at
+                id as "id!", event_id as "event_id!", user_id as "user_id!", training_phases as "training_phases!", peak_date as "peak_date!", taper_start_date as "taper_start_date!",
+                base_training_weeks as "base_training_weeks!", build_training_weeks as "build_training_weeks!", peak_training_weeks as "peak_training_weeks!",
+                taper_weeks as "taper_weeks!", recovery_weeks as "recovery_weeks!", travel_considerations, logistics_notes,
+                equipment_checklist, nutrition_plan, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             event_id,
             user_id,
@@ -273,15 +273,15 @@ impl EventService {
             Event,
             r#"
             SELECT
-                id, user_id, name, description,
-                event_type as "event_type: EventType",
-                sport as "sport: Sport",
-                event_date, event_time, location, distance, distance_unit,
+                id as "id!", user_id as "user_id!", name as "name!", description,
+                event_type as "event_type!: EventType",
+                sport as "sport!: EventSport",
+                event_date as "event_date!", event_time, location, distance, distance_unit,
                 elevation_gain, expected_duration, registration_deadline,
                 cost, website_url, notes,
-                status as "status: EventStatus",
-                priority as "priority: EventPriority",
-                created_at, updated_at
+                status as "status!: EventStatus",
+                priority as "priority!: EventPriority",
+                created_at as "created_at!", updated_at as "updated_at!"
             FROM events
             WHERE user_id = $1 AND event_date BETWEEN $2 AND $3
             ORDER BY event_date ASC
@@ -297,11 +297,11 @@ impl EventService {
             EventPlan,
             r#"
             SELECT
-                ep.id, ep.event_id, ep.user_id, ep.training_phases, ep.peak_date,
-                ep.taper_start_date, ep.base_training_weeks, ep.build_training_weeks,
-                ep.peak_training_weeks, ep.taper_weeks, ep.recovery_weeks,
+                ep.id as "id!", ep.event_id as "event_id!", ep.user_id as "user_id!", ep.training_phases as "training_phases!", ep.peak_date as "peak_date!",
+                ep.taper_start_date as "taper_start_date!", ep.base_training_weeks as "base_training_weeks!", ep.build_training_weeks as "build_training_weeks!",
+                ep.peak_training_weeks as "peak_training_weeks!", ep.taper_weeks as "taper_weeks!", ep.recovery_weeks as "recovery_weeks!",
                 ep.travel_considerations, ep.logistics_notes, ep.equipment_checklist,
-                ep.nutrition_plan, ep.created_at, ep.updated_at
+                ep.nutrition_plan, ep.created_at as "created_at!", ep.updated_at as "updated_at!"
             FROM event_plans ep
             INNER JOIN events e ON ep.event_id = e.id
             WHERE ep.user_id = $1 AND e.event_date BETWEEN $2 AND $3
@@ -320,8 +320,8 @@ impl EventService {
         let recommendations = self.generate_event_recommendations(&events, &event_plans).await?;
 
         Ok(EventCalendar {
-            events,
-            event_plans,
+            events: events.to_vec(),
+            event_plans: event_plans.to_vec(),
             conflicts,
             recommendations,
         })
@@ -464,7 +464,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.base_training_weeks as i64) - Duration::days(1),
                 weeks: request.base_training_weeks,
                 weekly_volume_range: (6.0, 12.0), // hours
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 20.0,
                     zone2_percentage: 65.0,
                     zone3_percentage: 10.0,
@@ -487,7 +487,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.build_training_weeks as i64) - Duration::days(1),
                 weeks: request.build_training_weeks,
                 weekly_volume_range: (8.0, 15.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 15.0,
                     zone2_percentage: 50.0,
                     zone3_percentage: 20.0,
@@ -510,7 +510,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.peak_training_weeks as i64) - Duration::days(1),
                 weeks: request.peak_training_weeks,
                 weekly_volume_range: (10.0, 18.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 10.0,
                     zone2_percentage: 40.0,
                     zone3_percentage: 20.0,
@@ -533,7 +533,7 @@ impl EventService {
                 end_date: request.peak_date,
                 weeks: request.taper_weeks,
                 weekly_volume_range: (3.0, 8.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 40.0,
                     zone2_percentage: 35.0,
                     zone3_percentage: 15.0,

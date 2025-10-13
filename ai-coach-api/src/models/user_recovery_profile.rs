@@ -169,14 +169,14 @@ pub struct EffectiveTechniquesResponse {
 /// Profile insights response
 #[derive(Debug, Serialize)]
 pub struct ProfileInsightsResponse {
-    pub insights: Vec<RecoveryInsight>,
-    pub patterns: Vec<RecoveryPattern>,
+    pub insights: Vec<ProfileRecoveryInsight>,
+    pub patterns: Vec<ProfileRecoveryPattern>,
     pub recommendations_summary: RecommendationsSummary,
 }
 
 /// Individual recovery insight
 #[derive(Debug, Serialize)]
-pub struct RecoveryInsight {
+pub struct ProfileRecoveryInsight {
     pub insight_type: String,
     pub title: String,
     pub description: String,
@@ -186,7 +186,7 @@ pub struct RecoveryInsight {
 
 /// Identified recovery pattern
 #[derive(Debug, Serialize)]
-pub struct RecoveryPattern {
+pub struct ProfileRecoveryPattern {
     pub pattern_type: String,
     pub description: String,
     pub frequency: String,
@@ -237,7 +237,7 @@ impl Default for SleepSchedule {
 // ============================================================================
 
 /// Calculate effectiveness score from technique data
-pub fn calculate_effectiveness_score(
+pub fn calculate_profile_effectiveness_score(
     completion_rate: f64,
     average_rating: f64,
     total_interactions: i32,

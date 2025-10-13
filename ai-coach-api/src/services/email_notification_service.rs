@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{Notification, NotificationType, NotificationPreferences};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EmailNotificationService {
     templates: HashMap<NotificationType, EmailTemplate>,
     smtp_config: SmtpConfig,

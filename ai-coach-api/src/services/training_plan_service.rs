@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{TrainingPlan, CreateTrainingPlan, UpdateTrainingPlan};
 
+#[derive(Clone)]
 pub struct TrainingPlanService {
     db: PgPool,
 }
@@ -20,7 +21,7 @@ impl TrainingPlanService {
             r#"
             INSERT INTO training_plans (user_id, goal, start_date, end_date, plan_data, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $6)
-            RETURNING id, user_id, goal, start_date, end_date, plan_data, status, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", goal as "goal!", start_date as "start_date!", end_date as "end_date!", plan_data as "plan_data!", status as "status!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             plan_data.user_id,
             plan_data.goal,
@@ -38,7 +39,7 @@ impl TrainingPlanService {
     pub async fn get_plan_by_id(&self, plan_id: Uuid) -> Result<Option<TrainingPlan>> {
         let plan = sqlx::query_as!(
             TrainingPlan,
-            "SELECT id, user_id, goal, start_date, end_date, plan_data, status, created_at, updated_at FROM training_plans WHERE id = $1",
+            "SELECT id as \"id!\", user_id as \"user_id!\", goal as \"goal!\", start_date as \"start_date!\", end_date as \"end_date!\", plan_data as \"plan_data!\", status as \"status!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM training_plans WHERE id = $1",
             plan_id
         )
         .fetch_optional(&self.db)
@@ -50,7 +51,7 @@ impl TrainingPlanService {
     pub async fn get_plans_by_user_id(&self, user_id: Uuid) -> Result<Vec<TrainingPlan>> {
         let plans = sqlx::query_as!(
             TrainingPlan,
-            "SELECT id, user_id, goal, start_date, end_date, plan_data, status, created_at, updated_at FROM training_plans WHERE user_id = $1 ORDER BY created_at DESC",
+            "SELECT id as \"id!\", user_id as \"user_id!\", goal as \"goal!\", start_date as \"start_date!\", end_date as \"end_date!\", plan_data as \"plan_data!\", status as \"status!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM training_plans WHERE user_id = $1 ORDER BY created_at DESC",
             user_id
         )
         .fetch_all(&self.db)
@@ -73,7 +74,7 @@ impl TrainingPlanService {
                 status = COALESCE($6, status),
                 updated_at = $7
             WHERE id = $1
-            RETURNING id, user_id, goal, start_date, end_date, plan_data, status, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", goal as "goal!", start_date as "start_date!", end_date as "end_date!", plan_data as "plan_data!", status as "status!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             plan_id,
             plan_data.goal,

@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     Goal, GoalProgress, CreateGoalRequest, UpdateGoalRequest, CreateGoalProgressRequest,
     GoalProgressSummary, GoalRecommendation, TrendDirection, GoalStatus, GoalType,
-    GoalCategory, GoalPriority, RecommendationType
+    GoalCategory, GoalPriority, GoalRecommendationType
 };
 
 #[derive(Clone)]
@@ -31,13 +31,13 @@ impl GoalService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', $12, $12)
             RETURNING
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             request.title,
@@ -63,13 +63,13 @@ impl GoalService {
             Goal,
             r#"
             SELECT
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             FROM goals
             WHERE id = $1 AND user_id = $2
             "#,
@@ -140,13 +140,13 @@ impl GoalService {
                 updated_at = $11
             WHERE id = $1 AND user_id = $2
             RETURNING
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             goal_id,
             user_id,
@@ -200,7 +200,7 @@ impl GoalService {
             r#"
             INSERT INTO goal_progress (goal_id, value, date, note, milestone_achieved, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id, goal_id, value, date, note, milestone_achieved, created_at
+            RETURNING id as "id!", goal_id as "goal_id!", value as "value!", date as "date!", note, milestone_achieved, created_at as "created_at!"
             "#,
             goal_id,
             request.value,
@@ -237,7 +237,7 @@ impl GoalService {
         let recent_entries = sqlx::query_as!(
             GoalProgress,
             r#"
-            SELECT id, goal_id, value, date, note, milestone_achieved, created_at
+            SELECT id as "id!", goal_id as "goal_id!", value as "value!", date as "date!", note, milestone_achieved, created_at as "created_at!"
             FROM goal_progress
             WHERE goal_id = $1
             ORDER BY date DESC, created_at DESC
@@ -275,7 +275,7 @@ impl GoalService {
             progress_percentage,
             trend_direction,
             projected_completion_date,
-            recent_entries,
+            recent_entries: recent_entries.to_vec(),
             milestones_achieved,
             success_probability,
         })
@@ -294,7 +294,7 @@ impl GoalService {
                 if progress_pct < 20.0 && goal.target_date.map_or(false, |date| (date - chrono::Local::now().naive_local().date()).num_days() < 30) {
                     recommendations.push(GoalRecommendation {
                         goal_id: goal.id,
-                        recommendation_type: RecommendationType::Warning,
+                        recommendation_type: GoalRecommendationType::Warning,
                         title: "Goal at Risk".to_string(),
                         description: format!("Goal '{}' has low progress with deadline approaching", goal.title),
                         priority: GoalPriority::High,
@@ -308,7 +308,7 @@ impl GoalService {
                 } else if progress_pct >= 100.0 {
                     recommendations.push(GoalRecommendation {
                         goal_id: goal.id,
-                        recommendation_type: RecommendationType::Celebration,
+                        recommendation_type: GoalRecommendationType::Celebration,
                         title: "Goal Achieved!".to_string(),
                         description: format!("Congratulations! You've achieved your goal '{}'", goal.title),
                         priority: GoalPriority::Medium,
