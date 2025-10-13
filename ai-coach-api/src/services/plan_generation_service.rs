@@ -388,13 +388,13 @@ impl PlanGenerationService {
                 available_days_per_week: prefs.available_days_per_week,
                 preferred_workout_duration: prefs.preferred_workout_duration,
                 max_workout_duration: prefs.max_workout_duration,
-                intensity_preference: serde_json::from_str(&prefs.intensity_preference.unwrap_or_else(|| "moderate_intensity_moderate_volume".to_string()))?,
+                intensity_preference: IntensityPreference::ModerateIntensityModerateVolume,
                 preferred_training_times: serde_json::from_value(prefs.preferred_training_times)?,
                 equipment_available: serde_json::from_value(prefs.equipment_available)?,
-                training_location: serde_json::from_str(&prefs.training_location.unwrap_or_else(|| "mixed".to_string()))?,
-                experience_level: serde_json::from_str(&prefs.experience_level.unwrap_or_else(|| "intermediate".to_string()))?,
+                training_location: crate::models::TrainingLocation::Mixed,
+                experience_level: ExperienceLevel::Intermediate,
                 injury_history: serde_json::from_value(prefs.injury_history)?,
-                recovery_needs: serde_json::from_str(&prefs.recovery_needs.unwrap_or_else(|| "normal".to_string()))?,
+                recovery_needs: crate::models::RecoveryLevel::Normal,
             })
         } else {
             // Return default preferences
