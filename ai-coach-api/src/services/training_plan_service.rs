@@ -20,7 +20,7 @@ impl TrainingPlanService {
             r#"
             INSERT INTO training_plans (user_id, goal, start_date, end_date, plan_data, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $6)
-            RETURNING id, user_id, goal, start_date, end_date, plan_data, status, created_at, updated_at
+            RETURNING id as "id!", user_id as "user_id!", goal as "goal!", start_date as "start_date!", end_date as "end_date!", plan_data as "plan_data!", status as "status!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             plan_data.user_id,
             plan_data.goal,

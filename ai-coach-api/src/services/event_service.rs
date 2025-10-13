@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     Event, EventPlan, CreateEventRequest, UpdateEventRequest, CreateEventPlanRequest,
     EventCalendar, EventConflict, EventRecommendation, EventStatus, EventPriority,
-    EventType, EventSport, PhaseType, TrainingPhase, IntensityDistribution, ConflictType,
+    EventType, EventSport, PhaseType, TrainingPhase, EventIntensityDistribution, ConflictType,
     ConflictSeverity, EventRecommendationType
 };
 
@@ -464,7 +464,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.base_training_weeks as i64) - Duration::days(1),
                 weeks: request.base_training_weeks,
                 weekly_volume_range: (6.0, 12.0), // hours
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 20.0,
                     zone2_percentage: 65.0,
                     zone3_percentage: 10.0,
@@ -487,7 +487,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.build_training_weeks as i64) - Duration::days(1),
                 weeks: request.build_training_weeks,
                 weekly_volume_range: (8.0, 15.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 15.0,
                     zone2_percentage: 50.0,
                     zone3_percentage: 20.0,
@@ -510,7 +510,7 @@ impl EventService {
                 end_date: current_date + Duration::weeks(request.peak_training_weeks as i64) - Duration::days(1),
                 weeks: request.peak_training_weeks,
                 weekly_volume_range: (10.0, 18.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 10.0,
                     zone2_percentage: 40.0,
                     zone3_percentage: 20.0,
@@ -533,7 +533,7 @@ impl EventService {
                 end_date: request.peak_date,
                 weeks: request.taper_weeks,
                 weekly_volume_range: (3.0, 8.0),
-                intensity_distribution: IntensityDistribution {
+                intensity_distribution: EventIntensityDistribution {
                     zone1_percentage: 40.0,
                     zone2_percentage: 35.0,
                     zone3_percentage: 15.0,

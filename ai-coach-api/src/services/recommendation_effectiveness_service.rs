@@ -1,7 +1,7 @@
 use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use tracing::{info, warn};
 use uuid::Uuid;
 
@@ -629,8 +629,6 @@ impl RecommendationEffectivenessService {
         &self,
         rows: Vec<sqlx::postgres::PgRow>,
     ) -> Vec<TemplatePerformance> {
-        use sqlx::Row;
-
         rows.iter()
             .map(|row| {
                 let template_id: Uuid = row.get("id");
