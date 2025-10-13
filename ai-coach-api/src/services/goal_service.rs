@@ -31,13 +31,13 @@ impl GoalService {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active', $12, $12)
             RETURNING
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             request.title,
@@ -63,13 +63,13 @@ impl GoalService {
             Goal,
             r#"
             SELECT
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             FROM goals
             WHERE id = $1 AND user_id = $2
             "#,
@@ -140,13 +140,13 @@ impl GoalService {
                 updated_at = $11
             WHERE id = $1 AND user_id = $2
             RETURNING
-                id, user_id, title, description,
-                goal_type as "goal_type: GoalType",
-                goal_category as "goal_category: GoalCategory",
+                id as "id!", user_id as "user_id!", title as "title!", description as "description!",
+                goal_type as "goal_type!: GoalType",
+                goal_category as "goal_category!: GoalCategory",
                 target_value, current_value, unit, target_date,
-                status as "status: GoalStatus",
-                priority as "priority: GoalPriority",
-                event_id, parent_goal_id, created_at, updated_at
+                status as "status!: GoalStatus",
+                priority as "priority!: GoalPriority",
+                event_id, parent_goal_id, created_at as "created_at!", updated_at as "updated_at!"
             "#,
             goal_id,
             user_id,
@@ -200,7 +200,7 @@ impl GoalService {
             r#"
             INSERT INTO goal_progress (goal_id, value, date, note, milestone_achieved, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id, goal_id, value, date, note, milestone_achieved, created_at
+            RETURNING id as "id!", goal_id as "goal_id!", value as "value!", date as "date!", note, milestone_achieved, created_at as "created_at!"
             "#,
             goal_id,
             request.value,
@@ -237,7 +237,7 @@ impl GoalService {
         let recent_entries = sqlx::query_as!(
             GoalProgress,
             r#"
-            SELECT id, goal_id, value, date, note, milestone_achieved, created_at
+            SELECT id as "id!", goal_id as "goal_id!", value as "value!", date as "date!", note, milestone_achieved, created_at as "created_at!"
             FROM goal_progress
             WHERE goal_id = $1
             ORDER BY date DESC, created_at DESC
