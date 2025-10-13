@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::models::{
     Goal, GoalProgress, CreateGoalRequest, UpdateGoalRequest, CreateGoalProgressRequest,
     GoalProgressSummary, GoalRecommendation, TrendDirection, GoalStatus, GoalType,
-    GoalCategory, GoalPriority, RecommendationType
+    GoalCategory, GoalPriority, GoalRecommendationType
 };
 
 #[derive(Clone)]
@@ -294,7 +294,7 @@ impl GoalService {
                 if progress_pct < 20.0 && goal.target_date.map_or(false, |date| (date - chrono::Local::now().naive_local().date()).num_days() < 30) {
                     recommendations.push(GoalRecommendation {
                         goal_id: goal.id,
-                        recommendation_type: RecommendationType::Warning,
+                        recommendation_type: GoalRecommendationType::Warning,
                         title: "Goal at Risk".to_string(),
                         description: format!("Goal '{}' has low progress with deadline approaching", goal.title),
                         priority: GoalPriority::High,
@@ -308,7 +308,7 @@ impl GoalService {
                 } else if progress_pct >= 100.0 {
                     recommendations.push(GoalRecommendation {
                         goal_id: goal.id,
-                        recommendation_type: RecommendationType::Celebration,
+                        recommendation_type: GoalRecommendationType::Celebration,
                         title: "Goal Achieved!".to_string(),
                         description: format!("Congratulations! You've achieved your goal '{}'", goal.title),
                         priority: GoalPriority::Medium,

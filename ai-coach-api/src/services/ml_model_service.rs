@@ -3,7 +3,7 @@ use chrono::Utc;
 use ndarray::{Array1, Array2};
 use linfa::prelude::*;
 use linfa_linear::LinearRegression;
-use linfa_trees::RandomForest;
+use linfa_trees::DecisionTree;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -23,7 +23,7 @@ pub struct TrainedModel {
     pub model_type: ModelType,
     pub model_version: String,
     pub linear_model: Option<LinearRegression<f64>>,
-    pub forest_model: Option<RandomForest<f64, usize>>,
+    pub forest_model: Option<DecisionTree<f64, usize>>,
     pub feature_scaler: FeatureScaler,
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
@@ -151,11 +151,11 @@ impl MLModelService {
         // Create dataset
         let train_dataset = Dataset::new(scaled_train_features, train_labels);
 
-        // Train Random Forest
-        let forest_model = RandomForest::params()
-            .n_trees(100)
+        // Train Decision Tree (note: linfa-trees 0.7 doesn't have RandomForest)
+        // Using DecisionTree as a placeholder for now
+        let forest_model = DecisionTree::params()
             .max_depth(Some(10))
-            .min_samples_split(5)
+            .min_weight_split(5.0)
             .fit(&train_dataset)?;
 
         // Create trained model
@@ -317,7 +317,7 @@ impl MLModelService {
     }
 
     /// Calculate confidence for Random Forest predictions
-    fn calculate_forest_confidence(&self, _model: &RandomForest<f64, usize>, _features: &Array1<f64>) -> f32 {
+    fn calculate_forest_confidence(&self, _model: &DecisionTree<f64, usize>, _features: &Array1<f64>) -> f32 {
         // Simplified confidence calculation
         // In practice, this would use ensemble variance or similar
         0.75

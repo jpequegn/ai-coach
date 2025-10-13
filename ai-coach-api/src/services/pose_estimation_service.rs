@@ -15,7 +15,7 @@
 use anyhow::{Context, Result};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
 use ndarray::{s, Array, Array2, Array3, Array4};
-use ort::{GraphOptimizationLevel, Session};
+use ort::session::{builder::GraphOptimizationLevel, Session};
 use std::path::Path;
 
 /// COCO keypoint names (17 keypoints)

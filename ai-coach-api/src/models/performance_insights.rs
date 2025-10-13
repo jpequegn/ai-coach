@@ -2,6 +2,8 @@ use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::models::recommendation::RecommendationPriority;
+
 /// Comprehensive performance insights for an athlete
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PerformanceInsights {
@@ -21,7 +23,7 @@ pub struct PerformanceInsights {
     pub recovery_analysis: RecoveryAnalysis,
 
     // Goal Progress
-    pub goal_progress: Vec<GoalProgress>,
+    pub goal_progress: Vec<PerformanceGoalProgress>,
     pub predicted_race_times: Vec<RaceTimePrediction>,
     pub training_plan_adherence: TrainingPlanAdherence,
 
@@ -105,12 +107,12 @@ pub struct RecoveryAnalysis {
     pub hrv_trends: Option<HrvTrends>, // If HRV data available
 }
 
-/// Goal progress tracking
+/// Goal progress tracking (performance insights view)
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GoalProgress {
+pub struct PerformanceGoalProgress {
     pub goal_id: Uuid,
     pub goal_name: String,
-    pub goal_type: GoalType,
+    pub goal_type: InsightGoalType,
     pub target_value: f64,
     pub current_value: f64,
     pub progress_percentage: f64,
@@ -199,7 +201,7 @@ pub struct AgeGroupBenchmarks {
 pub struct HistoricalComparison {
     pub vs_last_year: PerformanceComparison,
     pub vs_best_year: PerformanceComparison,
-    pub long_term_trend: TrendDirection,
+    pub long_term_trend: PerformanceTrendDirection,
     pub career_highlights: Vec<CareerHighlight>,
 }
 
@@ -304,7 +306,7 @@ pub struct HrvTrends {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum GoalType {
+pub enum InsightGoalType {
     PowerGoal,
     WeightGoal,
     DistanceGoal,
@@ -322,13 +324,7 @@ pub enum InsightCategory {
     Goals,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum RecommendationPriority {
-    Critical,
-    High,
-    Medium,
-    Low,
-}
+// Note: Use crate::models::recommendation::RecommendationPriority instead
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WarningSeverity {
@@ -361,7 +357,7 @@ pub struct PerformanceComparison {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum TrendDirection {
+pub enum PerformanceTrendDirection {
     Improving,
     Declining,
     Stable,
