@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT COUNT(*)\n            FROM recovery_scores\n            WHERE user_id = $1\n              AND score_date >= $2\n              AND score_date < $3\n              AND readiness_score < 50\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "79534395d006e62e368b912b474e0fb4b1ff096dcbca246c1e6f0ac25125b9a5"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            status as \"status: DeliveryQueueStatus\",\n            COUNT(*) as count\n        FROM alert_delivery_queue\n        GROUP BY status\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status: DeliveryQueueStatus",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "834ebc6eca482c9ccde304bb1cdab10f269437e4a36d3b70f7d0997db71f5487"
+}

@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                rt.category::text as category,\n                COUNT(DISTINCT ro.id) as completions,\n                COUNT(DISTINCT ur.id) as total_suggestions,\n                AVG(ro.user_rating) as avg_rating,\n                AVG(ro.effectiveness_score) as avg_effectiveness\n            FROM recommendation_templates rt\n            LEFT JOIN user_recommendations ur ON ur.recommendation_template_id = rt.id\n            LEFT JOIN recommendation_outcomes ro ON ro.recommendation_template_id = rt.id\n            GROUP BY rt.category\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "category",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "completions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "total_suggestions",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "avg_rating",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "avg_effectiveness",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a16ed634fbaade85b99a135ecb391dcabae866dd13b59a647484b3f17c4e0c17"
+}

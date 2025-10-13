@@ -1,0 +1,128 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE recommendation_outcomes\n            SET\n                next_day_recovery_score_id = $2,\n                next_day_recovery_score = $3,\n                recovery_improvement = $4,\n                effectiveness_score = $5,\n                updated_at = NOW()\n            WHERE id = $1\n            RETURNING\n                id, user_recommendation_id, user_id, recommendation_template_id,\n                shown_at, completed_at, completion_time_hours,\n                baseline_recovery_score_id, baseline_recovery_score,\n                next_day_recovery_score_id, next_day_recovery_score,\n                recovery_improvement, user_rating, user_feedback,\n                effectiveness_score, metadata, created_at, updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_recommendation_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "recommendation_template_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "shown_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "completed_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "completion_time_hours",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "baseline_recovery_score_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "baseline_recovery_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 9,
+        "name": "next_day_recovery_score_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "next_day_recovery_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 11,
+        "name": "recovery_improvement",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "user_rating",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "user_feedback",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "effectiveness_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 15,
+        "name": "metadata",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 16,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Float8",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "6e189b06324e62509477f9f794ca381c4f7a467fe378fbf3b4cee9bf4bbc1222"
+}

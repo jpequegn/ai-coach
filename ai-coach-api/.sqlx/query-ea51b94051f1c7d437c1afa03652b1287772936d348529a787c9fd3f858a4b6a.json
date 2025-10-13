@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id, user_id, measurement_date, measurement_timestamp,\n                resting_hr, source,\n                metadata as \"metadata: sqlx::types::Json<serde_json::Value>\",\n                created_at\n            FROM resting_hr_data\n            WHERE user_id = $1 AND measurement_date >= $2 AND measurement_date <= $3\n            ORDER BY measurement_date DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "measurement_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "measurement_timestamp",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "resting_hr",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "source",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "metadata: sqlx::types::Json<serde_json::Value>",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "ea51b94051f1c7d437c1afa03652b1287772936d348529a787c9fd3f858a4b6a"
+}

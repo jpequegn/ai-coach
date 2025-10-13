@@ -44,11 +44,7 @@ CREATE TABLE power_curve (
     date DATE NOT NULL,
     duration_seconds INTEGER NOT NULL,
     max_power DECIMAL(8,2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-    -- Index for efficient queries
-    INDEX idx_power_curve_user_duration (user_id, duration_seconds),
-    INDEX idx_power_curve_date (date)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Critical power model table

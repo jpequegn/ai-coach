@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            metric_date as \"metric_date!\",\n            AVG(completeness_score) as \"avg_completeness!\",\n            COUNT(CASE WHEN completeness_score >= 80.0 THEN 1 END) as \"good_quality!\",\n            COUNT(CASE WHEN completeness_score < 50.0 THEN 1 END) as \"poor_quality!\"\n        FROM data_quality_metrics\n        WHERE metric_date >= $1\n        GROUP BY metric_date\n        ORDER BY metric_date ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "metric_date!",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 1,
+        "name": "avg_completeness!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 2,
+        "name": "good_quality!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "poor_quality!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "433b698ec9b574d1ccd5a1ae041ee38903e703f6dab9da45be10ac2e0cfa5416"
+}
