@@ -390,9 +390,9 @@ impl TrainingAnalysisService {
         let sessions = sqlx::query_as!(
             TrainingSession,
             r#"
-            SELECT id, user_id, date, trainrs_data, uploaded_file_path,
+            SELECT id as "id!", user_id as "user_id!", date as "date!", trainrs_data, uploaded_file_path,
                    session_type, duration_seconds, distance_meters,
-                   created_at, updated_at
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM training_sessions
             WHERE user_id = $1 AND date >= $2 AND date <= $3
             ORDER BY date ASC
