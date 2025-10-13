@@ -4,6 +4,7 @@ use std::process::Command;
 use tracing::{error, info, warn};
 
 /// Service for video processing operations using FFmpeg
+#[derive(Clone)]
 pub struct VideoProcessingService {
     ffmpeg_path: String,
     ffprobe_path: String,

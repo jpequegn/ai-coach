@@ -35,7 +35,7 @@ pub struct UpdateTrainingPlan {
     pub status: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PlanStatus {
     #[serde(rename = "draft")]
     Draft,

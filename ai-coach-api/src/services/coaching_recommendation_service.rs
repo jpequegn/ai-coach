@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{CoachingRecommendation, CreateCoachingRecommendation, UpdateCoachingRecommendation};
 
+#[derive(Clone)]
 pub struct CoachingRecommendationService {
     db: PgPool,
 }

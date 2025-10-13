@@ -13,13 +13,25 @@ use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// Get user recovery profile
 pub async fn get_recovery_profile(
     State(service): State<Arc<UserRecoveryProfileService>>,
     Extension(claims): Extension<Claims>,
 ) -> impl IntoResponse {
-    match service.get_profile(claims.sub).await {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
+    match service.get_profile(user_id).await {
         Ok(profile) => {
             let response: ProfileResponse = profile.into();
             (StatusCode::OK, Json(response)).into_response()
@@ -38,7 +50,18 @@ pub async fn update_recovery_profile(
     Extension(claims): Extension<Claims>,
     Json(updates): Json<UpdateProfileRequest>,
 ) -> impl IntoResponse {
-    match service.update_profile(claims.sub, updates).await {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
+    match service.update_profile(user_id, updates).await {
         Ok(profile) => {
             let response: ProfileResponse = profile.into();
             (StatusCode::OK, Json(response)).into_response()
@@ -63,7 +86,18 @@ pub async fn get_effective_techniques(
     Extension(claims): Extension<Claims>,
     Query(params): Query<EffectiveTechniquesQuery>,
 ) -> impl IntoResponse {
-    match service.get_effective_techniques(claims.sub, params.limit).await {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
+    match service.get_effective_techniques(user_id, params.limit).await {
         Ok(techniques) => {
             let response = EffectiveTechniquesResponse {
                 total: techniques.len(),
@@ -84,7 +118,18 @@ pub async fn get_profile_insights(
     State(service): State<Arc<UserRecoveryProfileService>>,
     Extension(claims): Extension<Claims>,
 ) -> impl IntoResponse {
-    match service.get_insights(claims.sub).await {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
+    match service.get_insights(user_id).await {
         Ok(insights) => (StatusCode::OK, Json(insights)).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,

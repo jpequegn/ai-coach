@@ -15,6 +15,7 @@ use axum::{
 use serde_json::json;
 use sqlx::PgPool;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// Get current personalized recommendations
 pub async fn get_current_recommendations(
@@ -22,8 +23,19 @@ pub async fn get_current_recommendations(
     Extension(claims): Extension<Claims>,
     Query(params): Query<CurrentRecommendationsQuery>,
 ) -> impl IntoResponse {
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+            .into_response()
+        }
+    };
+
     // Get latest recovery score for the user
-    let recovery_score = match get_latest_recovery_score(&engine.db, claims.sub).await {
+    let recovery_score = match get_latest_recovery_score(&engine.db, user_id).await {
         Ok(Some(score)) => score,
         Ok(None) => {
             return (
@@ -47,7 +59,7 @@ pub async fn get_current_recommendations(
     // Generate recommendations
     match engine
         .generate_recommendations(
-            claims.sub,
+            user_id,
             &recovery_score,
             context,
             params.limit,

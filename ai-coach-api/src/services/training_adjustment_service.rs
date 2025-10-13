@@ -5,6 +5,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 /// Training adjustment service for recovery-based workout modifications
+#[derive(Clone)]
 pub struct TrainingAdjustmentService {
     db: PgPool,
 }

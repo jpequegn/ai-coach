@@ -12,7 +12,7 @@ use crate::services::{Job, RecoveryAlertService, RecoveryAnalysisService};
 
 const BATCH_SIZE: usize = 100;
 const BATCH_DELAY_MS: u64 = 100;
-const REDIS_CACHE_TTL_SECONDS: usize = 3600; // 1 hour
+const REDIS_CACHE_TTL_SECONDS: u64 = 3600; // 1 hour
 const HIGH_FAILURE_RATE_THRESHOLD: f64 = 0.05; // 5%
 
 /// User information for batch processing

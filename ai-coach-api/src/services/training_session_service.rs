@@ -155,7 +155,10 @@ impl TrainingSessionService {
             user_id
         )
         .fetch_all(&self.db)
-        .await?;
+        .await?
+        .into_iter()
+        .filter_map(|s| s)
+        .collect();
 
         Ok(SessionSummary {
             total_sessions: summary_row.total_sessions.unwrap_or(0),

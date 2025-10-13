@@ -275,7 +275,12 @@ pub async fn get_training_recommendation(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Query(query): Query<RecommendationQuery>,
 ) -> Result<Json<TrainingRecommendationResponse>, (StatusCode, Json<ApiError>)> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID format")),
+        )
+    })?;
 
     // Build recommendation request
     let user_feedback = if query.perceived_difficulty.is_some()
@@ -351,7 +356,12 @@ pub async fn get_user_features(
     State(state): State<MLAppState>,
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
 ) -> Result<Json<TrainingFeatures>, (StatusCode, Json<ApiError>)> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID format")),
+        )
+    })?;
 
     let features = state
         .feature_service
@@ -373,7 +383,12 @@ pub async fn train_user_models(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Query(query): Query<ModelTrainingQuery>,
 ) -> Result<Json<ModelTrainingResponse>, (StatusCode, Json<ApiError>)> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID format")),
+        )
+    })?;
 
     // Build training configuration
     let config = crate::services::model_training_service::TrainingConfig {
@@ -695,7 +710,12 @@ pub async fn get_data_quality_assessment(
     WithRejection(claims, _): WithRejection<Claims, StatusCode>,
     Query(query): Query<ModelTrainingQuery>,
 ) -> Result<Json<DataQualityInfo>, (StatusCode, Json<ApiError>)> {
-    let user_id = claims.sub;
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ApiError::new("INVALID_USER_ID", "Invalid user ID format")),
+        )
+    })?;
 
     let quality_report = state
         .training_service

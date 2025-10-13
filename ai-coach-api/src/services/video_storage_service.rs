@@ -9,6 +9,7 @@ use tracing::{error, info};
 use uuid::Uuid;
 
 /// Service for managing video storage in S3-compatible object storage
+#[derive(Clone)]
 pub struct VideoStorageService {
     client: S3Client,
     bucket_name: String,

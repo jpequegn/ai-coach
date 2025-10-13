@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::models::{DataSource, HrvReading, RestingHrData, SleepData, WearableConnection};
 use crate::services::oura_api_client::{OuraApiClient, OuraTokenResponse};
 
+#[derive(Clone)]
 pub struct OuraIntegrationService {
     db: PgPool,
     api_client: OuraApiClient,

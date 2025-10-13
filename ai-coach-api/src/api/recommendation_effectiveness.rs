@@ -59,7 +59,7 @@ pub async fn process_daily_outcomes(
     Extension(claims): Extension<Claims>,
 ) -> impl IntoResponse {
     // Admin role check
-    if claims.role != "admin" {
+    if !matches!(claims.role, crate::auth::UserRole::Admin) {
         return (
             StatusCode::FORBIDDEN,
             Json(json!({"error": "Admin access required"})),

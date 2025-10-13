@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use tracing::{info, warn};
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct UserRecoveryProfileService {
     db: PgPool,
 }

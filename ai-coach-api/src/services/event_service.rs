@@ -320,8 +320,8 @@ impl EventService {
         let recommendations = self.generate_event_recommendations(&events, &event_plans).await?;
 
         Ok(EventCalendar {
-            events,
-            event_plans,
+            events: events.to_vec(),
+            event_plans: event_plans.to_vec(),
             conflicts,
             recommendations,
         })

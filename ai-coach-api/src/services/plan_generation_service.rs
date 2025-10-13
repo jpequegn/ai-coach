@@ -389,11 +389,20 @@ impl PlanGenerationService {
                 preferred_workout_duration: prefs.preferred_workout_duration,
                 max_workout_duration: prefs.max_workout_duration,
                 intensity_preference: IntensityPreference::ModerateIntensityModerateVolume,
-                preferred_training_times: serde_json::from_value(prefs.preferred_training_times)?,
-                equipment_available: serde_json::from_value(prefs.equipment_available)?,
+                preferred_training_times: prefs.preferred_training_times
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(|| vec!["morning".to_string()]),
+                equipment_available: prefs.equipment_available
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(|| vec![Equipment::Road, Equipment::HeartRateMonitor]),
                 training_location: crate::models::TrainingLocation::Mixed,
                 experience_level: ExperienceLevel::Intermediate,
-                injury_history: serde_json::from_value(prefs.injury_history)?,
+                injury_history: prefs.injury_history
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
                 recovery_needs: crate::models::RecoveryLevel::Normal,
             })
         } else {
@@ -430,15 +439,30 @@ impl PlanGenerationService {
 
         if let Some(cons) = constraints {
             Ok(TrainingConstraints {
-                max_weekly_hours: cons.max_weekly_hours,
-                min_weekly_hours: cons.min_weekly_hours,
+                max_weekly_hours: cons.max_weekly_hours.unwrap_or(10.0),
+                min_weekly_hours: cons.min_weekly_hours.unwrap_or(3.0),
                 max_consecutive_hard_days: cons.max_consecutive_hard_days,
                 required_rest_days: cons.required_rest_days,
-                travel_dates: serde_json::from_value(cons.travel_dates)?,
-                blackout_dates: serde_json::from_value(cons.blackout_dates)?,
-                priority_dates: serde_json::from_value(cons.priority_dates)?,
-                equipment_limitations: serde_json::from_value(cons.equipment_limitations)?,
-                health_considerations: serde_json::from_value(cons.health_considerations)?,
+                travel_dates: cons.travel_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                blackout_dates: cons.blackout_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                priority_dates: cons.priority_dates
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                equipment_limitations: cons.equipment_limitations
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
+                health_considerations: cons.health_considerations
+                    .map(|v| serde_json::from_value(v))
+                    .transpose()?
+                    .unwrap_or_else(Vec::new),
             })
         } else {
             // Return default constraints

@@ -494,7 +494,7 @@ impl TrainingAnalysisService {
             let cache_data = serde_json::to_string(pmc_data)?;
 
             // Cache for 1 hour
-            let _: () = conn.setex(&cache_key, 3600, cache_data).await?;
+            let _: () = conn.set_ex(&cache_key, cache_data, 3600).await?;
             info!("Cached PMC data for user: {}", user_id);
         }
 

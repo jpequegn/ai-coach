@@ -270,7 +270,7 @@ pub async fn update_recovery_settings(
         Some(s) => Ok(Json(s.into())),
         None => {
             // Settings don't exist, create them
-            get_recovery_settings(State(state), WithRejection(claims, StatusCode::OK)).await
+            get_recovery_settings(State(state), WithRejection(claims, _)).await
         }
     }
 }

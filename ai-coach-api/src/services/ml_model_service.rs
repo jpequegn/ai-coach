@@ -97,8 +97,8 @@ impl MLModelService {
         let scaler = FeatureScaler::fit(&train_features.to_owned());
         let scaled_train_features = scaler.transform(&train_features.to_owned());
 
-        // Create dataset
-        let train_dataset = Dataset::new(scaled_train_features, train_targets.to_owned());
+        // Create dataset with proper builder pattern
+        let train_dataset = linfa::Dataset::from((scaled_train_features, train_targets.to_owned()));
 
         // Train linear regression
         let linear_model = LinearRegression::default().fit(&train_dataset)?;
@@ -148,8 +148,8 @@ impl MLModelService {
         // Convert targets to discrete labels for Random Forest
         let train_labels: Array1<usize> = train_targets.mapv(|x| self.discretize_tss(x));
 
-        // Create dataset
-        let train_dataset = Dataset::new(scaled_train_features, train_labels);
+        // Create dataset with proper builder pattern
+        let train_dataset = linfa::Dataset::from((scaled_train_features, train_labels));
 
         // Train Decision Tree (note: linfa-trees 0.7 doesn't have RandomForest)
         // Using DecisionTree as a placeholder for now

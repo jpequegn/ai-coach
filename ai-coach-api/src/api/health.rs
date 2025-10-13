@@ -221,7 +221,7 @@ fn determine_overall_status(components: &[&ComponentHealth]) -> HealthStatus {
 /// - Overall system health
 pub async fn health_check_detailed(
     State(state): State<Arc<HealthState>>,
-) -> Result<Json<Value>, StatusCode> {
+) -> Result<(StatusCode, Json<Value>), StatusCode> {
     // Check all components
     let db_health = check_database_health(&state.db).await;
     let redis_health = check_redis_health().await;

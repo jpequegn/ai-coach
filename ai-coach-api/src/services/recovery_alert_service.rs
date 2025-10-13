@@ -11,6 +11,7 @@ use crate::services::NotificationService;
 
 const ALERT_COOLDOWN_HOURS: i64 = 24;
 
+#[derive(Clone)]
 pub struct RecoveryAlertService {
     db: PgPool,
     notification_service: NotificationService,
@@ -421,7 +422,7 @@ impl RecoveryAlertService {
         {
             self.notification_service
                 .send_email_notification(
-                    alert.user_id,
+                    alert.user_id.to_string(),
                     "Recovery Alert".to_string(),
                     alert.message.clone(),
                 )

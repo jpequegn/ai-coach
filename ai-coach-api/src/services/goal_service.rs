@@ -275,7 +275,7 @@ impl GoalService {
             progress_percentage,
             trend_direction,
             projected_completion_date,
-            recent_entries,
+            recent_entries: recent_entries.to_vec(),
             milestones_achieved,
             success_probability,
         })

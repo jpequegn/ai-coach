@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::auth::password::hash_password;
 use crate::models::{CreateUser, UpdateUser, User, UserResponse, DietaryPreferences, SleepSchedule};
 
+#[derive(Clone)]
 pub struct UserService {
     db: PgPool,
 }
