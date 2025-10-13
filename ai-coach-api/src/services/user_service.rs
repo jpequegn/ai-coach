@@ -29,7 +29,7 @@ impl UserService {
             r#"
             INSERT INTO users (email, password_hash, timezone, active, created_at, updated_at)
             VALUES ($1, $2, 'UTC', true, $3, $3)
-            RETURNING id, email, password_hash, timezone, active, created_at, updated_at
+            RETURNING id as "id!", email as "email!", password_hash as "password_hash!", timezone as "timezone!", active as "active!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_data.email,
             password_hash,
@@ -83,7 +83,7 @@ impl UserService {
     pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserResponse>> {
         let user = sqlx::query_as!(
             User,
-            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE id = $1",
+            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE id = $1",
             user_id
         )
         .fetch_optional(&self.db)
@@ -102,7 +102,7 @@ impl UserService {
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<UserResponse>> {
         let user = sqlx::query_as!(
             User,
-            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE email = $1",
+            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE email = $1",
             email
         )
         .fetch_optional(&self.db)
@@ -128,7 +128,7 @@ impl UserService {
             SET email = COALESCE($2, email),
                 updated_at = $3
             WHERE id = $1
-            RETURNING id, email, password_hash, created_at, updated_at
+            RETURNING id as "id!", email as "email!", password_hash as "password_hash!", timezone as "timezone!", active as "active!", created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             user_data.email,
@@ -162,7 +162,7 @@ impl UserService {
 
         let users = sqlx::query_as!(
             User,
-            "SELECT id, email, password_hash, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2",
             limit,
             offset
         )
