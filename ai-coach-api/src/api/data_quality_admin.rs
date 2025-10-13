@@ -162,10 +162,17 @@ pub async fn get_quality_summary(
         DataQualityMetrics,
         r#"
         SELECT DISTINCT ON (user_id)
-            id, user_id, metric_date,
-            completeness_score, consistency_score, reliability_score,
-            last_data_timestamp, days_without_data,
-            data_sources, created_at, updated_at
+            id as "id!",
+            user_id as "user_id!",
+            metric_date as "metric_date!",
+            completeness_score as "completeness_score!",
+            consistency_score,
+            reliability_score,
+            last_data_timestamp,
+            days_without_data as "days_without_data!",
+            data_sources,
+            created_at as "created_at!",
+            updated_at as "updated_at!"
         FROM data_quality_metrics
         ORDER BY user_id, metric_date DESC
         "#
@@ -227,10 +234,10 @@ pub async fn get_poor_quality_users(
         UserQualityReport,
         r#"
         SELECT DISTINCT ON (m.user_id)
-            m.user_id,
-            u.email,
-            m.completeness_score,
-            m.days_without_data,
+            m.user_id as "user_id!",
+            u.email as "email!",
+            m.completeness_score as "completeness_score!",
+            m.days_without_data as "days_without_data!",
             m.last_data_timestamp,
             m.data_sources
         FROM data_quality_metrics m
@@ -274,9 +281,9 @@ pub async fn get_missing_data_users(
         UserMissingDataReport,
         r#"
         SELECT DISTINCT ON (m.user_id)
-            m.user_id,
-            u.email,
-            m.days_without_data,
+            m.user_id as "user_id!",
+            u.email as "email!",
+            m.days_without_data as "days_without_data!",
             m.last_data_timestamp,
             m.data_sources
         FROM data_quality_metrics m
@@ -347,10 +354,17 @@ pub async fn get_user_quality_history(
         DataQualityMetrics,
         r#"
         SELECT
-            id, user_id, metric_date,
-            completeness_score, consistency_score, reliability_score,
-            last_data_timestamp, days_without_data,
-            data_sources, created_at, updated_at
+            id as "id!",
+            user_id as "user_id!",
+            metric_date as "metric_date!",
+            completeness_score as "completeness_score!",
+            consistency_score,
+            reliability_score,
+            last_data_timestamp,
+            days_without_data as "days_without_data!",
+            data_sources,
+            created_at as "created_at!",
+            updated_at as "updated_at!"
         FROM data_quality_metrics
         WHERE user_id = $1 AND metric_date >= $2
         ORDER BY metric_date DESC
