@@ -88,10 +88,10 @@ pub async fn get_recovery_settings(
         TrainingRecoverySettings,
         r#"
         SELECT
-            id, user_id, auto_adjust_enabled, adjustment_aggressiveness,
-            min_rest_days_per_week, max_consecutive_training_days,
-            allow_intensity_reduction, allow_volume_reduction, allow_workout_swap,
-            created_at, updated_at
+            id as "id!", user_id as "user_id!", auto_adjust_enabled as "auto_adjust_enabled!", adjustment_aggressiveness as "adjustment_aggressiveness!",
+            min_rest_days_per_week as "min_rest_days_per_week!", max_consecutive_training_days as "max_consecutive_training_days!",
+            allow_intensity_reduction as "allow_intensity_reduction!", allow_volume_reduction as "allow_volume_reduction!", allow_workout_swap as "allow_workout_swap!",
+            created_at as "created_at!", updated_at as "updated_at!"
         FROM training_recovery_settings
         WHERE user_id = $1
         "#,
@@ -120,10 +120,10 @@ pub async fn get_recovery_settings(
                 INSERT INTO training_recovery_settings (user_id)
                 VALUES ($1)
                 RETURNING
-                    id, user_id, auto_adjust_enabled, adjustment_aggressiveness,
-                    min_rest_days_per_week, max_consecutive_training_days,
-                    allow_intensity_reduction, allow_volume_reduction, allow_workout_swap,
-                    created_at, updated_at
+                    id as "id!", user_id as "user_id!", auto_adjust_enabled as "auto_adjust_enabled!", adjustment_aggressiveness as "adjustment_aggressiveness!",
+                    min_rest_days_per_week as "min_rest_days_per_week!", max_consecutive_training_days as "max_consecutive_training_days!",
+                    allow_intensity_reduction as "allow_intensity_reduction!", allow_volume_reduction as "allow_volume_reduction!", allow_workout_swap as "allow_workout_swap!",
+                    created_at as "created_at!", updated_at as "updated_at!"
                 "#,
                 user_id
             )
