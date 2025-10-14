@@ -383,8 +383,8 @@ pub async fn get_user_quality_history(
 
     // Calculate trend
     let trend = if metrics.len() >= 2 {
-        let recent_avg = metrics.iter().take(7).map(|m| m.completeness_score).sum::<f64>() / 7.0.min(metrics.len() as f64);
-        let older_avg = metrics.iter().skip(7).take(7).map(|m| m.completeness_score).sum::<f64>() / 7.0.min(metrics.len().saturating_sub(7) as f64);
+        let recent_avg = metrics.iter().take(7).map(|m| m.completeness_score).sum::<f64>() / 7.0_f64.min(metrics.len() as f64);
+        let older_avg = metrics.iter().skip(7).take(7).map(|m| m.completeness_score).sum::<f64>() / 7.0_f64.min(metrics.len().saturating_sub(7) as f64);
 
         if recent_avg > older_avg + 5.0 {
             QualityTrend::Improving

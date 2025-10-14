@@ -444,8 +444,8 @@ impl TrainingAnalysisService {
         }
 
         // Calculate PMC for each day
-        let start_date = sessions.first().map(|s| s.date).unwrap_or_else(chrono::Utc::now().date_naive);
-        let end_date = sessions.last().map(|s| s.date).unwrap_or_else(chrono::Utc::now().date_naive);
+        let start_date = sessions.first().map(|s| s.date).unwrap_or_else(|| chrono::Utc::now().date_naive());
+        let end_date = sessions.last().map(|s| s.date).unwrap_or_else(|| chrono::Utc::now().date_naive());
 
         let mut current_date = start_date;
         while current_date <= end_date {
