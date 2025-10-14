@@ -638,7 +638,7 @@ impl PlanGenerationService {
             ratio if ratio <= 0.3 => 0.6, // Base phase - lower intensity
             ratio if ratio <= 0.6 => 0.6 + ((ratio - 0.3) / 0.3) * 0.25, // Build phase
             ratio if ratio <= 0.85 => 0.85, // Peak phase - highest intensity
-            _ => 0.85 - ((ratio - 0.85) / 0.15) * 0.25, // Taper
+            _ => 0.85 - ((phase_ratio - 0.85) / 0.15) * 0.25, // Taper
         }
     }
 

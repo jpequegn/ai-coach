@@ -6,7 +6,7 @@ use tracing::{info, warn};
 use uuid::Uuid;
 
 use crate::models::{
-    calculate_effectiveness_score, determine_effectiveness_trend, update_effectiveness_with_ema,
+    calculate_profile_effectiveness_score, determine_effectiveness_trend, update_effectiveness_with_ema,
     CategoryAnalytics, EffectivenessAnalytics, EffectivenessFilter, ProcessOutcomesResult,
     RecommendationOutcome, SystemAnalytics, TemplatePerformance, UserRecommendation,
     UserRecommendationStatus,
@@ -118,7 +118,7 @@ impl RecommendationEffectivenessService {
 
         // Calculate improvement and effectiveness
         let recovery_improvement = next_day_recovery_score - outcome.baseline_recovery_score;
-        let effectiveness_score = calculate_effectiveness_score(
+        let effectiveness_score = calculate_profile_effectiveness_score(
             outcome.baseline_recovery_score,
             next_day_recovery_score,
             outcome.user_rating,
