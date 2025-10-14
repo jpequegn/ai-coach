@@ -248,6 +248,7 @@ impl Default for StorageConfig {
 }
 
 /// Performance optimization recommendations based on video characteristics
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct OptimizationRecommendation {
     pub recommended_fps: u32,
     pub recommended_resolution: u32,
