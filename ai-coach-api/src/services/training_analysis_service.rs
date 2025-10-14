@@ -151,6 +151,24 @@ impl TrainingAnalysisService {
         Ok(pmc_data)
     }
 
+    /// Get PMC for a specific date
+    pub async fn get_pmc_for_date(
+        &self,
+        user_id: Uuid,
+        date: chrono::NaiveDate,
+    ) -> Result<PerformanceManagementChart> {
+        // Calculate days from start of training to the requested date
+        // For simplicity, use 90 days of history to get accurate CTL/ATL
+        let days = 90;
+        let pmc_data = self.calculate_pmc(user_id, days).await?;
+
+        // Find the PMC entry for the specific date
+        pmc_data
+            .into_iter()
+            .find(|pmc| pmc.date == date)
+            .ok_or_else(|| anyhow!("No PMC data found for date: {}", date))
+    }
+
     /// Save uploaded file to permanent storage
     pub async fn save_training_file(
         &self,

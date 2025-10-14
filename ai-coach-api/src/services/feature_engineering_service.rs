@@ -61,9 +61,9 @@ impl FeatureEngineeringService {
         let days_until_goal_event = self.get_days_until_goal_event(user_id).await?;
 
         Ok(TrainingFeatures {
-            current_ctl: pmc.ctl,
-            current_atl: pmc.atl,
-            current_tsb: pmc.tsb,
+            current_ctl: pmc.ctl as f32,
+            current_atl: pmc.atl as f32,
+            current_tsb: pmc.tsb as f32,
             days_since_last_workout,
             avg_weekly_tss_4weeks,
             recent_performance_trend,
@@ -130,9 +130,9 @@ impl FeatureEngineeringService {
         let days_until_goal_event = self.get_days_until_goal_event(user_id).await?;
 
         Ok(TrainingFeatures {
-            current_ctl: pmc.ctl,
-            current_atl: pmc.atl,
-            current_tsb: pmc.tsb,
+            current_ctl: pmc.ctl as f32,
+            current_atl: pmc.atl as f32,
+            current_tsb: pmc.tsb as f32,
             days_since_last_workout,
             avg_weekly_tss_4weeks,
             recent_performance_trend,
