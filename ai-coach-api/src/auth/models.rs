@@ -1,3 +1,8 @@
+use axum::{
+    async_trait,
+    extract::FromRequestParts,
+    http::{request::Parts, StatusCode},
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -40,7 +45,7 @@ impl UserRole {
 }
 
 /// JWT token claims
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,      // Subject (user ID)
     pub email: String,    // User email
@@ -183,5 +188,32 @@ impl Default for RateLimitConfig {
             max_requests: 5,      // 5 requests
             window_seconds: 300,  // per 5 minutes
         }
+    }
+}
+
+/// Implement FromRequestParts for Claims to make it usable as an Axum extractor
+#[async_trait]
+impl<S> FromRequestParts<S> for Claims
+where
+    S: Send + Sync,
+{
+    type Rejection = StatusCode;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        // Extract UserSession from request extensions (inserted by jwt_auth_middleware)
+        let session = parts
+            .extensions
+            .get::<UserSession>()
+            .ok_or(StatusCode::UNAUTHORIZED)?;
+
+        // Convert UserSession to Claims
+        Ok(Claims {
+            sub: session.user_id.to_string(),
+            email: session.email.clone(),
+            role: session.role.clone(),
+            exp: 0, // Not available from session, set to 0
+            iat: 0, // Not available from session, set to 0
+            jti: session.jti.clone(),
+        })
     }
 }

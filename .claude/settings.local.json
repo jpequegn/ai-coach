@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(then echo \"$file\")"
+      "Bash(/tmp/check_services.sh:*)",
+      "Bash(timeout 60 cargo check --message-format=short)"
     ],
     "deny": [],
     "ask": []
