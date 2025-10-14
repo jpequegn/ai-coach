@@ -356,7 +356,7 @@ impl RecoveryJobScheduler {
             total_executions: stats.total_executions,
             success_count: stats.success_count,
             failed_count: stats.failed_count,
-            average_execution_time_ms: stats.avg_execution_time.flatten(),
+            average_execution_time_ms: stats.avg_execution_time.and_then(|x| x.map(|v| v as f64)),
             last_success_at: stats.last_success_at,
             last_failure_at: stats.last_failure_at,
         })
