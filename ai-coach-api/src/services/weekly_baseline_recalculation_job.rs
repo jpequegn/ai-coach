@@ -214,7 +214,7 @@ impl WeeklyBaselineRecalculationJob {
                 id, user_id,
                 hrv_baseline_rmssd, rhr_baseline, typical_sleep_hours,
                 calculated_at, data_points_count,
-                created_at, updated_at
+                created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_baselines
             WHERE user_id = $1
             ORDER BY calculated_at DESC

@@ -277,10 +277,10 @@ impl RecoveryAnalysisService {
             HrvReading,
             r#"
             SELECT
-                id, user_id, measurement_date, measurement_timestamp,
+                id, user_id, measurement_date, measurement_timestamp as "measurement_timestamp!",
                 rmssd, sdnn, pnn50, source,
                 metadata as "metadata: sqlx::types::Json<serde_json::Value>",
-                created_at
+                created_at as "created_at!"
             FROM hrv_readings
             WHERE user_id = $1 AND measurement_date >= $2 AND measurement_date <= $3
             ORDER BY measurement_date DESC
@@ -311,7 +311,7 @@ impl RecoveryAnalysisService {
                 rem_sleep_hours, light_sleep_hours, awake_hours,
                 sleep_efficiency, sleep_latency_minutes, bedtime, wake_time, source,
                 metadata as "metadata: sqlx::types::Json<serde_json::Value>",
-                created_at
+                created_at as "created_at!"
             FROM sleep_data
             WHERE user_id = $1 AND sleep_date >= $2 AND sleep_date <= $3
             ORDER BY sleep_date DESC
@@ -338,10 +338,10 @@ impl RecoveryAnalysisService {
             RestingHrData,
             r#"
             SELECT
-                id, user_id, measurement_date, measurement_timestamp,
+                id, user_id, measurement_date, measurement_timestamp as "measurement_timestamp!",
                 resting_hr, source,
                 metadata as "metadata: sqlx::types::Json<serde_json::Value>",
-                created_at
+                created_at as "created_at!"
             FROM resting_hr_data
             WHERE user_id = $1 AND measurement_date >= $2 AND measurement_date <= $3
             ORDER BY measurement_date DESC
@@ -362,7 +362,7 @@ impl RecoveryAnalysisService {
             r#"
             SELECT id, user_id, hrv_baseline_rmssd, rhr_baseline,
                    typical_sleep_hours, calculated_at, data_points_count,
-                   created_at, updated_at
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_baselines
             WHERE user_id = $1
             "#,
@@ -573,8 +573,8 @@ impl RecoveryAnalysisService {
             RETURNING
                 id, user_id, score_date, readiness_score, hrv_trend, hrv_deviation,
                 sleep_quality_score, recovery_adequacy, rhr_deviation, training_strain,
-                recovery_status, recommended_tss_adjustment, calculated_at, model_version,
-                created_at, updated_at
+                recovery_status, recommended_tss_adjustment, calculated_at as "calculated_at!", model_version,
+                created_at as "created_at!", updated_at as "updated_at!"
             "#,
             user_id,
             score_date,
@@ -602,8 +602,8 @@ impl RecoveryAnalysisService {
             r#"
             SELECT id, user_id, score_date, readiness_score, hrv_trend, hrv_deviation,
                    sleep_quality_score, recovery_adequacy, rhr_deviation, training_strain,
-                   recovery_status, recommended_tss_adjustment, calculated_at, model_version,
-                   created_at, updated_at
+                   recovery_status, recommended_tss_adjustment, calculated_at as "calculated_at!", model_version,
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_scores
             WHERE user_id = $1 AND score_date = $2
             "#,
@@ -627,8 +627,8 @@ impl RecoveryAnalysisService {
             r#"
             SELECT id, user_id, score_date, readiness_score, hrv_trend, hrv_deviation,
                    sleep_quality_score, recovery_adequacy, rhr_deviation, training_strain,
-                   recovery_status, recommended_tss_adjustment, calculated_at, model_version,
-                   created_at, updated_at
+                   recovery_status, recommended_tss_adjustment, calculated_at as "calculated_at!", model_version,
+                   created_at as "created_at!", updated_at as "updated_at!"
             FROM recovery_scores
             WHERE user_id = $1 AND score_date >= $2 AND score_date <= $3
             ORDER BY score_date DESC

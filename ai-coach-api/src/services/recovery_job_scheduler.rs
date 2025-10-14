@@ -270,7 +270,7 @@ impl RecoveryJobScheduler {
             SELECT
                 id,
                 job_name,
-                started_at,
+                started_at as "started_at!",
                 completed_at,
                 status as "status: JobExecutionStatus",
                 records_processed,
@@ -278,8 +278,8 @@ impl RecoveryJobScheduler {
                 error_message,
                 execution_time_ms,
                 metadata,
-                created_at,
-                updated_at
+                created_at as "created_at!",
+                updated_at as "updated_at!"
             FROM job_execution_log
             WHERE job_name = $1
             ORDER BY started_at DESC
@@ -304,7 +304,7 @@ impl RecoveryJobScheduler {
             SELECT
                 id,
                 job_name,
-                started_at,
+                started_at as "started_at!",
                 completed_at,
                 status as "status: JobExecutionStatus",
                 records_processed,
@@ -312,8 +312,8 @@ impl RecoveryJobScheduler {
                 error_message,
                 execution_time_ms,
                 metadata,
-                created_at,
-                updated_at
+                created_at as "created_at!",
+                updated_at as "updated_at!"
             FROM job_execution_log
             WHERE job_name = $1
             ORDER BY started_at DESC
