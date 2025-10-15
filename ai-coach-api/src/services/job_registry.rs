@@ -109,9 +109,11 @@ impl JobRegistry {
                         job_future.await?;
                         // Return empty stats for now
                         Ok(crate::models::JobExecutionStats {
-                            duration_ms: 0,
-                            success: true,
+                            records_processed: 0,
+                            records_failed: 0,
+                            execution_time_ms: 0,
                             error_message: None,
+                            metadata: None,
                         })
                     })
                 })
