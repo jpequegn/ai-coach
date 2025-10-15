@@ -25,7 +25,7 @@ impl UserService {
         // Start a transaction to ensure user and profile are created together
         let mut tx = self.db.begin().await?;
 
-        let user = sqlx::query_as!(
+        let user = sqlx::query_as(
             User,
             r#"
             INSERT INTO users (email, password_hash, timezone, active, created_at, updated_at)
@@ -40,7 +40,7 @@ impl UserService {
         .await?;
 
         // Create default recovery profile for the new user
-        sqlx::query!(
+        sqlx::query(
             r#"
             INSERT INTO user_recovery_profiles (
                 user_id,
@@ -82,7 +82,7 @@ impl UserService {
     }
 
     pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserResponse>> {
-        let user = sqlx::query_as!(
+        let user = sqlx::query_as(
             User,
             "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE id = $1",
             user_id
@@ -101,7 +101,7 @@ impl UserService {
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<UserResponse>> {
-        let user = sqlx::query_as!(
+        let user = sqlx::query_as(
             User,
             "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE email = $1",
             email
@@ -122,7 +122,7 @@ impl UserService {
     pub async fn update_user(&self, user_id: Uuid, user_data: UpdateUser) -> Result<Option<UserResponse>> {
         let now = Utc::now();
 
-        let user = sqlx::query_as!(
+        let user = sqlx::query_as(
             User,
             r#"
             UPDATE users
@@ -149,7 +149,7 @@ impl UserService {
     }
 
     pub async fn delete_user(&self, user_id: Uuid) -> Result<bool> {
-        let result = sqlx::query!(
+        let result = sqlx::query(
             "DELETE FROM users WHERE id = $1",
             user_id
         )
@@ -163,7 +163,7 @@ impl UserService {
         let limit = limit.unwrap_or(50);
         let offset = offset.unwrap_or(0);
 
-        let users = sqlx::query_as!(
+        let users = sqlx::query_as(
             User,
             "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2",
             limit,

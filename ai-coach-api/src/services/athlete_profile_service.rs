@@ -16,7 +16,7 @@ impl AthleteProfileService {
     }
 
     pub async fn create_profile(&self, profile_data: CreateAthleteProfile) -> Result<AthleteProfile> {
-        let profile = sqlx::query_as!(
+        let profile = sqlx::query_as(
             AthleteProfile,
             r#"
             INSERT INTO athlete_profiles (user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at)
@@ -39,7 +39,7 @@ impl AthleteProfileService {
     }
 
     pub async fn get_profile_by_id(&self, profile_id: Uuid) -> Result<Option<AthleteProfile>> {
-        let profile = sqlx::query_as!(
+        let profile = sqlx::query_as(
             AthleteProfile,
             "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE id = $1",
             profile_id
@@ -51,7 +51,7 @@ impl AthleteProfileService {
     }
 
     pub async fn get_profile_by_user_id(&self, user_id: Uuid) -> Result<Option<AthleteProfile>> {
-        let profile = sqlx::query_as!(
+        let profile = sqlx::query_as(
             AthleteProfile,
             "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE user_id = $1",
             user_id
@@ -63,7 +63,7 @@ impl AthleteProfileService {
     }
 
     pub async fn get_profiles_by_sport(&self, sport: &str) -> Result<Vec<AthleteProfile>> {
-        let profiles = sqlx::query_as!(
+        let profiles = sqlx::query_as(
             AthleteProfile,
             "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles WHERE sport = $1",
             sport
@@ -77,7 +77,7 @@ impl AthleteProfileService {
     pub async fn update_profile(&self, profile_id: Uuid, profile_data: UpdateAthleteProfile) -> Result<Option<AthleteProfile>> {
         let now = Utc::now();
 
-        let profile = sqlx::query_as!(
+        let profile = sqlx::query_as(
             AthleteProfile,
             r#"
             UPDATE athlete_profiles
@@ -107,7 +107,7 @@ impl AthleteProfileService {
     }
 
     pub async fn delete_profile(&self, profile_id: Uuid) -> Result<bool> {
-        let result = sqlx::query!(
+        let result = sqlx::query(
             "DELETE FROM athlete_profiles WHERE id = $1",
             profile_id
         )
@@ -121,7 +121,7 @@ impl AthleteProfileService {
         let limit = limit.unwrap_or(50);
         let offset = offset.unwrap_or(0);
 
-        let profiles = sqlx::query_as!(
+        let profiles = sqlx::query_as(
             AthleteProfile,
             "SELECT id as \"id!\", user_id as \"user_id!\", sport as \"sport!\", ftp, lthr, max_heart_rate, threshold_pace, zones as \"zones!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM athlete_profiles ORDER BY created_at DESC LIMIT $1 OFFSET $2",
             limit,
