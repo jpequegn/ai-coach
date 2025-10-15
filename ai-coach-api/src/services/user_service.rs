@@ -1,7 +1,7 @@
 use anyhow::Result;
 use chrono::Utc;
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use tracing::info;
 use uuid::Uuid;
 
@@ -10,11 +10,11 @@ use crate::models::{CreateUser, UpdateUser, User, UserResponse, DietaryPreferenc
 
 #[derive(Clone)]
 pub struct UserService {
-    db: PgPool,
+    db: SqlitePool,
 }
 
 impl UserService {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: SqlitePool) -> Self {
         Self { db }
     }
 

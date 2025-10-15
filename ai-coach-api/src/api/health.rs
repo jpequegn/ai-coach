@@ -1,12 +1,14 @@
 use axum::{extract::State, http::StatusCode, response::Json};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use std::time::Instant;
 
-use crate::models::JobHealthStatus;
-use crate::services::RecoveryJobScheduler;
+// MVP: JobHealthStatus disabled with job models
+// use crate::models::JobHealthStatus;
+// Disabled for MVP
+// use crate::services::RecoveryJobScheduler;
 
 /// Overall health status
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -67,8 +69,8 @@ impl ComponentHealth {
 
 /// Application health state
 pub struct HealthState {
-    pub scheduler: Option<Arc<RecoveryJobScheduler>>,
-    pub db: PgPool,
+    pub scheduler: Option<Arc<()>>,  // MVP: Disabled RecoveryJobScheduler
+    pub db: SqlitePool,
 }
 
 /// Basic health check endpoint
@@ -84,7 +86,7 @@ pub async fn health_check() -> Result<Json<Value>, StatusCode> {
 }
 
 /// Check database health
-async fn check_database_health(db: &PgPool) -> ComponentHealth {
+async fn check_database_health(db: &SqlitePool) -> ComponentHealth {
     let start = Instant::now();
 
     match sqlx::query("SELECT 1 as health_check")
@@ -165,6 +167,7 @@ async fn check_redis_health() -> ComponentHealth {
     }
 }
 
+/* MVP: Disabled scheduler health check
 /// Check job scheduler health
 async fn check_scheduler_health(scheduler: &RecoveryJobScheduler) -> ComponentHealth {
     match scheduler.check_all_jobs_health().await {
@@ -192,6 +195,7 @@ async fn check_scheduler_health(scheduler: &RecoveryJobScheduler) -> ComponentHe
         Err(e) => ComponentHealth::unhealthy(format!("Failed to check jobs: {}", e)),
     }
 }
+*/
 
 /// Determine overall health status from component statuses
 fn determine_overall_status(components: &[&ComponentHealth]) -> HealthStatus {
@@ -226,17 +230,19 @@ pub async fn health_check_detailed(
     let db_health = check_database_health(&state.db).await;
     let redis_health = check_redis_health().await;
 
-    let scheduler_health = if let Some(scheduler) = &state.scheduler {
-        Some(check_scheduler_health(scheduler).await)
-    } else {
-        None
-    };
+    // MVP: Scheduler health check disabled
+    // let scheduler_health = if let Some(scheduler) = &state.scheduler {
+    //     Some(check_scheduler_health(scheduler).await)
+    // } else {
+    //     None
+    // };
 
     // Determine overall status
-    let mut components = vec![&db_health, &redis_health];
-    if let Some(ref sched_health) = scheduler_health {
-        components.push(sched_health);
-    }
+    let components = vec![&db_health, &redis_health];
+    // MVP: No scheduler health
+    // if let Some(ref sched_health) = scheduler_health {
+    //     components.push(sched_health);
+    // }
 
     let overall_status = determine_overall_status(&components);
 
@@ -252,10 +258,10 @@ pub async fn health_check_detailed(
         }
     });
 
-    // Add scheduler health if available
-    if let Some(sched_health) = scheduler_health {
-        response["components"]["scheduler"] = json!(sched_health);
-    }
+    // MVP: No scheduler health to add
+    // if let Some(sched_health) = scheduler_health {
+    //     response["components"]["scheduler"] = json!(sched_health);
+    // }
 
     // Set HTTP status code based on overall health
     let status_code = match overall_status {

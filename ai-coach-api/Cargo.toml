@@ -18,7 +18,10 @@ tracing-subscriber = { workspace = true }
 # API-specific dependencies
 axum = { version = "0.7", features = ["multipart"] }
 axum-extra = { version = "0.9", features = ["typed-header", "multipart"] }
-sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate", "macros"] }
+# MVP: Using SQLite instead of PostgreSQL for simpler setup
+sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid", "migrate", "macros"] }
+# Production: Uncomment below and remove sqlite feature above
+# sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate", "macros"] }
 jsonwebtoken = "9.0"
 bcrypt = "0.15"
 tower = "0.5"

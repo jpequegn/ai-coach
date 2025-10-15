@@ -1,18 +1,18 @@
 use anyhow::Result;
 use chrono::{NaiveDate, Utc};
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use uuid::Uuid;
 
 use crate::models::*;
 use crate::services::*;
 
 pub struct DatabaseSeeder {
-    pool: PgPool,
+    pool: SqlitePool,
 }
 
 impl DatabaseSeeder {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: SqlitePool) -> Self {
         Self { pool }
     }
 
