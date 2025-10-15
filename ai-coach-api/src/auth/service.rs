@@ -1,5 +1,5 @@
 use chrono::{Duration, Utc};
-use sqlx::{PgPool, Row};
+use sqlx::{SqlitePool, Row};
 use uuid::Uuid;
 
 use crate::auth::{
@@ -21,11 +21,11 @@ pub struct User {
 #[derive(Debug, Clone)]
 pub struct AuthService {
     jwt_service: JwtService,
-    db: PgPool,
+    db: SqlitePool,
 }
 
 impl AuthService {
-    pub fn new(db: PgPool, jwt_secret: &str) -> Self {
+    pub fn new(db: SqlitePool, jwt_secret: &str) -> Self {
         Self {
             jwt_service: JwtService::new(jwt_secret),
             db,

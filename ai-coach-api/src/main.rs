@@ -1,14 +1,18 @@
+// ============================================================================
+// MVP Main - Simplified startup without background jobs
+// ============================================================================
 use ai_coach::api::routes::create_routes;
 use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
-use ai_coach::services::{
-    AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
-    DataQualityCheckJob, JobRegistry, NotificationService, RecoveryAlertService,
-    RecoveryAnalysisService, RecoveryDataService, RecoveryJobScheduler,
-    WeeklyBaselineRecalculationJob,
-};
-use std::sync::Arc;
+// Disabled for MVP - background jobs not needed
+// use ai_coach::services::{
+//     AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,
+//     DataQualityCheckJob, JobRegistry, NotificationService, RecoveryAlertService,
+//     RecoveryAnalysisService, RecoveryDataService, RecoveryJobScheduler,
+//     WeeklyBaselineRecalculationJob,
+// };
+// use std::sync::Arc;
 use tokio::net::TcpListener;
-use tracing::{info, instrument};
+use tracing::{info, warn, instrument};
 use tracing_subscriber;
 
 #[tokio::main]
@@ -17,69 +21,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing
     tracing_subscriber::fmt::init();
 
+    info!("🚀 Starting AI Coach API - MVP Mode");
+    warn!("⚠️  MVP Mode: Background jobs, ML features, and recovery tracking disabled");
+
     // Load configuration
     let app_config = AppConfig::from_env()?;
     let db_config = DatabaseConfig::from_env()?;
 
-    // Create database connection pool
+    // Create database connection pool (SQLite)
+    info!("📦 Connecting to SQLite database...");
     let db = db_config.create_pool().await?;
+    info!("✅ Database connected");
 
     // Run migrations
+    info!("🔄 Running database migrations...");
     run_migrations(&db).await?;
+    info!("✅ Migrations complete");
 
-    // Create and start the recovery job scheduler
-    let scheduler = Arc::new(RecoveryJobScheduler::new(db.clone()).await?);
-    scheduler.start().await?;
-    info!("Recovery job scheduler started");
+    // MVP: Skip background jobs entirely
+    // Production version would start RecoveryJobScheduler, DailyRecoveryCalculationJob, etc.
 
-    // Create recovery analysis service with alert service
-    let notification_service = NotificationService::new(db.clone());
-    let alert_service = RecoveryAlertService::new(db.clone(), notification_service);
-    let analysis_service = RecoveryAnalysisService::with_alerts(db.clone(), alert_service);
-
-    // Create all background jobs
-    let redis_url = std::env::var("REDIS_URL").ok();
-    let recovery_job = Arc::new(DailyRecoveryCalculationJob::new(
-        db.clone(),
-        analysis_service,
-        redis_url,
-    )?);
-
-    let queue_service = AlertDeliveryQueueService::new(db.clone(), notification_service.clone());
-    let recovery_data_service = RecoveryDataService::new(db.clone());
-
-    // Register all jobs using JobRegistry
-    JobRegistry::new(scheduler.clone())
-        .register_job(recovery_job.as_ref().clone())
-        .register_job(AlertDeliveryJob::new(queue_service))
-        .register_job(DataQualityCheckJob::new(
-            db.clone(),
-            notification_service.clone(),
-        ))
-        .register_job(WeeklyBaselineRecalculationJob::new(
-            db.clone(),
-            recovery_data_service,
-            notification_service.clone(),
-        ))
-        .start_all()
-        .await?;
-
-    info!("All background jobs registered successfully");
-
-    // Create the application routes
+    // Create the application routes (MVP configuration)
     let app = create_routes(
         db,
         &app_config.jwt_secret,
         &app_config,
-        Some(scheduler.clone()),
-        Some(recovery_job.clone()),
+        None,  // No scheduler in MVP
+        None,  // No recovery job in MVP
     );
 
     // Start the server
-    let listener = TcpListener::bind(&app_config.server_address()).await?;
-    info!("AI Coach server starting on http://{}", app_config.server_address());
-    info!("Health check available at http://{}/health", app_config.server_address());
-    info!("Authentication endpoints available at http://{}/api/auth", app_config.server_address());
+    let addr = app_config.server_address();
+    let listener = TcpListener::bind(&addr).await?;
+
+    info!("✅ AI Coach API (MVP) ready!");
+    info!("🌐 Server: http://{}", addr);
+    info!("❤️  Health: http://{}/health", addr);
+    info!("🔐 Auth: http://{}/api/v1/auth/*", addr);
+    info!("👤 Profile: http://{}/api/v1/user/*", addr);
 
     axum::serve(listener, app).await?;
 

@@ -2,7 +2,28 @@
   "permissions": {
     "allow": [
       "Bash(/tmp/check_services.sh:*)",
-      "Bash(timeout 60 cargo check --message-format=short)"
+      "Bash(timeout 60 cargo check --message-format=short)",
+      "Read(//Users/julienpequegnot/.config/superpowers/skills/skills/using-skills/**)",
+      "Bash(/Users/julienpequegnot/.config/superpowers/skills/skills/using-skills/find-skills \"planning\\|strategy\\|next\")",
+      "Bash(/Users/julienpequegnot/.config/superpowers/skills/skills/using-skills/find-skills \"brainstorm\")",
+      "Read(//Users/julienpequegnot/.config/superpowers/skills/skills/collaboration/brainstorming/**)",
+      "Bash(awk:*)",
+      "Bash(cargo check:*)",
+      "Bash(git checkout:*)",
+      "Bash(cargo build:*)",
+      "Bash(DATABASE_URL=\"sqlite:ai-coach.db\" cargo check)",
+      "Bash(DATABASE_URL=\"sqlite:ai-coach.db\" cargo build)",
+      "Bash(SQLX_OFFLINE=true DATABASE_URL=\"sqlite:ai-coach.db\" cargo build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Switch to SQLite for MVP deployment\n\nMajor architecture simplification to enable MVP deployment:\n\nDatabase Changes:\n- Switched from PostgreSQL to SQLite for simpler setup\n- Updated all PgPool references to SqlitePool\n- Modified Cargo.toml to use sqlite feature instead of postgres\n- Updated database connection in config/database.rs\n- Simplified main.rs to remove PostgreSQL-specific initialization\n\nService Layer Simplification:\n- Disabled 48+ services that have compilation errors\n- Kept only UserService and AthleteProfileService for MVP\n- Commented out job scheduler, background processing, ML services\n- Removed RecoveryJobScheduler and related job services\n\nModel Layer Simplification:\n- Disabled 25+ models with PostgreSQL-specific types (sqlx::types::Json)\n- Kept only user, athlete_profile, and user_recovery_profile models\n- Exported only DietaryPreferences and SleepSchedule from recovery profile\n- Commented out seeding module that references disabled services\n\nAPI Layer Simplification:\n- Disabled 30+ API route modules\n- Kept only auth, user_profile, and health endpoints for MVP\n- Fixed health check to work without scheduler\n- Updated all route handlers to use SqlitePool\n\nError Reduction:\n- Reduced compilation errors from 399 → 14 (96% reduction)\n- Remaining 14 errors are SQLx query validation (need database schema)\n- Fixed all PgPool → SqlitePool conversions\n- Fixed all service and model import errors\n\nNext Steps:\n- Run migrations to create SQLite schema\n- Generate SQLx offline query cache for SQLite\n- Test MVP endpoints (auth, health, user profile)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(DATABASE_URL=\"sqlite:ai-coach.db\" sqlx migrate run)",
+      "Bash(sqlx:*)",
+      "Bash(DATABASE_URL=\"sqlite:///Users/julienpequegnot/Code/ai-coach/ai-coach-api/ai-coach.db\" cargo check)",
+      "Bash(sqlite3:*)",
+      "Bash(DATABASE_URL=\"sqlite:///Users/julienpequegnot/Code/ai-coach/ai-coach-api/ai-coach.db\" cargo build)",
+      "Bash(SQLX_OFFLINE=true cargo build:*)",
+      "Bash(SQLX_OFFLINE=true cargo check:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nWIP: SQLite migration progress - 39 errors remaining\n\nProgress on switching from PostgreSQL to SQLite for MVP deployment.\n\nMigrations:\n- Created SQLite-compatible migrations (3 tables: users, athlete_profiles, user_recovery_profiles)\n- Swapped migrations directory (migrations-postgres backed up)\n- Manually ran migrations with sqlite3 CLI\n- Schema created successfully\n\nType System Changes:\n- Disabled SQLx macros feature to avoid compile-time type checking\n- Converted query_as! to query_as (but syntax needs fixing)\n- SQLite stores UUID/DateTime/JSON as TEXT, needs runtime conversion\n\nCurrent State:\n- Database schema exists with 3 tables\n- Compilation errors reduced from 399 → 39  \n- Main issues: Need to convert all query_as macro calls to query_as builder pattern\n- 14 queries need conversion in user_service.rs and athlete_profile_service.rs\n\nNext Steps:\n- Fix query_as syntax to use builder pattern (.bind() calls)\n- Test compilation with proper query syntax\n- Test server startup\n- Test auth/user endpoints\n\nArchitecture Notes:\n- MVP uses only 2 services: UserService, AthleteProfileService\n- MVP uses only 3 models: User, AthleteProfile, UserRecoveryProfile  \n- All other services/models/APIs disabled to reduce complexity\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

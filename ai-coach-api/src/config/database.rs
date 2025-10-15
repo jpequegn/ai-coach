@@ -1,5 +1,5 @@
 use anyhow::Result;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 use std::env;
 use std::time::Duration;
 
@@ -15,7 +15,7 @@ pub struct DatabaseConfig {
 impl DatabaseConfig {
     pub fn from_env() -> Result<Self> {
         let database_url = env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "postgresql://postgres:password@localhost:5432/ai_coach".to_string());
+            .unwrap_or_else(|_| "sqlite:ai-coach.db".to_string());
 
         let max_connections = env::var("DB_MAX_CONNECTIONS")
             .unwrap_or_else(|_| "20".to_string())
@@ -46,8 +46,8 @@ impl DatabaseConfig {
         })
     }
 
-    pub async fn create_pool(&self) -> Result<PgPool> {
-        let pool = PgPoolOptions::new()
+    pub async fn create_pool(&self) -> Result<SqlitePool> {
+        let pool = SqlitePoolOptions::new()
             .max_connections(self.max_connections)
             .min_connections(self.min_connections)
             .acquire_timeout(self.connect_timeout)
@@ -59,7 +59,7 @@ impl DatabaseConfig {
     }
 }
 
-pub async fn run_migrations(pool: &PgPool) -> Result<()> {
+pub async fn run_migrations(pool: &SqlitePool) -> Result<()> {
     sqlx::migrate!("./migrations").run(pool).await?;
     Ok(())
 }

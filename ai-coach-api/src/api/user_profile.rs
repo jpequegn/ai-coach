@@ -7,7 +7,7 @@ use axum::{
 };
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use uuid::Uuid;
 use chrono::{NaiveDate, DateTime, Utc};
 
@@ -170,11 +170,11 @@ impl ApiError {
 
 #[derive(Clone)]
 pub struct ProfileAppState {
-    pub db: PgPool,
+    pub db: SqlitePool,
     pub auth_service: AuthService,
 }
 
-pub fn user_profile_routes(db: PgPool, auth_service: AuthService) -> Router {
+pub fn user_profile_routes(db: SqlitePool, auth_service: AuthService) -> Router {
     let shared_state = ProfileAppState {
         db,
         auth_service,
@@ -403,8 +403,44 @@ pub async fn update_thresholds(
 
     tracing::info!("Updating thresholds for user {}", user_id);
 
-    // Return updated thresholds
-    get_thresholds(State(state), WithRejection(claims, _)).await
+    // Return updated thresholds with new values
+    let ftp = request.ftp_watts.unwrap_or(250);
+    let max_hr = 185;
+
+    // Calculate power zones based on FTP
+    let power_zones = vec![
+        PowerZone { zone: 1, name: "Recovery".to_string(), min_watts: 0, max_watts: Some((ftp as f64 * 0.55) as u32), description: "Easy spinning".to_string() },
+        PowerZone { zone: 2, name: "Endurance".to_string(), min_watts: ((ftp as f64 * 0.56) as u32), max_watts: Some((ftp as f64 * 0.75) as u32), description: "Aerobic base building".to_string() },
+        PowerZone { zone: 3, name: "Tempo".to_string(), min_watts: ((ftp as f64 * 0.76) as u32), max_watts: Some((ftp as f64 * 0.90) as u32), description: "Moderate effort".to_string() },
+        PowerZone { zone: 4, name: "Threshold".to_string(), min_watts: ((ftp as f64 * 0.91) as u32), max_watts: Some((ftp as f64 * 1.05) as u32), description: "Lactate threshold".to_string() },
+        PowerZone { zone: 5, name: "VO2 Max".to_string(), min_watts: ((ftp as f64 * 1.06) as u32), max_watts: Some((ftp as f64 * 1.20) as u32), description: "Maximum aerobic power".to_string() },
+        PowerZone { zone: 6, name: "Anaerobic".to_string(), min_watts: ((ftp as f64 * 1.21) as u32), max_watts: Some((ftp as f64 * 1.50) as u32), description: "Short intense efforts".to_string() },
+        PowerZone { zone: 7, name: "Neuromuscular".to_string(), min_watts: ((ftp as f64 * 1.51) as u32), max_watts: None, description: "Sprint power".to_string() },
+    ];
+
+    // Calculate heart rate zones
+    let heart_rate_zones = vec![
+        HeartRateZone { zone: 1, name: "Recovery".to_string(), min_bpm: 0, max_bpm: Some((max_hr as f64 * 0.60) as u32), description: "Easy recovery".to_string() },
+        HeartRateZone { zone: 2, name: "Aerobic".to_string(), min_bpm: ((max_hr as f64 * 0.61) as u32), max_bpm: Some((max_hr as f64 * 0.70) as u32), description: "Base building".to_string() },
+        HeartRateZone { zone: 3, name: "Tempo".to_string(), min_bpm: ((max_hr as f64 * 0.71) as u32), max_bpm: Some((max_hr as f64 * 0.80) as u32), description: "Moderate effort".to_string() },
+        HeartRateZone { zone: 4, name: "Threshold".to_string(), min_bpm: ((max_hr as f64 * 0.81) as u32), max_bpm: Some((max_hr as f64 * 0.90) as u32), description: "Hard effort".to_string() },
+        HeartRateZone { zone: 5, name: "VO2 Max".to_string(), min_bpm: ((max_hr as f64 * 0.91) as u32), max_bpm: None, description: "Maximum effort".to_string() },
+    ];
+
+    let pace_zones = vec![];
+
+    Ok(Json(ThresholdsResponse {
+        user_id: Uuid::parse_str(&user_id).unwrap_or_default(),
+        ftp_watts: request.ftp_watts,
+        threshold_pace_ms: request.threshold_pace_ms,
+        lactate_threshold_hr: request.lactate_threshold_hr,
+        vo2_max: request.vo2_max,
+        power_zones,
+        heart_rate_zones,
+        pace_zones,
+        last_updated: Utc::now(),
+        success: true,
+    }))
 }
 
 /// Update training preferences
