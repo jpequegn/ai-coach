@@ -37,7 +37,7 @@ use super::user_profile::user_profile_routes;
 // use super::daily_recovery_job_admin_routes::daily_recovery_job_admin_routes;
 // use super::alert_delivery_admin_routes::alert_delivery_admin_routes;
 // use super::data_quality_admin_routes::data_quality_admin_routes;
-use crate::auth::AuthService;
+use crate::auth::{AuthService, middleware::cors_layer};
 use crate::config::AppConfig;
 use crate::middleware::{UuidRequestIdGenerator, logging_middleware};
 // Disabled for MVP - admin/job services not needed
@@ -50,7 +50,7 @@ use std::sync::Arc;
 pub fn create_routes(
     db: SqlitePool,
     jwt_secret: &str,
-    _app_config: &AppConfig,  // Disabled for MVP
+    app_config: &AppConfig,
     _scheduler: Option<Arc<()>>,  // Disabled - type changed to avoid importing RecoveryJobScheduler
     _recovery_job: Option<Arc<()>>,  // Disabled - type changed to avoid importing DailyRecoveryCalculationJob
 ) -> Router {
@@ -101,6 +101,11 @@ pub fn create_routes(
         // Maintain backward compatibility with existing auth routes
         .nest("/api/auth", auth_routes(auth_service.clone()))
         .nest("/api/admin", admin_routes(auth_service.clone()))
+        // Add CORS middleware with configured origins
+        .layer(cors_layer(
+            app_config.allowed_origins.clone(),
+            app_config.is_development(),
+        ))
         // Add request ID generation and propagation
         .layer(SetRequestIdLayer::new(
             axum::http::header::HeaderName::from_static("x-request-id"),
