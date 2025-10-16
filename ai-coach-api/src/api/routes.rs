@@ -16,7 +16,7 @@ use super::user_profile::user_profile_routes;
 // use super::ml_predictions::ml_prediction_routes;
 // use super::workout_recommendations::workout_recommendation_routes;
 // use super::performance_insights::performance_insights_routes;
-// use super::goals::goals_routes;
+// use super::goals::goals_routes;  // Blocked by SQLite DateTime TEXT compatibility
 // use super::analytics::analytics_routes;
 // use super::coaching::coaching_routes;
 // use super::notifications::notification_routes;
@@ -63,11 +63,11 @@ pub fn create_routes(
         .nest("/auth", auth_routes(auth_service.clone()))
         .nest("/admin", admin_routes(auth_service.clone()))
         .nest("/user", user_profile_routes(db.clone(), auth_service.clone()));
+        // .nest("/goals", goals_routes(db.clone(), auth_service.clone()));  // Blocked by SQLite DateTime
 
     // Disabled for MVP - too many compilation errors
     // .nest("/training", training_routes(db.clone(), auth_service.clone()))
     // .nest("/coaching", coaching_routes(db.clone(), auth_service.clone()))
-    // .nest("/goals", goals_routes(db.clone(), auth_service.clone()))
     // .nest("/analytics", analytics_routes(db.clone(), auth_service.clone()))
     // .nest("/notifications", notification_routes(db.clone(), auth_service.clone()))
     // .nest("/events", events_routes(db.clone(), auth_service.clone()))
@@ -83,7 +83,7 @@ pub fn create_routes(
     // .nest("/validation", validation_routes(db.clone(), auth_service.clone()));
 
     tracing::info!("✅ MVP API initialized with: auth, admin, user profile");
-    tracing::warn!("⚠️  Disabled for MVP: training, ML, recovery, notifications, analytics, goals");
+    tracing::warn!("⚠️  Disabled for MVP: goals (SQLite blocker), training, ML, recovery, notifications, analytics");
 
     // Create minimal health state
     let health_state = Arc::new(HealthState {

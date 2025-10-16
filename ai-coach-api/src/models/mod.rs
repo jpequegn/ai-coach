@@ -4,6 +4,7 @@
 pub mod user;
 pub mod athlete_profile;
 pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedule used by User model
+// pub mod goal;  // Blocked by SQLite DateTime TEXT compatibility - see docs/sqlite-compatibility-notes.md
 
 // Disabled for MVP - too many compilation errors or not needed
 // pub mod training_session;
@@ -15,7 +16,6 @@ pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedu
 // pub mod workout_recommendation;
 // pub mod performance_insights;
 // pub mod notification;
-// pub mod goal;
 // pub mod event;
 // pub mod plan_generation;
 // pub mod vision_analysis;
@@ -35,6 +35,7 @@ pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedu
 pub use user::*;
 pub use athlete_profile::*;
 pub use user_recovery_profile::{DietaryPreferences, SleepSchedule};
+// pub use goal::*;  // Blocked by SQLite DateTime TEXT compatibility
 
 // Disabled for MVP
 // pub use training_session::*;
@@ -46,7 +47,6 @@ pub use user_recovery_profile::{DietaryPreferences, SleepSchedule};
 // pub use workout_recommendation::*;
 // pub use performance_insights::*;
 // pub use notification::*;
-// pub use goal::*;
 // pub use event::*;
 // pub use plan_generation::*;
 // pub use vision_analysis::*;

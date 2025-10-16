@@ -14,7 +14,7 @@ pub mod user_profile;
 // pub mod ml_predictions;
 // pub mod workout_recommendations;
 // pub mod performance_insights;
-// pub mod goals;
+// pub mod goals;  // Blocked by SQLite DateTime TEXT compatibility - see docs/sqlite-compatibility-notes.md
 // pub mod analytics;
 // pub mod coaching;
 // pub mod notifications;
