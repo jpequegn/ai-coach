@@ -164,7 +164,7 @@ impl AuthService {
 
     /// Check if token is blacklisted
     pub async fn is_token_blacklisted(&self, jti: &str) -> Result<bool, AuthError> {
-        let result = sqlx::query("SELECT 1 FROM token_blacklist WHERE jti = $1 AND expires_at > NOW()")
+        let result = sqlx::query("SELECT 1 FROM token_blacklist WHERE jti = $1 AND expires_at > CURRENT_TIMESTAMP")
             .bind(jti)
             .fetch_optional(&self.db)
             .await
@@ -252,7 +252,7 @@ impl AuthService {
     async fn update_user_role(&self, user_id: Uuid, role: &UserRole) -> Result<(), AuthError> {
         sqlx::query(
             "INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
-             ON CONFLICT (user_id) DO UPDATE SET role = $2, updated_at = NOW()"
+             ON CONFLICT (user_id) DO UPDATE SET role = $2, updated_at = CURRENT_TIMESTAMP"
         )
         .bind(user_id)
         .bind(role.as_str())
@@ -288,7 +288,7 @@ impl AuthService {
 
         let result = sqlx::query(
             "SELECT 1 FROM refresh_tokens
-             WHERE user_id = $1 AND token_hash = $2 AND expires_at > NOW() AND NOT revoked"
+             WHERE user_id = $1 AND token_hash = $2 AND expires_at > CURRENT_TIMESTAMP AND revoked = 0"
         )
         .bind(user_id)
         .bind(token_hash)
@@ -300,7 +300,7 @@ impl AuthService {
     }
 
     async fn revoke_user_refresh_tokens(&self, user_id: Uuid) -> Result<(), AuthError> {
-        sqlx::query("UPDATE refresh_tokens SET revoked = true WHERE user_id = $1")
+        sqlx::query("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = $1")
             .bind(user_id)
             .execute(&self.db)
             .await
