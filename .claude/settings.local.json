@@ -1,12 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)",
-      "Bash(cargo check:*)",
-      "Bash(cargo build:*)",
-      "Bash(timeout 10 cargo run)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Complete SQLite migration - MVP builds and runs successfully\n\nSuccessfully migrated from PostgreSQL to SQLite for simplified MVP deployment.\n\nChanges Made:\n1. Converted all SQL queries from macro syntax (query_as!) to builder pattern (query_as)\n2. Fixed crate name imports in main.rs (ai_coach → ai_coach_api)\n3. Re-enabled macros feature for FromRow derive support\n4. All 14 queries in UserService and AthleteProfileService now use .bind() pattern\n\nBuild Results:\n- ✅ cargo build: SUCCESS (0 errors, 42 warnings)\n- ✅ Server startup: SUCCESS\n- ⚠️  Migration error expected (tables already exist from manual run)\n\nTechnical Details:\n- SQLite stores UUID as TEXT, datetime as TEXT, JSON as TEXT\n- SQLx handles runtime type conversion with chrono + uuid features\n- Using runtime queries (query_as) instead of compile-time (query_as!)\n- FromRow derive macro works correctly with SQLite\n\nDatabase Schema:\n- users table (id, email, password_hash, timezone, active, created_at, updated_at)\n- athlete_profiles table (id, user_id, sport, ftp, lthr, max_heart_rate, threshold_pace, zones, created_at, updated_at)\n- user_recovery_profiles table (id, user_id, preferences JSON fields, created_at, updated_at)\n\nNext Steps:\n- Test with fresh database (delete ai-coach.db)\n- Test auth endpoints (register, login)\n- Test user profile endpoints\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(cargo run:*)",
+      "Bash(curl:*)",
+      "Bash(sqlite3:*)",
+      "Bash(chmod:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

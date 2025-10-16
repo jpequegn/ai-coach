@@ -15,7 +15,7 @@ pub struct DatabaseConfig {
 impl DatabaseConfig {
     pub fn from_env() -> Result<Self> {
         let database_url = env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "sqlite:ai-coach.db".to_string());
+            .unwrap_or_else(|_| "sqlite::memory:".to_string());
 
         let max_connections = env::var("DB_MAX_CONNECTIONS")
             .unwrap_or_else(|_| "20".to_string())
@@ -47,12 +47,19 @@ impl DatabaseConfig {
     }
 
     pub async fn create_pool(&self) -> Result<SqlitePool> {
+        // For SQLite, use file:// prefix to allow query parameters
+        let url = if self.database_url.starts_with("sqlite://") {
+            self.database_url.replace("sqlite://", "sqlite:///")
+        } else {
+            self.database_url.clone()
+        };
+
         let pool = SqlitePoolOptions::new()
             .max_connections(self.max_connections)
             .min_connections(self.min_connections)
             .acquire_timeout(self.connect_timeout)
             .idle_timeout(Some(self.idle_timeout))
-            .connect(&self.database_url)
+            .connect(&url)
             .await?;
 
         Ok(pool)
