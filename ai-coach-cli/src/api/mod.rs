@@ -15,7 +15,7 @@ pub use retry::RetryConfig;
 /// Login request payload
 #[derive(Debug, Serialize)]
 pub struct LoginRequest {
-    pub username: String,
+    pub email: String,
     pub password: String,
 }
 
@@ -24,6 +24,8 @@ pub struct LoginRequest {
 pub struct LoginResponse {
     pub access_token: String,
     pub refresh_token: String,
+    pub token_type: String,
+    pub expires_in: u64,
     pub user: UserInfo,
 }
 
@@ -31,8 +33,10 @@ pub struct LoginResponse {
 #[derive(Debug, Deserialize, Clone)]
 pub struct UserInfo {
     pub id: String,
-    pub username: String,
     pub email: String,
+    pub role: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 /// Token refresh request
@@ -94,18 +98,18 @@ impl ApiClient {
     }
 
     /// Login to AI Coach API
-    pub async fn login(&self, username: &str, password: &str) -> Result<LoginResponse> {
+    pub async fn login(&self, email: &str, password: &str) -> Result<LoginResponse> {
         let url = format!("{}/api/v1/auth/login", self.base_url);
-        let username = username.to_string();
+        let email = email.to_string();
         let password = password.to_string();
 
-        tracing::debug!("Logging in as {}", username);
+        tracing::debug!("Logging in as {}", email);
 
         // Use retry logic for login request
         self.retry_config
             .execute(|| async {
                 let request = LoginRequest {
-                    username: username.clone(),
+                    email: email.clone(),
                     password: password.clone(),
                 };
 
@@ -135,7 +139,7 @@ impl ApiClient {
                         config.save()?;
                     }
 
-                    tracing::info!("Successfully logged in as {}", username);
+                    tracing::info!("Successfully logged in as {}", email);
                     Ok(login_response)
                 } else {
                     let error_text = response.text().await.unwrap_or_default();
@@ -181,7 +185,7 @@ impl ApiClient {
 
     /// Get current user information
     pub async fn whoami(&self) -> Result<UserInfo> {
-        let url = format!("{}/api/v1/auth/me", self.base_url);
+        let url = format!("{}/api/v1/auth/profile", self.base_url);
 
         let config = self.config.lock().unwrap();
         if !config.is_authenticated() {
@@ -209,7 +213,7 @@ impl ApiClient {
                 .await
                 .context("Failed to parse user info response")?;
 
-            tracing::info!("Retrieved user info for {}", user_info.username);
+            tracing::info!("Retrieved user info for {}", user_info.email);
             Ok(user_info)
         } else if status == StatusCode::UNAUTHORIZED {
             Err(anyhow::anyhow!(

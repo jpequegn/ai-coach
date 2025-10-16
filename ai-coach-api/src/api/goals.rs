@@ -7,7 +7,7 @@ use axum::{
 };
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use uuid::Uuid;
 use chrono::{NaiveDate, DateTime, Utc};
 
@@ -56,12 +56,12 @@ impl ApiError {
 
 #[derive(Clone)]
 pub struct GoalsAppState {
-    pub db: PgPool,
+    pub db: SqlitePool,
     pub auth_service: AuthService,
     pub goal_service: GoalService,
 }
 
-pub fn goals_routes(db: PgPool, auth_service: AuthService) -> Router {
+pub fn goals_routes(db: SqlitePool, auth_service: AuthService) -> Router {
     let goal_service = GoalService::new(db.clone());
     let shared_state = GoalsAppState {
         db,

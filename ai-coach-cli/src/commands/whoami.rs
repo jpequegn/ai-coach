@@ -27,8 +27,8 @@ impl WhoamiCommand {
             Ok(user_info) => {
                 println!("✓ Authenticated as:");
                 println!();
-                println!("  Username: {}", user_info.username);
                 println!("  Email:    {}", user_info.email);
+                println!("  Role:     {}", user_info.role);
                 println!("  User ID:  {}", user_info.id);
 
                 Ok(())

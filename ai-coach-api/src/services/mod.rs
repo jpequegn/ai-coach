@@ -3,6 +3,7 @@
 // ============================================================================
 pub mod user_service;
 pub mod athlete_profile_service;
+// pub mod goal_service;  // Blocked by SQLite DateTime TEXT compatibility - see docs/sqlite-compatibility-notes.md
 
 // Disabled for MVP - too many compilation errors
 // pub mod crud_service;
@@ -23,7 +24,6 @@ pub mod athlete_profile_service;
 // pub mod notification_service;
 // pub mod notification_scheduler;
 // pub mod email_notification_service;
-// pub mod goal_service;
 // pub mod event_service;
 // pub mod plan_generation_service;
 // pub mod vision_analysis_service;
@@ -55,6 +55,7 @@ pub mod athlete_profile_service;
 
 pub use user_service::UserService;
 pub use athlete_profile_service::AthleteProfileService;
+// pub use goal_service::GoalService;  // Blocked by SQLite DateTime TEXT compatibility
 
 // Disabled for MVP
 // pub use training_session_service::TrainingSessionService;
@@ -73,7 +74,6 @@ pub use athlete_profile_service::AthleteProfileService;
 // pub use notification_service::NotificationService;
 // pub use notification_scheduler::NotificationScheduler;
 // pub use email_notification_service::EmailNotificationService;
-// pub use goal_service::GoalService;
 // pub use event_service::EventService;
 // pub use plan_generation_service::PlanGenerationService;
 // pub use vision_analysis_service::VisionAnalysisService;

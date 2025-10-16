@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{NaiveDate, Utc};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use uuid::Uuid;
 
 use crate::models::{
@@ -11,11 +11,11 @@ use crate::models::{
 
 #[derive(Clone)]
 pub struct GoalService {
-    db: PgPool,
+    db: SqlitePool,
 }
 
 impl GoalService {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: SqlitePool) -> Self {
         Self { db }
     }
 

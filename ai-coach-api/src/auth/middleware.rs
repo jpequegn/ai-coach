@@ -98,11 +98,36 @@ pub fn extract_user_session(request: &Request) -> Result<&UserSession, AuthError
 }
 
 /// CORS configuration for authentication endpoints
-pub fn cors_layer() -> CorsLayer {
+/// Takes a list of allowed origins, or allows all in development if empty
+pub fn cors_layer(allowed_origins: Vec<String>, is_development: bool) -> CorsLayer {
+    use axum::http::Method;
+    use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
+
+    if allowed_origins.is_empty() && !is_development {
+        // Production with no origins configured - block all
+        return CorsLayer::new()
+            .allow_origin(tower_http::cors::AllowOrigin::list(vec![]));
+    }
+
+    if allowed_origins.is_empty() && is_development {
+        // Development mode - allow any origin
+        return CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(vec![Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+            .allow_headers(vec![AUTHORIZATION, CONTENT_TYPE, ACCEPT])
+            .allow_credentials(true);
+    }
+
+    // Production with explicit origins
+    let origins: Vec<_> = allowed_origins
+        .iter()
+        .filter_map(|origin| origin.parse::<axum::http::HeaderValue>().ok())
+        .collect();
+
     CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any)
+        .allow_origin(tower_http::cors::AllowOrigin::list(origins))
+        .allow_methods(vec![Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers(vec![AUTHORIZATION, CONTENT_TYPE, ACCEPT])
         .allow_credentials(true)
 }
 
@@ -179,11 +204,11 @@ pub async fn rate_limit_middleware(
 }
 
 /// Create a service builder with common middleware
-pub fn create_middleware_stack() -> impl Clone {
+pub fn create_middleware_stack(allowed_origins: Vec<String>, is_development: bool) -> impl Clone {
     ServiceBuilder::new()
         .layer(tower_http::trace::TraceLayer::new_for_http())
         .layer(security_headers_layer())
-        .layer(cors_layer())
+        .layer(cors_layer(allowed_origins, is_development))
 }
 
 #[cfg(test)]
