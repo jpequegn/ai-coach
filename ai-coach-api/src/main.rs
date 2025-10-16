@@ -1,8 +1,8 @@
 // ============================================================================
 // MVP Main - Simplified startup without background jobs
 // ============================================================================
-use ai_coach::api::routes::create_routes;
-use ai_coach::config::{AppConfig, DatabaseConfig, run_migrations};
+use ai_coach_api::api::routes::create_routes;
+use ai_coach_api::config::{AppConfig, DatabaseConfig, run_migrations};
 // Disabled for MVP - background jobs not needed
 // use ai_coach::services::{
 //     AlertDeliveryJob, AlertDeliveryQueueService, DailyRecoveryCalculationJob,

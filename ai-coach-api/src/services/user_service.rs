@@ -25,17 +25,16 @@ impl UserService {
         // Start a transaction to ensure user and profile are created together
         let mut tx = self.db.begin().await?;
 
-        let user = sqlx::query_as(
-            User,
+        let user = sqlx::query_as::<_, User>(
             r#"
             INSERT INTO users (email, password_hash, timezone, active, created_at, updated_at)
             VALUES ($1, $2, 'UTC', true, $3, $3)
-            RETURNING id as "id!", email as "email!", password_hash as "password_hash!", timezone as "timezone!", active as "active!", created_at as "created_at!", updated_at as "updated_at!"
-            "#,
-            user_data.email,
-            password_hash,
-            Utc::now()
+            RETURNING id, email, password_hash, timezone, active, created_at, updated_at
+            "#
         )
+        .bind(&user_data.email)
+        .bind(&password_hash)
+        .bind(Utc::now())
         .fetch_one(&mut *tx)
         .await?;
 
@@ -53,16 +52,16 @@ impl UserService {
                 completion_stats
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            "#,
-            user.id,
-            json!([]),
-            json!([]),
-            json!(DietaryPreferences::default()),
-            json!(SleepSchedule::default()),
-            json!([]),
-            json!([]),
-            json!({})
+            "#
         )
+        .bind(&user.id)
+        .bind(json!([]).to_string())
+        .bind(json!([]).to_string())
+        .bind(json!(DietaryPreferences::default()).to_string())
+        .bind(json!(SleepSchedule::default()).to_string())
+        .bind(json!([]).to_string())
+        .bind(json!([]).to_string())
+        .bind(json!({}).to_string())
         .execute(&mut *tx)
         .await?;
 
@@ -82,11 +81,10 @@ impl UserService {
     }
 
     pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserResponse>> {
-        let user = sqlx::query_as(
-            User,
-            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE id = $1",
-            user_id
+        let user = sqlx::query_as::<_, User>(
+            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE id = $1"
         )
+        .bind(&user_id)
         .fetch_optional(&self.db)
         .await?;
 
@@ -101,11 +99,10 @@ impl UserService {
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<UserResponse>> {
-        let user = sqlx::query_as(
-            User,
-            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users WHERE email = $1",
-            email
+        let user = sqlx::query_as::<_, User>(
+            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users WHERE email = $1"
         )
+        .bind(email)
         .fetch_optional(&self.db)
         .await?;
 
@@ -122,19 +119,18 @@ impl UserService {
     pub async fn update_user(&self, user_id: Uuid, user_data: UpdateUser) -> Result<Option<UserResponse>> {
         let now = Utc::now();
 
-        let user = sqlx::query_as(
-            User,
+        let user = sqlx::query_as::<_, User>(
             r#"
             UPDATE users
             SET email = COALESCE($2, email),
                 updated_at = $3
             WHERE id = $1
-            RETURNING id as "id!", email as "email!", password_hash as "password_hash!", timezone as "timezone!", active as "active!", created_at as "created_at!", updated_at as "updated_at!"
-            "#,
-            user_id,
-            user_data.email,
-            now
+            RETURNING id, email, password_hash, timezone, active, created_at, updated_at
+            "#
         )
+        .bind(&user_id)
+        .bind(&user_data.email)
+        .bind(now)
         .fetch_optional(&self.db)
         .await?;
 
@@ -149,12 +145,10 @@ impl UserService {
     }
 
     pub async fn delete_user(&self, user_id: Uuid) -> Result<bool> {
-        let result = sqlx::query(
-            "DELETE FROM users WHERE id = $1",
-            user_id
-        )
-        .execute(&self.db)
-        .await?;
+        let result = sqlx::query("DELETE FROM users WHERE id = $1")
+            .bind(&user_id)
+            .execute(&self.db)
+            .await?;
 
         Ok(result.rows_affected() > 0)
     }
@@ -163,12 +157,11 @@ impl UserService {
         let limit = limit.unwrap_or(50);
         let offset = offset.unwrap_or(0);
 
-        let users = sqlx::query_as(
-            User,
-            "SELECT id as \"id!\", email as \"email!\", password_hash as \"password_hash!\", timezone as \"timezone!\", active as \"active!\", created_at as \"created_at!\", updated_at as \"updated_at!\" FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2",
-            limit,
-            offset
+        let users = sqlx::query_as::<_, User>(
+            "SELECT id, email, password_hash, timezone, active, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2"
         )
+        .bind(limit)
+        .bind(offset)
         .fetch_all(&self.db)
         .await?;
 
