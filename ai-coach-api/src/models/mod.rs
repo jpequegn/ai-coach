@@ -31,6 +31,7 @@ pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedu
 // pub mod job_execution;
 // pub mod alert_delivery;
 // pub mod data_quality;
+// pub mod recovery_protocol;  // Depends on recommendation module - Issue #178
 
 pub use user::*;
 pub use athlete_profile::*;
