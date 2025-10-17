@@ -10,3 +10,4 @@ pub mod keypoint_processor_test;
 pub mod recommendation_engine_test;
 pub mod user_recovery_profile_service_test;
 pub mod recommendation_effectiveness_service_test;
+pub mod athlete_profile_service_test;

@@ -1,0 +1,270 @@
+use axum::{
+    body::Body,
+    http::{Method, Request, StatusCode},
+    Router,
+};
+use serde_json::{json, Value};
+use sqlx::SqlitePool;
+use tower::ServiceExt;
+use uuid::Uuid;
+
+use ai_coach::api::routes::create_routes;
+use crate::common::{TestDatabase, DatabaseTestHelpers};
+
+#[cfg(test)]
+mod admin_integration_tests {
+    use super::*;
+
+    /// Test helper to create the app router with test database
+    async fn create_test_app(pool: SqlitePool) -> Router {
+        create_routes(pool, "test_secret_key_for_testing_only")
+    }
+
+    /// Helper to create authenticated user with specific role
+    async fn create_authenticated_user_with_role(
+        app: Router,
+        role: &str,
+    ) -> (Router, String, Uuid) {
+        let register_request = json!({
+            "email": format!("test_{}@example.com", Uuid::new_v4()),
+            "password": "SecurePass123!",
+            "role": role
+        });
+
+        let request = Request::builder()
+            .method(Method::POST)
+            .uri("/api/v1/auth/register")
+            .header("Content-Type", "application/json")
+            .body(Body::from(register_request.to_string()))
+            .unwrap();
+
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::CREATED);
+
+        let body = hyper::body::to_bytes(response.into_body()).await.unwrap();
+        let body_str = String::from_utf8(body.to_vec()).unwrap();
+        let auth_response: Value = serde_json::from_str(&body_str).unwrap();
+
+        let access_token = auth_response["access_token"].as_str().unwrap().to_string();
+        let user_id = Uuid::parse_str(auth_response["user"]["id"].as_str().unwrap()).unwrap();
+
+        (app, access_token, user_id)
+    }
+
+    // ========================================
+    // List Users Tests (GET /admin/users)
+    // ========================================
+
+    #[tokio::test]
+    async fn test_list_users_success_as_admin() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, admin_token, _) = create_authenticated_user_with_role(app, "admin").await;
+
+        let request = Request::builder()
+            .method(Method::GET)
+            .uri("/api/v1/admin/users")
+            .header("Authorization", format!("Bearer {}", admin_token))
+            .body(Body::empty())
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = hyper::body::to_bytes(response.into_body()).await.unwrap();
+        let body_str = String::from_utf8(body.to_vec()).unwrap();
+        let users: Value = serde_json::from_str(&body_str).unwrap();
+
+        assert!(users.is_array());
+    }
+
+    #[tokio::test]
+    async fn test_list_users_forbidden_as_athlete() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, athlete_token, _) = create_authenticated_user_with_role(app, "athlete").await;
+
+        let request = Request::builder()
+            .method(Method::GET)
+            .uri("/api/v1/admin/users")
+            .header("Authorization", format!("Bearer {}", athlete_token))
+            .body(Body::empty())
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn test_list_users_forbidden_as_coach() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, coach_token, _) = create_authenticated_user_with_role(app, "coach").await;
+
+        let request = Request::builder()
+            .method(Method::GET)
+            .uri("/api/v1/admin/users")
+            .header("Authorization", format!("Bearer {}", coach_token))
+            .body(Body::empty())
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn test_list_users_unauthorized() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+
+        let request = Request::builder()
+            .method(Method::GET)
+            .uri("/api/v1/admin/users")
+            .body(Body::empty())
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    // ========================================
+    // Update User Role Tests (PUT /admin/users/:id/role)
+    // ========================================
+
+    #[tokio::test]
+    async fn test_update_user_role_success_as_admin() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, admin_token, _) = create_authenticated_user_with_role(app.clone(), "admin").await;
+        let (app, _, target_user_id) = create_authenticated_user_with_role(app, "athlete").await;
+
+        let update_request = json!({
+            "role": "coach"
+        });
+
+        let request = Request::builder()
+            .method(Method::PUT)
+            .uri(format!("/api/v1/admin/users/{}/role", target_user_id))
+            .header("Authorization", format!("Bearer {}", admin_token))
+            .header("Content-Type", "application/json")
+            .body(Body::from(update_request.to_string()))
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = hyper::body::to_bytes(response.into_body()).await.unwrap();
+        let body_str = String::from_utf8(body.to_vec()).unwrap();
+        let message: Value = serde_json::from_str(&body_str).unwrap();
+
+        assert_eq!(message["message"].as_str().unwrap(), "User role updated successfully");
+    }
+
+    #[tokio::test]
+    async fn test_update_user_role_forbidden_as_athlete() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, athlete_token, _) = create_authenticated_user_with_role(app.clone(), "athlete").await;
+        let (app, _, target_user_id) = create_authenticated_user_with_role(app, "athlete").await;
+
+        let update_request = json!({
+            "role": "coach"
+        });
+
+        let request = Request::builder()
+            .method(Method::PUT)
+            .uri(format!("/api/v1/admin/users/{}/role", target_user_id))
+            .header("Authorization", format!("Bearer {}", athlete_token))
+            .header("Content-Type", "application/json")
+            .body(Body::from(update_request.to_string()))
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn test_update_user_role_forbidden_as_coach() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, coach_token, _) = create_authenticated_user_with_role(app.clone(), "coach").await;
+        let (app, _, target_user_id) = create_authenticated_user_with_role(app, "athlete").await;
+
+        let update_request = json!({
+            "role": "admin"
+        });
+
+        let request = Request::builder()
+            .method(Method::PUT)
+            .uri(format!("/api/v1/admin/users/{}/role", target_user_id))
+            .header("Authorization", format!("Bearer {}", coach_token))
+            .header("Content-Type", "application/json")
+            .body(Body::from(update_request.to_string()))
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn test_update_user_role_unauthorized() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+
+        let random_user_id = Uuid::new_v4();
+        let update_request = json!({
+            "role": "coach"
+        });
+
+        let request = Request::builder()
+            .method(Method::PUT)
+            .uri(format!("/api/v1/admin/users/{}/role", random_user_id))
+            .header("Content-Type", "application/json")
+            .body(Body::from(update_request.to_string()))
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn test_update_user_role_invalid_role() {
+        let test_db = TestDatabase::new().await;
+        let app = create_test_app(test_db.pool.clone()).await;
+        DatabaseTestHelpers::clean_database(&test_db.pool).await.unwrap();
+
+        let (app, admin_token, _) = create_authenticated_user_with_role(app.clone(), "admin").await;
+        let (app, _, target_user_id) = create_authenticated_user_with_role(app, "athlete").await;
+
+        let update_request = json!({
+            "role": "superadmin"
+        });
+
+        let request = Request::builder()
+            .method(Method::PUT)
+            .uri(format!("/api/v1/admin/users/{}/role", target_user_id))
+            .header("Authorization", format!("Bearer {}", admin_token))
+            .header("Content-Type", "application/json")
+            .body(Body::from(update_request.to_string()))
+            .unwrap();
+
+        let response = app.oneshot(request).await.unwrap();
+        // Should return 422 Unprocessable Entity or 400 Bad Request for invalid enum value
+        assert!(
+            response.status() == StatusCode::UNPROCESSABLE_ENTITY
+                || response.status() == StatusCode::BAD_REQUEST
+        );
+    }
+}
