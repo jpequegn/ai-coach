@@ -3,7 +3,7 @@ use crate::models::{
     CompleteRecommendationRequest, HistoryFilter, RateRecommendationRequest,
     SkipRecommendationRequest, UserRecommendation, UserRecommendationWithTemplate,
 };
-use crate::services::RecommendationTrackingService;
+use crate::services::{RecommendationTrackingService, CompleteRecommendationResponse, ProgressionService};
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -13,7 +13,7 @@ use axum::{
     Extension, Router,
 };
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -39,7 +39,7 @@ pub async fn complete_recommendation(
         .complete_recommendation(recommendation_id, user_id, request)
         .await
     {
-        Ok(recommendation) => (StatusCode::OK, Json(recommendation)).into_response(),
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
         Err(e) => (
             StatusCode::BAD_REQUEST,
             Json(json!({"error": e.to_string()})),
@@ -138,8 +138,9 @@ pub async fn get_recommendation_history(
 }
 
 /// Create recommendation tracking routes
-pub fn recommendation_tracking_routes(db: PgPool, auth_service: Arc<AuthService>) -> Router {
-    let service = Arc::new(RecommendationTrackingService::new(db));
+pub fn recommendation_tracking_routes(db: SqlitePool, auth_service: Arc<AuthService>) -> Router {
+    let progression_service = Arc::new(ProgressionService::new(db.clone()));
+    let service = Arc::new(RecommendationTrackingService::new(db, progression_service));
 
     Router::new()
         .route("/:id/complete", post(complete_recommendation))
