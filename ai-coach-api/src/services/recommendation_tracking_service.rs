@@ -1,25 +1,36 @@
 use crate::models::{
-    CompleteRecommendationRequest, HistoryFilter, RateRecommendationRequest,
+    AdvancementNotification, CompleteRecommendationRequest, HistoryFilter, RateRecommendationRequest,
     SkipRecommendationRequest, UserRecommendation, UserRecommendationStatus,
     UserRecommendationWithTemplate, RecommendationTemplate,
 };
+use crate::services::ProgressionService;
 // use crate::services::RecommendationEffectivenessService;  // TODO: Enable when effectiveness service is updated
 use anyhow::{Context, Result};
 use chrono::Utc;
+use serde::Serialize;
 use sqlx::{SqlitePool, Row};
 use std::sync::Arc;
 use tracing::{info, warn};
 use uuid::Uuid;
 
+/// Response for completing a recommendation with progression data
+#[derive(Debug, Serialize)]
+pub struct CompleteRecommendationResponse {
+    pub recommendation: UserRecommendation,
+    pub advancement_notifications: Vec<AdvancementNotification>,
+}
+
 pub struct RecommendationTrackingService {
     db: SqlitePool,
+    progression_service: Arc<ProgressionService>,
     // effectiveness_service: Option<Arc<RecommendationEffectivenessService>>,  // TODO: Enable when ready
 }
 
 impl RecommendationTrackingService {
-    pub fn new(db: SqlitePool) -> Self {
+    pub fn new(db: SqlitePool, progression_service: Arc<ProgressionService>) -> Self {
         Self {
             db,
+            progression_service,
             // effectiveness_service: Some(Arc::new(RecommendationEffectivenessService::new(db.clone()))),
         }
     }
@@ -30,7 +41,7 @@ impl RecommendationTrackingService {
         recommendation_id: Uuid,
         user_id: Uuid,
         request: CompleteRecommendationRequest,
-    ) -> Result<UserRecommendation> {
+    ) -> Result<CompleteRecommendationResponse> {
         let completed_at = request.completed_at.unwrap_or_else(Utc::now);
 
         let recommendation = sqlx::query_as::<_, UserRecommendation>(
@@ -55,6 +66,37 @@ impl RecommendationTrackingService {
             user_id, recommendation_id
         );
 
+        // Update progression tracking
+        let mut advancement_notifications = Vec::new();
+
+        // Step 1: Update total completion count
+        if let Err(e) = self.progression_service.update_completion_count(user_id).await {
+            warn!("Failed to update completion count for user {}: {}", user_id, e);
+        }
+
+        // Step 2: Check for experience level advancement
+        if let Ok(Some(notification)) = self.progression_service.check_advancement_eligibility(user_id).await {
+            info!("User {} is eligible for level advancement: {}", user_id, notification.new_level);
+
+            // Advance the user
+            if let Ok(Some(advanced_notification)) = self.progression_service.advance_user_level(user_id).await {
+                info!("User {} advanced to {}", user_id, advanced_notification.new_level);
+                advancement_notifications.push(advanced_notification);
+            }
+        }
+
+        // Step 3: Check for category mastery advancement
+        // Get the category of the completed recommendation
+        if let Ok(template) = self.get_recommendation_template(recommendation.recommendation_template_id).await {
+            if let Ok(Some(category_notification)) = self.progression_service
+                .check_category_advancement(user_id, template.category.clone())
+                .await
+            {
+                info!("User {} advanced in category {}", user_id, template.category);
+                advancement_notifications.push(category_notification);
+            }
+        }
+
         // TODO: Track outcome for effectiveness measurement when effectiveness service is enabled
         // if let Some(effectiveness_service) = &self.effectiveness_service {
         //     if let Ok(Some((score_id, score_value))) = self.get_recovery_score_at_time(
@@ -78,7 +120,23 @@ impl RecommendationTrackingService {
         //     }
         // }
 
-        Ok(recommendation)
+        Ok(CompleteRecommendationResponse {
+            recommendation,
+            advancement_notifications,
+        })
+    }
+
+    /// Get recommendation template by ID
+    async fn get_recommendation_template(&self, template_id: Uuid) -> Result<RecommendationTemplate> {
+        sqlx::query_as::<_, RecommendationTemplate>(
+            r#"
+            SELECT * FROM recommendation_templates WHERE id = ?1
+            "#,
+        )
+        .bind(template_id.to_string())
+        .fetch_one(&self.db)
+        .await
+        .context("Failed to fetch recommendation template")
     }
 
     /// Get recovery score closest to a specific time
