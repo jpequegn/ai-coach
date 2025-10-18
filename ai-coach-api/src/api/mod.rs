@@ -9,6 +9,11 @@ pub mod routes;
 pub mod auth;
 pub mod user_profile;
 
+// Recommendation system modules
+pub mod recommendation_tracking;
+pub mod recommendation_engine;
+pub mod progression;
+
 // Disabled modules - too many compilation errors for MVP
 // pub mod training;
 // pub mod ml_predictions;

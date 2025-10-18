@@ -4,21 +4,27 @@ use crate::models::recommendation::{
     RecommendationTemplate, RecoveryIssues, ScoredRecommendation,
     UserRecommendation, UserRecommendationHistory, UserRecommendationStatus,
 };
-use crate::models::RecoveryScore;
+use crate::models::{RecoveryScore, ExperienceLevel, RecommendationProgression};
+use crate::services::ProgressionService;
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
-use sqlx::PgPool;
+use sqlx::{SqlitePool, Row};
 use std::collections::HashMap;
-use tracing::info;
+use std::sync::Arc;
+use tracing::{info, warn};
 use uuid::Uuid;
 
 pub struct RecommendationEngine {
-    pub db: PgPool,
+    pub db: SqlitePool,
+    pub progression_service: Arc<ProgressionService>,
 }
 
 impl RecommendationEngine {
-    pub fn new(db: PgPool) -> Self {
-        Self { db }
+    pub fn new(db: SqlitePool, progression_service: Arc<ProgressionService>) -> Self {
+        Self {
+            db,
+            progression_service,
+        }
     }
 
     /// Generate personalized recommendations based on recovery state
@@ -32,6 +38,10 @@ impl RecommendationEngine {
     ) -> Result<CurrentRecommendationsResponse> {
         let limit = limit.unwrap_or(5).min(10) as usize;
 
+        // Step 0: Get user's progression data for filtering and personalization
+        let experience_level = self.progression_service.calculate_experience_level(user_id).await?;
+        let weeks_active = self.get_weeks_active(user_id).await?;
+
         // Step 1: Identify recovery issues
         let issues = self.identify_issues(recovery_score).await?;
 
@@ -39,34 +49,137 @@ impl RecommendationEngine {
         let history = self.get_user_history(user_id).await?;
 
         // Step 3: Get applicable recommendation templates
-        let templates = self
+        let mut templates = self
             .get_applicable_templates(&issues, &context, category_filter)
             .await?;
 
-        // Step 4: Score each recommendation
-        let mut scored: Vec<ScoredRecommendation> = templates
+        // Step 3.5: Apply week-based filtering (habit building sequences)
+        templates = self.apply_week_based_filtering(templates, weeks_active, &experience_level);
+
+        // Step 4: Apply progressive difficulty - select appropriate variants
+        let mut progressive_templates = Vec::new();
+        for template in templates {
+            if let Some(progression) = self.progression_service
+                .select_appropriate_version(user_id, template.id)
+                .await?
+            {
+                // Use progressive variant - apply difficulty/time modifiers
+                let mut modified_template = template.clone();
+                modified_template.difficulty = Self::adjust_difficulty(
+                    &template.difficulty,
+                    progression.difficulty_modifier,
+                );
+                if let Some(time) = template.time_required_minutes {
+                    modified_template.time_required_minutes = Some(
+                        (time as f64 * progression.time_modifier) as i32
+                    );
+                }
+                // Add complexity description to metadata or description
+                if let Some(complexity) = progression.complexity_description {
+                    modified_template.description = format!(
+                        "{}\n\n{} Level: {}",
+                        modified_template.description,
+                        experience_level,
+                        complexity
+                    );
+                }
+                progressive_templates.push(modified_template);
+            } else {
+                // No progressive variant, use base template
+                progressive_templates.push(template);
+            }
+        }
+
+        // Step 5: Score each recommendation
+        let mut scored: Vec<ScoredRecommendation> = progressive_templates
             .into_iter()
             .map(|template| self.score_recommendation(&template, &issues, &history, &context))
             .collect();
 
-        // Step 5: Sort by score and apply diversity filtering
+        // Step 6: Sort by score and apply diversity filtering
         scored.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
         let filtered = self.apply_diversity_filtering(scored, limit);
 
-        // Step 6: Format output
+        // Step 7: Format output
         let recommendations: Vec<RecommendationOutput> = filtered
             .into_iter()
             .map(|scored| self.format_recommendation(scored))
             .collect();
 
         info!(
-            "Generated {} recommendations for user {} with recovery score {}",
+            "Generated {} recommendations for user {} (level: {}, weeks: {}) with recovery score {}",
             recommendations.len(),
             user_id,
+            experience_level,
+            weeks_active,
             recovery_score.readiness_score
         );
 
         Ok(CurrentRecommendationsResponse { recommendations })
+    }
+
+    /// Get user's weeks active
+    async fn get_weeks_active(&self, user_id: Uuid) -> Result<i32> {
+        let row = sqlx::query(
+            r#"
+            SELECT weeks_active
+            FROM user_recovery_profiles
+            WHERE user_id = ?1
+            "#,
+        )
+        .bind(user_id.to_string())
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(row.and_then(|r| r.try_get("weeks_active").ok()).unwrap_or(0))
+    }
+
+    /// Apply week-based filtering for habit building sequences
+    fn apply_week_based_filtering(
+        &self,
+        templates: Vec<RecommendationTemplate>,
+        weeks_active: i32,
+        experience_level: &ExperienceLevel,
+    ) -> Vec<RecommendationTemplate> {
+        match weeks_active {
+            // Week 1 (0-1 weeks): Beginner only, focus on easy wins
+            0..=1 => {
+                templates
+                    .into_iter()
+                    .filter(|t| {
+                        // Only include easy/beginner-friendly recommendations
+                        matches!(t.difficulty.as_str(), "easy")
+                    })
+                    .take(1) // Limit to 1 per day in week 1
+                    .collect()
+            }
+            // Weeks 2-3 (2-3 weeks): Mix beginner/intermediate
+            2..=3 => {
+                templates
+                    .into_iter()
+                    .filter(|t| {
+                        // Include easy and medium difficulty
+                        matches!(t.difficulty.as_str(), "easy" | "medium")
+                    })
+                    .take(2) // Up to 2 per day in weeks 2-3
+                    .collect()
+            }
+            // Week 4+ (4+ weeks): Match user's experience level, no limits
+            _ => {
+                // No filtering, user is ready for full variety
+                templates
+            }
+        }
+    }
+
+    /// Adjust difficulty based on modifier
+    fn adjust_difficulty(base_difficulty: &str, modifier: f64) -> String {
+        match (base_difficulty, modifier) {
+            (_, m) if m < 0.7 => "easy".to_string(),
+            (_, m) if m >= 0.7 && m <= 1.3 => "medium".to_string(),
+            (_, m) if m > 1.3 => "hard".to_string(),
+            _ => base_difficulty.to_string(),
+        }
     }
 
     /// Identify recovery issues from recovery score

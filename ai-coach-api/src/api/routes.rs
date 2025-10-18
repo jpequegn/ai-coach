@@ -8,6 +8,9 @@ use tower_http::request_id::{PropagateRequestIdLayer, SetRequestIdLayer};
 use super::auth::{admin_routes, auth_routes};
 use super::health::{health_check, health_check_detailed, HealthState};
 use super::user_profile::user_profile_routes;
+use super::recommendation_tracking::recommendation_tracking_routes;
+use super::recommendation_engine::recommendation_engine_routes;
+use super::progression::progression_routes;
 
 // ============================================================================
 // Disabled Routes - Comment out for MVP
@@ -62,7 +65,10 @@ pub fn create_routes(
     let api_v1 = Router::new()
         .nest("/auth", auth_routes(auth_service.clone()))
         .nest("/admin", admin_routes(auth_service.clone()))
-        .nest("/user", user_profile_routes(db.clone(), auth_service.clone()));
+        .nest("/user", user_profile_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/recommendations", recommendation_tracking_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/recommendations", recommendation_engine_routes(db.clone(), auth_service.clone()))
+        .nest("/recovery/profile", progression_routes(db.clone(), auth_service.clone()));
         // .nest("/goals", goals_routes(db.clone(), auth_service.clone()));  // Blocked by SQLite DateTime
 
     // Disabled for MVP - too many compilation errors
@@ -82,8 +88,8 @@ pub fn create_routes(
     // .nest("/training/adjustment", training_adjustment_routes(db.clone(), auth_service.clone()))
     // .nest("/validation", validation_routes(db.clone(), auth_service.clone()));
 
-    tracing::info!("✅ MVP API initialized with: auth, admin, user profile");
-    tracing::warn!("⚠️  Disabled for MVP: goals (SQLite blocker), training, ML, recovery, notifications, analytics");
+    tracing::info!("✅ MVP API initialized with: auth, admin, user profile, recommendations, progression");
+    tracing::warn!("⚠️  Disabled for MVP: goals (SQLite blocker), training, ML, notifications, analytics");
 
     // Create minimal health state
     let health_state = Arc::new(HealthState {

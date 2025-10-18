@@ -3,7 +3,7 @@ use crate::models::recommendation::{
     CurrentRecommendationsQuery, CurrentRecommendationsResponse, RecommendationContext,
 };
 use crate::models::RecoveryScore;
-use crate::services::RecommendationEngine;
+use crate::services::{RecommendationEngine, ProgressionService};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -13,7 +13,7 @@ use axum::{
     Extension, Router,
 };
 use serde_json::json;
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -78,25 +78,26 @@ pub async fn get_current_recommendations(
 
 /// Helper function to get latest recovery score
 async fn get_latest_recovery_score(
-    db: &PgPool,
+    db: &SqlitePool,
     user_id: uuid::Uuid,
 ) -> Result<Option<RecoveryScore>, sqlx::Error> {
     sqlx::query_as::<_, RecoveryScore>(
         r#"
         SELECT * FROM recovery_scores
-        WHERE user_id = $1
+        WHERE user_id = ?1
         ORDER BY score_date DESC
         LIMIT 1
         "#,
     )
-    .bind(user_id)
+    .bind(user_id.to_string())
     .fetch_optional(db)
     .await
 }
 
 /// Create recommendation engine routes
-pub fn recommendation_engine_routes(db: PgPool, auth_service: Arc<AuthService>) -> Router {
-    let engine = Arc::new(RecommendationEngine::new(db.clone()));
+pub fn recommendation_engine_routes(db: SqlitePool, auth_service: Arc<AuthService>) -> Router {
+    let progression_service = Arc::new(ProgressionService::new(db.clone()));
+    let engine = Arc::new(RecommendationEngine::new(db.clone(), progression_service));
 
     Router::new()
         .route("/current", get(get_current_recommendations))
