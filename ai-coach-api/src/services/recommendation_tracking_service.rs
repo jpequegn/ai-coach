@@ -3,24 +3,24 @@ use crate::models::{
     SkipRecommendationRequest, UserRecommendation, UserRecommendationStatus,
     UserRecommendationWithTemplate, RecommendationTemplate,
 };
-use crate::services::RecommendationEffectivenessService;
+// use crate::services::RecommendationEffectivenessService;  // TODO: Enable when effectiveness service is updated
 use anyhow::{Context, Result};
 use chrono::Utc;
-use sqlx::{PgPool, Row};
+use sqlx::{SqlitePool, Row};
 use std::sync::Arc;
 use tracing::{info, warn};
 use uuid::Uuid;
 
 pub struct RecommendationTrackingService {
-    db: PgPool,
-    effectiveness_service: Option<Arc<RecommendationEffectivenessService>>,
+    db: SqlitePool,
+    // effectiveness_service: Option<Arc<RecommendationEffectivenessService>>,  // TODO: Enable when ready
 }
 
 impl RecommendationTrackingService {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: SqlitePool) -> Self {
         Self {
-            db: db.clone(),
-            effectiveness_service: Some(Arc::new(RecommendationEffectivenessService::new(db))),
+            db,
+            // effectiveness_service: Some(Arc::new(RecommendationEffectivenessService::new(db.clone()))),
         }
     }
 
@@ -38,7 +38,7 @@ impl RecommendationTrackingService {
             UPDATE user_recommendations
             SET status = 'completed',
                 completed_at = $3,
-                updated_at = NOW()
+                updated_at = datetime('now')
             WHERE id = $1 AND user_id = $2 AND status = 'pending'
             RETURNING *
             "#,
@@ -55,29 +55,28 @@ impl RecommendationTrackingService {
             user_id, recommendation_id
         );
 
-        // Track outcome for effectiveness measurement
-        if let Some(effectiveness_service) = &self.effectiveness_service {
-            // Get baseline recovery score at the time recommendation was shown
-            if let Ok(Some((score_id, score_value))) = self.get_recovery_score_at_time(
-                user_id,
-                recommendation.shown_at,
-            ).await {
-                if let Err(e) = effectiveness_service
-                    .track_outcome(&recommendation, Some(score_id), score_value)
-                    .await
-                {
-                    warn!(
-                        "Failed to track outcome for recommendation {}: {}",
-                        recommendation_id, e
-                    );
-                }
-            } else {
-                warn!(
-                    "No recovery score found for user {} at time {}",
-                    user_id, recommendation.shown_at
-                );
-            }
-        }
+        // TODO: Track outcome for effectiveness measurement when effectiveness service is enabled
+        // if let Some(effectiveness_service) = &self.effectiveness_service {
+        //     if let Ok(Some((score_id, score_value))) = self.get_recovery_score_at_time(
+        //         user_id,
+        //         recommendation.shown_at,
+        //     ).await {
+        //         if let Err(e) = effectiveness_service
+        //             .track_outcome(&recommendation, Some(score_id), score_value)
+        //             .await
+        //         {
+        //             warn!(
+        //                 "Failed to track outcome for recommendation {}: {}",
+        //                 recommendation_id, e
+        //             );
+        //         }
+        //     } else {
+        //         warn!(
+        //             "No recovery score found for user {} at time {}",
+        //             user_id, recommendation.shown_at
+        //         );
+        //     }
+        // }
 
         Ok(recommendation)
     }
@@ -88,22 +87,27 @@ impl RecommendationTrackingService {
         user_id: Uuid,
         target_time: chrono::DateTime<Utc>,
     ) -> Result<Option<(Uuid, f64)>> {
-        let result = sqlx::query!(
+        let result = sqlx::query(
             r#"
             SELECT id, overall_readiness
             FROM recovery_scores
-            WHERE user_id = $1
-              AND score_date <= $2
+            WHERE user_id = ?1
+              AND score_date <= ?2
             ORDER BY score_date DESC
             LIMIT 1
             "#,
-            user_id,
-            target_time
         )
+        .bind(user_id.to_string())
+        .bind(target_time.to_rfc3339())
         .fetch_optional(&self.db)
         .await?;
 
-        Ok(result.map(|r| (r.id, r.overall_readiness)))
+        Ok(result.map(|r| {
+            let id_str: String = r.get("id");
+            let id = Uuid::parse_str(&id_str).unwrap();
+            let overall_readiness: f64 = r.get("overall_readiness");
+            (id, overall_readiness)
+        }))
     }
 
     /// Skip a recommendation
@@ -118,8 +122,8 @@ impl RecommendationTrackingService {
             UPDATE user_recommendations
             SET status = 'skipped',
                 skip_reason = $3,
-                skipped_at = NOW(),
-                updated_at = NOW()
+                skipped_at = datetime('now'),
+                updated_at = datetime('now')
             WHERE id = $1 AND user_id = $2 AND status = 'pending'
             RETURNING *
             "#,
@@ -156,8 +160,8 @@ impl RecommendationTrackingService {
             UPDATE user_recommendations
             SET effectiveness_rating = $3,
                 user_feedback = $4,
-                rated_at = NOW(),
-                updated_at = NOW()
+                rated_at = datetime('now'),
+                updated_at = datetime('now')
             WHERE id = $1 AND user_id = $2
             RETURNING *
             "#,
@@ -322,10 +326,10 @@ impl RecommendationTrackingService {
             r#"
             UPDATE user_recommendations
             SET status = 'expired',
-                expired_at = NOW(),
-                updated_at = NOW()
+                expired_at = datetime('now'),
+                updated_at = datetime('now')
             WHERE status = 'pending'
-              AND shown_at < NOW() - INTERVAL '7 days'
+              AND shown_at < datetime('now', '-7 days')
             "#,
         )
         .execute(&self.db)
@@ -345,12 +349,14 @@ impl RecommendationTrackingService {
         // Calculate exponential moving average of ratings
         let result = sqlx::query(
             r#"
-            UPDATE recommendation_templates rt
+            UPDATE recommendation_templates
             SET effectiveness_score = (
                 SELECT COALESCE(
                     -- Exponential moving average: 0.7 * new_avg + 0.3 * old_score
-                    0.7 * (AVG(effectiveness_rating::float) / 5.0) + 0.3 * rt.effectiveness_score,
-                    rt.effectiveness_score
+                    0.7 * (AVG(CAST(effectiveness_rating AS REAL)) / 5.0) + 0.3 * (
+                        SELECT effectiveness_score FROM recommendation_templates WHERE id = $1
+                    ),
+                    (SELECT effectiveness_score FROM recommendation_templates WHERE id = $1)
                 )
                 FROM user_recommendations
                 WHERE recommendation_template_id = $1
@@ -362,7 +368,7 @@ impl RecommendationTrackingService {
                 WHERE recommendation_template_id = $1
                   AND status = 'completed'
             ),
-            updated_at = NOW()
+            updated_at = datetime('now')
             WHERE id = $1
             "#,
         )

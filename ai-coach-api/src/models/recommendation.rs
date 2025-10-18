@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 /// Recommendation category enum
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 pub enum RecommendationCategory {
     #[serde(rename = "sleep")]
     Sleep,
@@ -34,7 +34,7 @@ impl std::fmt::Display for RecommendationCategory {
 
 /// Priority level for recommendations
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 pub enum RecommendationPriority {
     #[serde(rename = "low")]
     Low,
@@ -59,7 +59,7 @@ impl std::fmt::Display for RecommendationPriority {
 
 /// Difficulty level for recommendations
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 pub enum RecommendationDifficulty {
     #[serde(rename = "easy")]
     Easy,
@@ -84,7 +84,7 @@ impl std::fmt::Display for RecommendationDifficulty {
 
 /// Content type for educational materials
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 pub enum ContentType {
     #[serde(rename = "article")]
     Article,
@@ -196,7 +196,7 @@ pub struct RecommendationFilter {
 
 /// User recommendation status enum
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "varchar", rename_all = "snake_case")]
+#[sqlx(type_name = "text", rename_all = "snake_case")]
 pub enum UserRecommendationStatus {
     #[serde(rename = "pending")]
     Pending,

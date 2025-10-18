@@ -34,6 +34,8 @@ pub enum AuthError {
     PasswordValidation(String),
     #[error("Email validation failed: {0}")]
     EmailValidation(String),
+    #[error("Validation error: {0}")]
+    ValidationError(String),
     #[error("Database error: {0}")]
     Database(#[from] sqlx::Error),
     #[error("JWT error: {0}")]
@@ -60,6 +62,7 @@ impl IntoResponse for AuthError {
             AuthError::RateLimitExceeded => (StatusCode::TOO_MANY_REQUESTS, "Rate limit exceeded"),
             AuthError::PasswordValidation(_) => (StatusCode::BAD_REQUEST, "Password validation failed"),
             AuthError::EmailValidation(_) => (StatusCode::BAD_REQUEST, "Email validation failed"),
+            AuthError::ValidationError(_) => (StatusCode::BAD_REQUEST, "Validation error"),
             AuthError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Database error"),
             AuthError::Jwt(_) => (StatusCode::UNAUTHORIZED, "Token error"),
             AuthError::PasswordHashing(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Password processing error"),
