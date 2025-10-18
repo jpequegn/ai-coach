@@ -25,9 +25,9 @@ pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedu
 // pub mod recovery_analysis;  // Uses sqlx::types::Json which is PostgreSQL-only
 // pub mod training_recovery_settings;
 // pub mod validation_framework;
-// pub mod recommendation;
+pub mod recommendation;
 // pub mod user_recovery_profile;
-// pub mod recommendation_outcome;
+pub mod recommendation_outcome;
 // pub mod job_execution;
 // pub mod alert_delivery;
 // pub mod data_quality;
@@ -57,9 +57,9 @@ pub use user_recovery_profile::{DietaryPreferences, SleepSchedule};
 // pub use recovery_analysis::*;
 // pub use training_recovery_settings::*;
 // pub use validation_framework::*;
-// pub use recommendation::*;
+pub use recommendation::*;
 // pub use user_recovery_profile::*;
-// pub use recommendation_outcome::*;
+pub use recommendation_outcome::*;
 // pub use job_execution::*;
 // pub use alert_delivery::*;
 // pub use data_quality::*;
