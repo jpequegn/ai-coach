@@ -28,6 +28,7 @@ pub mod user_recovery_profile;  // Needed for DietaryPreferences and SleepSchedu
 pub mod recommendation;
 // pub mod user_recovery_profile;
 pub mod recommendation_outcome;
+pub mod progression;
 // pub mod job_execution;
 // pub mod alert_delivery;
 // pub mod data_quality;
@@ -60,6 +61,7 @@ pub use user_recovery_profile::{DietaryPreferences, SleepSchedule};
 pub use recommendation::*;
 // pub use user_recovery_profile::*;
 pub use recommendation_outcome::*;
+pub use progression::*;
 // pub use job_execution::*;
 // pub use alert_delivery::*;
 // pub use data_quality::*;
