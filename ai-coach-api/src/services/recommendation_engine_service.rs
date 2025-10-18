@@ -7,17 +7,17 @@ use crate::models::recommendation::{
 use crate::models::RecoveryScore;
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
-use sqlx::PgPool;
+use sqlx::SqlitePool;
 use std::collections::HashMap;
 use tracing::info;
 use uuid::Uuid;
 
 pub struct RecommendationEngine {
-    pub db: PgPool,
+    pub db: SqlitePool,
 }
 
 impl RecommendationEngine {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: SqlitePool) -> Self {
         Self { db }
     }
 
